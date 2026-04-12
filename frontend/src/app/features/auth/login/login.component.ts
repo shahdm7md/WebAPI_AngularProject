@@ -20,6 +20,7 @@ export class LoginComponent {
   protected showPassword = false;
   protected loading = false;
   protected errorMessage = '';
+  protected submitted = false;
 
   protected readonly loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -31,6 +32,7 @@ export class LoginComponent {
   }
 
   protected submit(): void {
+    this.submitted = true;
     this.errorMessage = '';
 
     if (this.loginForm.invalid) {

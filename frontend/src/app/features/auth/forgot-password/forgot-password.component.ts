@@ -20,6 +20,7 @@ export class ForgotPasswordComponent {
   protected showPassword = false;
   protected message = '';
   protected errorMessage = '';
+  protected submitted = false;
 
   protected readonly resetForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -31,6 +32,7 @@ export class ForgotPasswordComponent {
   }
 
   protected submitReset(): void {
+    this.submitted = true;
     this.clearFeedback();
 
     if (this.resetForm.invalid) {
