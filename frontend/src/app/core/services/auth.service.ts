@@ -4,10 +4,13 @@ import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
 import {
   AuthResponse,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
   GoogleLoginRequest,
   LoginRequest,
   RegisterCustomerRequest,
   RegisterSellerRequest,
+  ResetPasswordRequest,
   ResendOtpRequest,
   VerifyEmailOtpRequest,
 } from '../models/auth.models';
@@ -54,6 +57,16 @@ export class AuthService {
     });
   }
 
+  forgotPassword(payload: ForgotPasswordRequest): Observable<ForgotPasswordResponse> {
+    return this.http.post<ForgotPasswordResponse>(`${this.baseUrl}/api/auth/forgot-password`, payload);
+  }
+
+  resetPassword(payload: ResetPasswordRequest): Observable<string> {
+    return this.http.post(`${this.baseUrl}/api/auth/reset-password`, payload, {
+      responseType: 'text',
+    });
+  }
+
   storeSession(response: AuthResponse): void {
     localStorage.setItem(this.tokenStorageKey, response.token);
     localStorage.setItem(this.emailStorageKey, response.email);
@@ -91,7 +104,17 @@ export class AuthService {
     }
 
     if (payload && typeof payload === 'object') {
-      const values = Object.values(payload as Record<string, unknown>).flatMap((value) =>
+      const record = payload as Record<string, unknown>;
+
+      if (typeof record['message'] === 'string' && record['message'].trim().length > 0) {
+        return record['message'];
+      }
+
+      if (typeof record['title'] === 'string' && record['title'].trim().length > 0) {
+        return record['title'];
+      }
+
+      const values = Object.values(record).flatMap((value) =>
         Array.isArray(value) ? value : [value],
       );
       const messages = values.filter(
