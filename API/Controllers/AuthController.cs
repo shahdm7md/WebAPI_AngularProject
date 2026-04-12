@@ -18,17 +18,20 @@ namespace API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
     private readonly JwtOptions _jwtOptions;
     private readonly IEmailSender _emailSender;
     private readonly ILogger<AuthController> _logger;
 
     public AuthController(
         UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager,
         IOptions<JwtOptions> jwtOptions,
         IEmailSender emailSender,
         ILogger<AuthController> logger)
     {
         _userManager = userManager;
+        _roleManager = roleManager;
         _jwtOptions = jwtOptions.Value;
         _emailSender = emailSender;
         _logger = logger;
@@ -37,6 +40,8 @@ public class AuthController : ControllerBase
     [HttpPost("register/customer")]
     public async Task<IActionResult> RegisterCustomer(RegisterCustomerRequest request)
     {
+        await EnsureRolesExistAsync();
+
         if (request.Password != request.ConfirmPassword)
         {
             return BadRequest("Password and Confirm Password do not match.");
@@ -59,21 +64,19 @@ public class AuthController : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
 
-        //var result = await _userManager.CreateAsync(user, request.Password);
-        //if (!result.Succeeded)
-        //{
-        //    return BadRequest(result.Errors.Select(error => error.Description));
-        //}
-
-        //await _userManager.AddToRoleAsync(user, "Customer");
-        //await SendOtpAsync(user, "Complete your customer registration");
-        // RegisterCustomer
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
-            return BadRequest(result.Errors.Select(e => e.Description));
+        {
+            return BadRequest(new { message = "Customer registration failed.", errors = result.Errors.Select(e => e.Description) });
+        }
 
-        await SendOtpAsync(user, "Complete your customer registration"); // ← الأول
-        await _userManager.AddToRoleAsync(user, "Customer");             // ← التاني
+        var roleResult = await _userManager.AddToRoleAsync(user, "Customer");
+        if (!roleResult.Succeeded)
+        {
+            return BadRequest(new { message = "User created but assigning the Customer role failed.", errors = roleResult.Errors.Select(e => e.Description) });
+        }
+
+        await SendOtpAsync(user, "Complete your customer registration");
 
         return Ok("Customer registration successful. Please verify your email with the OTP code sent to your inbox.");
     }
@@ -81,6 +84,8 @@ public class AuthController : ControllerBase
     [HttpPost("register/seller")]
     public async Task<IActionResult> RegisterSeller(RegisterSellerRequest request)
     {
+        await EnsureRolesExistAsync();
+
         if (request.Password != request.ConfirmPassword)
         {
             return BadRequest("Password and Confirm Password do not match.");
@@ -101,26 +106,24 @@ public class AuthController : ControllerBase
             StoreDescription = request.StoreDescription,
             SellerStatus = "Pending",
             WalletBalance = 0m,
-            IsActive = true,
+            IsActive = false,
             CreatedAt = DateTime.UtcNow
         };
 
-        //var result = await _userManager.CreateAsync(user, request.Password);
-        //if (!result.Succeeded)
-        //{
-        //    return BadRequest(result.Errors.Select(error => error.Description));
-        //}
-
-        //await _userManager.AddToRoleAsync(user, "Seller");
-        //await SendOtpAsync(user, "Complete your seller registration");
-
-        // RegisterSeller
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
-            return BadRequest(result.Errors.Select(e => e.Description));
+        {
+            return BadRequest(new { message = "Seller registration failed.", errors = result.Errors.Select(e => e.Description) });
+        }
 
-        await SendOtpAsync(user, "Complete your seller registration"); // ← الأول
-        await _userManager.AddToRoleAsync(user, "Seller");             // ← التاني
+        var roleResult = await _userManager.AddToRoleAsync(user, "Seller");
+        if (!roleResult.Succeeded)
+        {
+            return BadRequest(new { message = "User created but assigning the Seller role failed.", errors = roleResult.Errors.Select(e => e.Description) });
+        }
+
+        await SendOtpAsync(user, "Complete your seller registration");
+
         return Ok("Seller registration successful. Please verify your email with the OTP code sent to your inbox.");
     }
 
@@ -174,7 +177,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var user = await _userManager.FindByEmailAsync(request.Email);
-        if (user is null || !user.IsActive)
+        if (user is null)
         {
             return Unauthorized("Invalid credentials.");
         }
@@ -191,7 +194,20 @@ public class AuthController : ControllerBase
             return Unauthorized("Email is not verified. A fresh OTP code has been sent to your email.");
         }
 
-        var token = await GenerateJwtTokenAsync(user);
+        var userRoles = await _userManager.GetRolesAsync(user);
+        var isSeller = userRoles.Contains("Seller");
+
+        if (isSeller && !user.IsActive)
+        {
+            return Unauthorized("Your account is pending admin approval");
+        }
+
+        if (!isSeller && !user.IsActive)
+        {
+            return Unauthorized("Your account is inactive. Please contact support.");
+        }
+
+        var token = await GenerateJwtTokenAsync(user, userRoles);
         return Ok(token);
     }
 
@@ -215,14 +231,35 @@ public class AuthController : ControllerBase
         }
     }
 
-    private async Task<AuthResponse> GenerateJwtTokenAsync(ApplicationUser user)
+    private static readonly string[] RequiredRoles = ["Admin", "Seller", "Customer"];
+
+    private async Task EnsureRolesExistAsync()
     {
-        var userRoles = await _userManager.GetRolesAsync(user);
+        foreach (var roleName in RequiredRoles)
+        {
+            if (!await _roleManager.RoleExistsAsync(roleName))
+            {
+                var createRoleResult = await _roleManager.CreateAsync(new IdentityRole(roleName));
+                if (!createRoleResult.Succeeded)
+                {
+                    var errors = string.Join(", ", createRoleResult.Errors.Select(e => e.Description));
+                    throw new InvalidOperationException($"Failed to ensure role '{roleName}' exists: {errors}");
+                }
+            }
+        }
+    }
+
+    private Task<AuthResponse> GenerateJwtTokenAsync(ApplicationUser user, IList<string> userRoles)
+    {
+        var primaryRole = userRoles.FirstOrDefault() ?? string.Empty;
 
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.Id),
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            new("userId", user.Id),
+            new("email", user.Email ?? string.Empty),
+            new("role", primaryRole),
             new(ClaimTypes.NameIdentifier, user.Id),
             new(ClaimTypes.Name, user.UserName ?? string.Empty),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
@@ -241,12 +278,14 @@ public class AuthController : ControllerBase
             expires: expiresAt,
             signingCredentials: credentials);
 
-        return new AuthResponse
+        var authResponse = new AuthResponse
         {
             Token = new JwtSecurityTokenHandler().WriteToken(jwtToken),
             ExpiresAtUtc = expiresAt,
             Email = user.Email ?? string.Empty,
             FullName = user.FullName
         };
+
+        return Task.FromResult(authResponse);
     }
 }
