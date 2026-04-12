@@ -37,14 +37,6 @@
       <button class="btn solid" type="submit" [disabled]="loading">
         {{ loading ? 'Signing in...' : 'Login' }}
       </button>
-
-      <button class="btn google" type="button" (click)="loginWithGoogle()">
-        Continue with Google
-      </button>
-
-      @if (googleMessage) {
-      <p class="note">{{ googleMessage }}</p>
-      }
     </form>
 
     <p class="switch-link">

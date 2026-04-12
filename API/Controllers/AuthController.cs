@@ -5,6 +5,7 @@ using API.Contracts.Auth;
 using API.Services;
 using API.Settings;
 using Core.Entities;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -20,6 +21,7 @@ public class AuthController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly JwtOptions _jwtOptions;
+    private readonly GoogleAuthOptions _googleAuthOptions;
     private readonly IEmailSender _emailSender;
     private readonly ILogger<AuthController> _logger;
 
@@ -27,12 +29,14 @@ public class AuthController : ControllerBase
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager,
         IOptions<JwtOptions> jwtOptions,
+        IOptions<GoogleAuthOptions> googleAuthOptions,
         IEmailSender emailSender,
         ILogger<AuthController> logger)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _jwtOptions = jwtOptions.Value;
+        _googleAuthOptions = googleAuthOptions.Value;
         _emailSender = emailSender;
         _logger = logger;
     }
@@ -205,6 +209,118 @@ public class AuthController : ControllerBase
         if (!isSeller && !user.IsActive)
         {
             return Unauthorized("Your account is inactive. Please contact support.");
+        }
+
+        var token = await GenerateJwtTokenAsync(user, userRoles);
+        return Ok(token);
+    }
+
+    [HttpPost("google-login")]
+    public async Task<IActionResult> GoogleLogin(GoogleLoginRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.IdToken))
+        {
+            return BadRequest(new { message = "Google ID token is required." });
+        }
+
+        if (string.IsNullOrWhiteSpace(_googleAuthOptions.ClientId))
+        {
+            _logger.LogError("Google ClientId is missing from configuration.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Google authentication is not configured." });
+        }
+
+        GoogleJsonWebSignature.Payload payload;
+        try
+        {
+            payload = await GoogleJsonWebSignature.ValidateAsync(
+                request.IdToken,
+                new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = [_googleAuthOptions.ClientId]
+                });
+        }
+        catch (InvalidJwtException)
+        {
+            return Unauthorized(new { message = "Invalid Google token." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while validating Google token.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Google authentication failed." });
+        }
+
+        if (string.IsNullOrWhiteSpace(payload.Email))
+        {
+            return BadRequest(new { message = "Google token does not contain an email address." });
+        }
+
+        await EnsureRolesExistAsync();
+
+        var user = await _userManager.FindByEmailAsync(payload.Email);
+        if (user is null)
+        {
+            user = new ApplicationUser
+            {
+                UserName = payload.Email,
+                Email = payload.Email,
+                FullName = string.IsNullOrWhiteSpace(payload.Name) ? payload.Email.Split('@')[0] : payload.Name,
+                IsActive = true,
+                EmailConfirmed = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var createResult = await _userManager.CreateAsync(user);
+            if (!createResult.Succeeded)
+            {
+                return BadRequest(new
+                {
+                    message = "Google login failed while creating user account.",
+                    errors = createResult.Errors.Select(e => e.Description)
+                });
+            }
+
+            var addToCustomerRoleResult = await _userManager.AddToRoleAsync(user, "Customer");
+            if (!addToCustomerRoleResult.Succeeded)
+            {
+                return BadRequest(new
+                {
+                    message = "Google login failed while assigning Customer role.",
+                    errors = addToCustomerRoleResult.Errors.Select(e => e.Description)
+                });
+            }
+        }
+
+        if (!user.EmailConfirmed)
+        {
+            user.EmailConfirmed = true;
+            await _userManager.UpdateAsync(user);
+        }
+
+        var userRoles = await _userManager.GetRolesAsync(user);
+        if (userRoles.Count == 0)
+        {
+            var addToCustomerRoleResult = await _userManager.AddToRoleAsync(user, "Customer");
+            if (!addToCustomerRoleResult.Succeeded)
+            {
+                return BadRequest(new
+                {
+                    message = "Google login failed while assigning Customer role.",
+                    errors = addToCustomerRoleResult.Errors.Select(e => e.Description)
+                });
+            }
+
+            userRoles = await _userManager.GetRolesAsync(user);
+        }
+
+        var isSeller = userRoles.Contains("Seller");
+        if (isSeller && !user.IsActive)
+        {
+            return Unauthorized(new { message = "Your account is pending admin approval" });
+        }
+
+        if (!isSeller && !user.IsActive)
+        {
+            return Unauthorized(new { message = "Your account is inactive. Please contact support." });
         }
 
         var token = await GenerateJwtTokenAsync(user, userRoles);

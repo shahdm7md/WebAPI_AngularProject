@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
 import {
   AuthResponse,
+  GoogleLoginRequest,
   LoginRequest,
   RegisterCustomerRequest,
   RegisterSellerRequest,
@@ -23,6 +24,10 @@ export class AuthService {
 
   login(payload: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.baseUrl}/api/auth/login`, payload);
+  }
+
+  googleLogin(payload: GoogleLoginRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.baseUrl}/api/auth/google-login`, payload);
   }
 
   registerCustomer(payload: RegisterCustomerRequest): Observable<string> {

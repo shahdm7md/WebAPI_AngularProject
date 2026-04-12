@@ -74,6 +74,10 @@
       <button type="submit" class="btn solid" [disabled]="loading || customerForm.invalid">
         {{ loading ? 'Creating...' : 'Register Customer' }}
       </button>
+
+      <button type="button" class="btn google" [disabled]="googleLoading" (click)="continueWithGoogle()">
+        {{ googleLoading ? 'Connecting...' : 'Continue with Google' }}
+      </button>
     </form>
     }
 
