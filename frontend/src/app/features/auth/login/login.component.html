@@ -1,0 +1,55 @@
+<main class="auth-shell">
+  <div class="bg-layer"></div>
+
+  <section class="auth-card">
+    <header>
+      <p class="brand">Architectural Curator</p>
+      <h1>Welcome back</h1>
+      <p class="muted">Sign in to continue to your dashboard.</p>
+    </header>
+
+    <form [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
+      <label>Email Address</label>
+      <input type="email" formControlName="email" placeholder="name@domain.com" />
+      @if (loginForm.controls.email.touched && loginForm.controls.email.invalid) {
+      <small class="error">Please enter a valid email address.</small>
+      }
+
+      <label>Password</label>
+      <div class="password-row">
+        <input
+          [type]="showPassword ? 'text' : 'password'"
+          formControlName="password"
+          placeholder="Your password"
+        />
+        <button type="button" (click)="togglePassword()" class="icon-btn">
+          {{ showPassword ? 'Hide' : 'Show' }}
+        </button>
+      </div>
+      @if (loginForm.controls.password.touched && loginForm.controls.password.invalid) {
+      <small class="error">Password is required.</small>
+      }
+
+      @if (errorMessage) {
+      <p class="error-box">{{ errorMessage }}</p>
+      }
+
+      <button class="btn solid" type="submit" [disabled]="loading">
+        {{ loading ? 'Signing in...' : 'Login' }}
+      </button>
+
+      <button class="btn google" type="button" (click)="loginWithGoogle()">
+        Continue with Google
+      </button>
+
+      @if (googleMessage) {
+      <p class="note">{{ googleMessage }}</p>
+      }
+    </form>
+
+    <p class="switch-link">
+      New here?
+      <a routerLink="/auth/register">Create an account</a>
+    </p>
+  </section>
+</main>

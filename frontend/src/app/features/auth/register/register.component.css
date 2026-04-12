@@ -1,0 +1,179 @@
+.register-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  background: radial-gradient(circle at 20% 20%, #f8efe2 0%, #f2efe8 45%, #eceff3 100%);
+}
+
+.hero-panel {
+  position: relative;
+  isolation: isolate;
+  background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAtBUycgerV798Jwdjd3Nl7Ec_c_WeNIfYl0VK8TjeJ9J_IMhDAieBdXm3tir4ZrdUf6SZZQ_AxkP0-l969hHJZrEPmvkr74hvDhG1wlXQ9Z0o9k498dFwzC_Z6IZSkBDEYBhDbv0VWe9i-E5aoFfZx7nT1sfhDCYdvUwHVXlS6_rja6_GHbxE7AFvW0V_sCMDsy8lprQ4pRZNsCPtdkSSA-g7Nv3S1lHx24Ae9FUMf61ERMV-efmV2kOjj7FJJqXP5kdB2OQ0bltQ');
+  background-size: cover;
+  background-position: center;
+  padding: clamp(1.5rem, 4vw, 3rem);
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(125deg, rgba(25, 17, 9, 0.88), rgba(23, 31, 39, 0.72));
+}
+
+.hero-content {
+  max-width: 480px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 100%;
+}
+
+.brand {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: #f3d8ab;
+  margin: 0;
+}
+
+.hero-content h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 0.96;
+  letter-spacing: -0.03em;
+}
+
+.hero-content p {
+  color: #f2e9dd;
+  margin: 0;
+}
+
+.hero-content ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.45rem;
+  color: #f8efe2;
+}
+
+.form-panel {
+  padding: clamp(1.25rem, 4vw, 3rem);
+  display: grid;
+  align-content: center;
+  gap: 1.25rem;
+}
+
+.form-panel header h2 {
+  margin: 0 0 0.3rem;
+  font-size: 2rem;
+  letter-spacing: -0.03em;
+}
+
+.form-panel header p {
+  margin: 0;
+  color: #4f5360;
+}
+
+.switcher {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+  background: #ffffffcc;
+  border-radius: 0.95rem;
+  border: 1px solid #dadada;
+  padding: 0.35rem;
+}
+
+.switcher button {
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 0.7rem;
+  padding: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #373d47;
+}
+
+.switcher button.active {
+  border-color: #0d4a67;
+  background: #0d4a6712;
+  color: #0d4a67;
+}
+
+form {
+  background: #ffffffd9;
+  border: 1px solid #dadde2;
+  border-radius: 1rem;
+  padding: 1rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+input,
+textarea {
+  border: 1px solid #c0c4cc;
+  border-radius: 0.6rem;
+  padding: 0.75rem 0.8rem;
+  font: inherit;
+  background: #fffefd;
+}
+
+.btn.solid {
+  border: none;
+  border-radius: 0.65rem;
+  background: linear-gradient(135deg, #0d4a67 0%, #176f7a 100%);
+  color: #fff;
+  padding: 0.9rem;
+  font-weight: 700;
+  margin-top: 0.7rem;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #a2191f;
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.error-box {
+  background: #ffdad6;
+  color: #93000a;
+  border: 1px solid #93000a44;
+  border-radius: 0.6rem;
+  padding: 0.7rem;
+}
+
+.switch-link {
+  margin-top: 0;
+}
+
+.switch-link a {
+  color: #0d4a67;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .register-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-panel {
+    min-height: 300px;
+  }
+}

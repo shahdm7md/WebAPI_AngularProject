@@ -1,0 +1,67 @@
+<div class="home-shell">
+  <nav class="top-nav">
+    <div class="brand">Architectural Curator</div>
+    <div class="nav-links desktop-only">
+      <a href="#">Shop</a>
+      <a href="#">Collections</a>
+      <a href="#">About</a>
+    </div>
+
+    @if (!isLoggedIn()) {
+    <div class="auth-actions">
+      <a routerLink="/auth/login" class="btn ghost">Login</a>
+      <a routerLink="/auth/register" class="btn solid">Register</a>
+    </div>
+    } @else {
+    <div class="account-actions">
+      <button type="button" class="icon-pill" aria-label="Search">Search</button>
+      <button type="button" class="icon-pill" aria-label="Wishlist">Wishlist</button>
+      <button type="button" class="icon-pill" aria-label="Cart">Cart</button>
+      <div class="profile-pill">{{ currentUserName() }}</div>
+      <button type="button" class="btn ghost" (click)="logout()">Logout</button>
+    </div>
+    }
+  </nav>
+
+  <section class="hero">
+    <img
+      class="hero-bg"
+      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtBUycgerV798Jwdjd3Nl7Ec_c_WeNIfYl0VK8TjeJ9J_IMhDAieBdXm3tir4ZrdUf6SZZQ_AxkP0-l969hHJZrEPmvkr74hvDhG1wlXQ9Z0o9k498dFwzC_Z6IZSkBDEYBhDbv0VWe9i-E5aoFfZx7nT1sfhDCYdvUwHVXlS6_rja6_GHbxE7AFvW0V_sCMDsy8lprQ4pRZNsCPtdkSSA-g7Nv3S1lHx24Ae9FUMf61ERMV-efmV2kOjj7FJJqXP5kdB2OQ0bltQ"
+      alt="modern interior"
+    />
+    <div class="hero-overlay"></div>
+    <div class="hero-copy">
+      <p class="kicker">Summer Collection 2024</p>
+      <h1>Structural Sophistication.</h1>
+      <p>
+        Curating the world's most evocative architectural elements for modern
+        spaces.
+      </p>
+      <div class="hero-cta">
+        @if (!isLoggedIn()) {
+        <a routerLink="/auth/register" class="btn solid">Join as Customer</a>
+        <a routerLink="/auth/register" class="btn ghost light">Become a Seller</a>
+        } @else {
+        <a href="#" class="btn solid">Go to Dashboard</a>
+        <a href="#" class="btn ghost light">Continue Shopping</a>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="products">
+    <h2>The Seasonal Edit</h2>
+    <div class="product-grid">
+      @for (item of featuredProducts; track item.name) {
+      <article class="product-card">
+        <img [src]="item.image" [alt]="item.name" />
+        <div class="content">
+          <small>{{ item.label }}</small>
+          <h3>{{ item.name }}</h3>
+          <p>{{ item.price }}</p>
+        </div>
+      </article>
+      }
+    </div>
+  </section>
+</div>

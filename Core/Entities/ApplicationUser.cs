@@ -4,6 +4,20 @@ namespace Core.Entities;
 
 public class ApplicationUser : IdentityUser
 {
+    public string? OtpCode { get; set; }
+
+    public DateTime? OtpExpiry { get; set; }
+
+    public string? RefreshToken { get; set; }
+
+    public string? SellerStatus { get; set; }
+
+    public string? StoreName { get; set; }
+
+    public string? StoreDescription { get; set; }
+
+    public decimal WalletBalance { get; set; }
+
     public string FullName { get; set; } = string.Empty;
 
     public string? Address { get; set; }

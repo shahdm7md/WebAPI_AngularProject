@@ -46,6 +46,26 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
                 .IsRequired()
                 .HasMaxLength(200);
 
+            entity.Property(user => user.OtpCode)
+                .HasMaxLength(20);
+
+            entity.Property(user => user.RefreshToken)
+                .HasMaxLength(500);
+
+            entity.Property(user => user.SellerStatus)
+                .HasMaxLength(50)
+                .HasDefaultValue("Pending");
+
+            entity.Property(user => user.StoreName)
+                .HasMaxLength(200);
+
+            entity.Property(user => user.StoreDescription)
+                .HasMaxLength(2000);
+
+            entity.Property(user => user.WalletBalance)
+                .HasPrecision(18, 2)
+                .HasDefaultValue(0m);
+
             entity.Property(user => user.Address)
                 .HasMaxLength(500);
 
