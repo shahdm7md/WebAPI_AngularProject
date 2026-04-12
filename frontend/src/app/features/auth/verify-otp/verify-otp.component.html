@@ -9,13 +9,13 @@
     <form [formGroup]="otpForm" (ngSubmit)="submit()" novalidate>
       <label for="otp-email">Email Address</label>
       <input id="otp-email" type="email" formControlName="email" placeholder="name@domain.com" />
-      @if (otpForm.controls.email.touched && otpForm.controls.email.invalid) {
+      @if ((submitted || otpForm.controls.email.touched) && otpForm.controls.email.invalid) {
       <small class="error">Enter a valid email address.</small>
       }
 
       <label for="otp-code">OTP Code</label>
       <input id="otp-code" type="text" formControlName="otpCode" maxlength="6" placeholder="123456" />
-      @if (otpForm.controls.otpCode.touched && otpForm.controls.otpCode.invalid) {
+      @if ((submitted || otpForm.controls.otpCode.touched) && otpForm.controls.otpCode.invalid) {
       <small class="error">Enter the 6-digit OTP code.</small>
       }
 

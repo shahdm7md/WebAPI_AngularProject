@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, inject } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -24,6 +24,18 @@ declare global {
             client_id: string;
             callback: (response: { credential?: string }) => void;
           }) => void;
+          renderButton: (
+            parent: HTMLElement,
+            options: {
+              type?: 'standard' | 'icon';
+              theme?: 'outline' | 'filled_blue' | 'filled_black';
+              size?: 'large' | 'medium' | 'small';
+              text?: 'signin_with' | 'signup_with' | 'continue_with' | 'signin';
+              shape?: 'rectangular' | 'pill' | 'circle' | 'square';
+              logo_alignment?: 'left' | 'center';
+              width?: number;
+            },
+          ) => void;
           prompt: () => void;
         };
       };
@@ -42,9 +54,7 @@ const passwordPolicyValidator: ValidatorFn = (
 
   return hasUppercase && hasLowercase && hasDigit && hasMinLength
     ? null
-    : {
-        passwordPolicy: true,
-      };
+    : { passwordPolicy: true };
 };
 
 const passwordMatchValidator: ValidatorFn = (
@@ -69,13 +79,36 @@ export class RegisterComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  @ViewChild('googleButtonHost') private googleButtonHost?: ElementRef<HTMLDivElement>;
 
   protected accountType: AccountType = 'customer';
   protected loading = false;
-  protected googleLoading = false;
   protected errorMessage = '';
+  protected customerSubmitted = false;
+  protected sellerSubmitted = false;
 
   private googleScriptPromise: Promise<void> | null = null;
+  private googleInitialized = false;
+
+  private readonly handleGoogleCredential = (response: { credential?: string }) => {
+    if (!response.credential) {
+      this.errorMessage = 'Unable to retrieve Google ID token.';
+      return;
+    }
+
+    this.authService.googleLogin({ idToken: response.credential }).subscribe({
+      next: (loginResponse) => {
+        this.authService.storeSession(loginResponse);
+        this.router.navigateByUrl('/');
+      },
+      error: (error) => {
+        this.errorMessage = this.authService.extractErrorMessage(
+          error,
+          'Google login failed. Please try again.',
+        );
+      },
+    });
+  };
 
   protected readonly customerForm = this.fb.nonNullable.group(
     {
@@ -100,9 +133,22 @@ export class RegisterComponent {
   protected selectType(type: AccountType): void {
     this.accountType = type;
     this.errorMessage = '';
+    this.customerSubmitted = false;
+    this.sellerSubmitted = false;
+
+    if (type === 'customer') {
+      window.setTimeout(() => this.renderGoogleButton(), 0);
+    }
+  }
+
+  ngAfterViewInit(): void {
+    if (this.accountType === 'customer') {
+      this.renderGoogleButton();
+    }
   }
 
   protected submitCustomer(): void {
+    this.customerSubmitted = true;
     this.errorMessage = '';
 
     if (this.customerForm.invalid) {
@@ -115,9 +161,10 @@ export class RegisterComponent {
       .registerCustomer(this.customerForm.getRawValue())
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: () => this.router.navigate(['/auth/verify-otp'], {
-          queryParams: { email: this.customerForm.getRawValue().email, source: 'register' },
-        }),
+        next: () =>
+          this.router.navigate(['/auth/verify-otp'], {
+            queryParams: { email: this.customerForm.getRawValue().email, source: 'register' },
+          }),
         error: (error) => {
           this.errorMessage = this.authService.extractErrorMessage(
             error,
@@ -127,39 +174,8 @@ export class RegisterComponent {
       });
   }
 
-  protected async continueWithGoogle(): Promise<void> {
-    this.errorMessage = '';
-    this.googleLoading = true;
-
-    try {
-      const idToken = await this.requestGoogleIdTokenAsync();
-
-      this.authService.googleLogin({ idToken }).subscribe({
-        next: (response) => {
-          this.authService.storeSession(response);
-          this.router.navigateByUrl('/');
-        },
-        error: (error) => {
-          this.errorMessage = this.authService.extractErrorMessage(
-            error,
-            'Google login failed. Please try again.',
-          );
-          this.googleLoading = false;
-        },
-        complete: () => {
-          this.googleLoading = false;
-        },
-      });
-    } catch (error) {
-      this.googleLoading = false;
-      this.errorMessage = this.authService.extractErrorMessage(
-        error,
-        'Unable to complete Google sign in.',
-      );
-    }
-  }
-
   protected submitSeller(): void {
+    this.sellerSubmitted = true;
     this.errorMessage = '';
 
     if (this.sellerForm.invalid) {
@@ -172,9 +188,10 @@ export class RegisterComponent {
       .registerSeller(this.sellerForm.getRawValue())
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: () => this.router.navigate(['/auth/verify-otp'], {
-          queryParams: { email: this.sellerForm.getRawValue().email, source: 'register' },
-        }),
+        next: () =>
+          this.router.navigate(['/auth/verify-otp'], {
+            queryParams: { email: this.sellerForm.getRawValue().email, source: 'register' },
+          }),
         error: (error) => {
           this.errorMessage = this.authService.extractErrorMessage(
             error,
@@ -186,22 +203,26 @@ export class RegisterComponent {
 
   protected customerControlInvalid(controlName: 'email' | 'password' | 'confirmPassword'): boolean {
     const control = this.customerForm.controls[controlName];
-    return control.invalid && control.touched;
+    return control.invalid && (control.touched || this.customerSubmitted);
   }
 
   protected sellerControlInvalid(
     controlName: 'email' | 'password' | 'confirmPassword' | 'storeName' | 'storeDescription',
   ): boolean {
     const control = this.sellerForm.controls[controlName];
-    return control.invalid && control.touched;
+    return control.invalid && (control.touched || this.sellerSubmitted);
   }
 
   protected passwordPolicyInvalid(form: 'customer' | 'seller'): boolean {
     const targetForm = form === 'customer' ? this.customerForm : this.sellerForm;
-    return !!targetForm.controls.password.errors?.['passwordPolicy'] && targetForm.controls.password.touched;
+    const submitted = form === 'customer' ? this.customerSubmitted : this.sellerSubmitted;
+    return (
+      !!targetForm.controls.password.errors?.['passwordPolicy'] &&
+      (targetForm.controls.password.touched || submitted)
+    );
   }
 
-  private async requestGoogleIdTokenAsync(): Promise<string> {
+  private async renderGoogleButton(): Promise<void> {
     await this.ensureGoogleScriptAsync();
 
     const googleClient = window.google?.accounts?.id;
@@ -209,35 +230,28 @@ export class RegisterComponent {
       throw new Error('Google identity script is not available.');
     }
 
-    return new Promise<string>((resolve, reject) => {
-      let completed = false;
-      const timeoutId = window.setTimeout(() => {
-        if (!completed) {
-          completed = true;
-          reject(new Error('Google sign in timed out. Please try again.'));
-        }
-      }, 60000);
+    const host = this.googleButtonHost?.nativeElement;
+    if (!host) {
+      return;
+    }
 
+    if (!this.googleInitialized) {
       googleClient.initialize({
         client_id: GOOGLE_CLIENT_ID,
-        callback: (response) => {
-          if (completed) {
-            return;
-          }
-
-          completed = true;
-          window.clearTimeout(timeoutId);
-
-          if (!response.credential) {
-            reject(new Error('Unable to retrieve Google ID token.'));
-            return;
-          }
-
-          resolve(response.credential);
-        },
+        callback: this.handleGoogleCredential,
       });
+      this.googleInitialized = true;
+    }
 
-      googleClient.prompt();
+    host.innerHTML = '';
+    googleClient.renderButton(host, {
+      type: 'standard',
+      theme: 'outline',
+      size: 'large',
+      text: 'continue_with',
+      shape: 'rectangular',
+      logo_alignment: 'left',
+      width: host.clientWidth > 0 ? host.clientWidth : 360,
     });
   }
 
@@ -252,12 +266,16 @@ export class RegisterComponent {
         return;
       }
 
-      const existingScript = document.querySelector<HTMLScriptElement>('script[data-google-identity="true"]');
+      const existingScript = document.querySelector<HTMLScriptElement>(
+        'script[data-google-identity="true"]',
+      );
       if (existingScript) {
         existingScript.addEventListener('load', () => resolve(), { once: true });
-        existingScript.addEventListener('error', () => reject(new Error('Failed to load Google identity script.')), {
-          once: true,
-        });
+        existingScript.addEventListener(
+          'error',
+          () => reject(new Error('Failed to load Google identity script.')),
+          { once: true },
+        );
         return;
       }
 

@@ -52,7 +52,7 @@
       }
 
       <label for="customer-password">Password</label>
-      <input id="customer-password" formControlName="password" type="password" placeholder="Minimum 6 characters" />
+      <input id="customer-password" formControlName="password" type="password" placeholder="Minimum 8 characters" />
       @if (customerControlInvalid('password')) {
       <small class="error">Password must be 8+ chars and include uppercase, lowercase, and a digit.</small>
       }
@@ -67,17 +67,15 @@
       <small class="error">Confirm password is required.</small>
       }
 
-      @if (customerForm.hasError('passwordMismatch') && customerForm.touched) {
+      @if (customerForm.hasError('passwordMismatch') && (customerForm.touched || customerSubmitted)) {
       <small class="error">Passwords do not match.</small>
       }
 
-      <button type="submit" class="btn solid" [disabled]="loading || customerForm.invalid">
+      <button type="submit" class="btn solid" [disabled]="loading">
         {{ loading ? 'Creating...' : 'Register Customer' }}
       </button>
 
-      <button type="button" class="btn google" [disabled]="googleLoading" (click)="continueWithGoogle()">
-        {{ googleLoading ? 'Connecting...' : 'Continue with Google' }}
-      </button>
+      <div class="google-button-host" #googleButtonHost></div>
     </form>
     }
 
@@ -90,7 +88,7 @@
       }
 
       <label for="seller-password">Password</label>
-      <input id="seller-password" formControlName="password" type="password" placeholder="Minimum 6 characters" />
+      <input id="seller-password" formControlName="password" type="password" placeholder="Minimum 8 characters" />
       @if (sellerControlInvalid('password')) {
       <small class="error">Password must be 8+ chars and include uppercase, lowercase, and a digit.</small>
       }
@@ -117,11 +115,11 @@
       <small class="error">Store description must be at least 10 characters.</small>
       }
 
-      @if (sellerForm.hasError('passwordMismatch') && sellerForm.touched) {
+      @if (sellerForm.hasError('passwordMismatch') && (sellerForm.touched || sellerSubmitted)) {
       <small class="error">Passwords do not match.</small>
       }
 
-      <button type="submit" class="btn solid" [disabled]="loading || sellerForm.invalid">
+      <button type="submit" class="btn solid" [disabled]="loading">
         {{ loading ? 'Creating...' : 'Register Seller' }}
       </button>
     </form>
