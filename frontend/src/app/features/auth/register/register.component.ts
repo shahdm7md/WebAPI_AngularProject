@@ -13,7 +13,8 @@ import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 
 type AccountType = 'customer' | 'seller';
-const GOOGLE_CLIENT_ID = '215693797532-gqo9s8f998jgdb5r3ingol2bmm4h5est.apps.googleusercontent.com';
+// register.component.ts
+const GOOGLE_CLIENT_ID = '429102089004-op47mj85bbe9s278h9bc8vld6v9o9ugs.apps.googleusercontent.com';
 
 declare global {
   interface Window {

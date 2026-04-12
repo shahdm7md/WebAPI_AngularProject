@@ -271,16 +271,18 @@ public class AuthController : ControllerBase
         GoogleJsonWebSignature.Payload payload;
         try
         {
-            payload = await GoogleJsonWebSignature.ValidateAsync(
+           payload = await GoogleJsonWebSignature.ValidateAsync(
                 request.IdToken,
                 new GoogleJsonWebSignature.ValidationSettings
                 {
-                    Audience = [_googleAuthOptions.ClientId]
+                    Audience = [_googleAuthOptions.ClientId],
+                    IssuedAtClockTolerance = TimeSpan.FromMinutes(5),
+                    ExpirationTimeClockTolerance = TimeSpan.FromMinutes(5)
                 });
         }
-        catch (InvalidJwtException)
+        catch (InvalidJwtException ex)
         {
-            return Unauthorized(new { message = "Invalid Google token." });
+            return Unauthorized(new { message = ex.Message }); 
         }
         catch (Exception ex)
         {
