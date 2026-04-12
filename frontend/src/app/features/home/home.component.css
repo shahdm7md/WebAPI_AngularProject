@@ -1,0 +1,214 @@
+.home-shell {
+  min-height: 100vh;
+  background: radial-gradient(circle at 10% 0%, #faf0de 0%, #f4f5f7 42%, #edf2f6 100%);
+  color: #151b25;
+}
+
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: rgba(252, 252, 252, 0.85);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #d4d8df;
+}
+
+.brand {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.2rem;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #424957;
+  font-size: 0.95rem;
+}
+
+.auth-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.65rem;
+  padding: 0.65rem 1rem;
+  text-decoration: none;
+  border: 1px solid transparent;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn.solid {
+  background: linear-gradient(135deg, #0f4b66 0%, #1d7a72 100%);
+  color: #fff;
+}
+
+.btn.ghost {
+  border-color: #bcc3cd;
+  background: #ffffffd4;
+  color: #161c27;
+}
+
+.account-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.icon-pill {
+  border: 1px solid #bcc3cd;
+  background: #fff;
+  color: #2d3644;
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+}
+
+.profile-pill {
+  border-radius: 999px;
+  background: #f2ede3;
+  color: #3c3120;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #dfd4c0;
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn.ghost.light {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+
+.hero {
+  position: relative;
+  margin: 1.5rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  min-height: 480px;
+  display: flex;
+  align-items: center;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(118deg, rgba(24, 18, 12, 0.83), rgba(16, 41, 54, 0.54));
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 2;
+  max-width: 580px;
+  padding: 2.5rem;
+  color: #fff;
+}
+
+.kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #f4d8a0;
+  font-size: 0.75rem;
+}
+
+.hero-copy h1 {
+  font-size: clamp(2rem, 6vw, 4rem);
+  line-height: 0.95;
+  margin: 0.5rem 0 1rem;
+}
+
+.hero-cta {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.products {
+  padding: 2rem 1.5rem 3rem;
+}
+
+.products h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  letter-spacing: -0.04em;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.product-card {
+  background: #fff;
+  border: 1px solid #d5d8de;
+  border-radius: 0.9rem;
+  overflow: hidden;
+}
+
+.product-card img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.product-card .content {
+  padding: 0.85rem;
+}
+
+.product-card h3 {
+  margin: 0.25rem 0;
+  font-size: 1rem;
+}
+
+.product-card small,
+.product-card p {
+  color: #585e6c;
+}
+
+@media (max-width: 900px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .top-nav {
+    flex-wrap: wrap;
+  }
+
+  .account-actions {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+  }
+
+  .hero {
+    margin: 1rem;
+    min-height: 420px;
+  }
+}

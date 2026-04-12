@@ -1,0 +1,44 @@
+<main class="otp-shell">
+  <section class="otp-card">
+    <p class="eyebrow">Email Verification</p>
+    <h1>Enter your OTP</h1>
+    <p class="lead">
+      We sent a 6-digit code to the email address below. Enter it to verify your account.
+    </p>
+
+    <form [formGroup]="otpForm" (ngSubmit)="submit()" novalidate>
+      <label for="otp-email">Email Address</label>
+      <input id="otp-email" type="email" formControlName="email" placeholder="name@domain.com" />
+      @if (otpForm.controls.email.touched && otpForm.controls.email.invalid) {
+      <small class="error">Enter a valid email address.</small>
+      }
+
+      <label for="otp-code">OTP Code</label>
+      <input id="otp-code" type="text" formControlName="otpCode" maxlength="6" placeholder="123456" />
+      @if (otpForm.controls.otpCode.touched && otpForm.controls.otpCode.invalid) {
+      <small class="error">Enter the 6-digit OTP code.</small>
+      }
+
+      @if (errorMessage) {
+      <p class="error-box">{{ errorMessage }}</p>
+      }
+
+      @if (message) {
+      <p class="success-box">{{ message }}</p>
+      }
+
+      <button class="btn solid" type="submit" [disabled]="loading">
+        {{ loading ? 'Verifying...' : 'Verify Email' }}
+      </button>
+
+      <button class="btn ghost" type="button" (click)="resendOtp()" [disabled]="resendLoading">
+        {{ resendLoading ? 'Resending...' : 'Resend OTP' }}
+      </button>
+    </form>
+
+    <p class="switch-link">
+      Back to
+      <a routerLink="/auth/login">Login</a>
+    </p>
+  </section>
+</main>
