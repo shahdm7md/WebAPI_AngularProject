@@ -1,7 +1,0 @@
-.vs/
-bin/
-obj/
-node_modules/
-.env
-*.user
-*.suo

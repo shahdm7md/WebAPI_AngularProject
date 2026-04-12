@@ -1,10 +1,10 @@
 .vs/
 
-# .NET backend
-backend/bin/
-backend/obj/
-backend/*.user
-backend/*.suo
+# .NET build outputs
+**/bin/
+**/obj/
+**/*.user
+**/*.suo
 
 # Angular frontend
 frontend/node_modules/
