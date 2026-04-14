@@ -1,0 +1,95 @@
+<form (ngSubmit)="onSubmit()" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+  
+  <div class="lg:col-span-8 space-y-8">
+    
+    <section class="bg-surface-container-lowest p-8 rounded-xl space-y-6">
+      <div class="space-y-1 mb-4">
+        <h3 class="text-lg font-bold tracking-tight text-primary">Product Narrative</h3>
+        <p class="text-xs text-on-surface-variant uppercase tracking-widest">The Soul of the Piece</p>
+      </div>
+      <div class="space-y-4">
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold uppercase tracking-widest text-outline">Product Title</label>
+          <input type="text" [(ngModel)]="product.name" name="name" required
+                 class="w-full bg-surface-container-low border-none rounded-md px-4 py-3 text-on-surface placeholder-on-primary-container text-sm transition-all focus:ring-0" placeholder="e.g. Mid-Century Modern Teak Credenza"/>
+        </div>
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold uppercase tracking-widest text-outline">Description</label>
+          <textarea [(ngModel)]="product.description" name="description" required rows="6"
+                    class="w-full bg-surface-container-low border-none rounded-md px-4 py-3 text-on-surface placeholder-on-primary-container text-sm leading-relaxed transition-all focus:ring-0" placeholder="Describe the architectural significance, materials, and history..."></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-surface-container-lowest p-8 rounded-xl space-y-6">
+      <div class="space-y-1 mb-4">
+        <h3 class="text-lg font-bold tracking-tight text-primary">Visual Gallery</h3>
+      </div>
+      <div class="grid grid-cols-4 grid-rows-2 gap-4 h-[400px]">
+        
+        <div (click)="fileInput.click()" class="col-span-2 row-span-2 bg-surface-container-low border-2 border-dashed border-outline-variant/30 rounded-xl flex flex-col items-center justify-center p-6 text-center group hover:border-secondary transition-colors cursor-pointer overflow-hidden relative">
+          
+          <input type="file" #fileInput hidden (change)="onFileSelected($event)" accept="image/*">
+          
+          @if (imagePreview) {
+            <img [src]="imagePreview" class="w-full h-full object-cover absolute inset-0" />
+          } @else {
+            <span class="material-symbols-outlined text-4xl text-outline group-hover:text-secondary mb-2">add_photo_alternate</span>
+            <p class="text-sm font-bold text-primary">Primary Hero Shot</p>
+            <p class="text-[10px] text-on-surface-variant max-w-[150px] mt-1">Click to browse (PNG, JPG)</p>
+          }
+        </div>
+        
+        </div>
+    </section>
+  </div>
+
+  <div class="lg:col-span-4 space-y-8">
+    
+    <section class="bg-surface-container-lowest p-8 rounded-xl space-y-6 shadow-sm">
+      <div class="space-y-1 mb-4">
+        <h3 class="text-lg font-bold tracking-tight text-primary">Valuation</h3>
+      </div>
+      <div class="space-y-4">
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold uppercase tracking-widest text-outline">Base Listing Price ($)</label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold">$</span>
+            <input type="number" [(ngModel)]="product.price" name="price" required
+                   class="w-full bg-surface-container-low border-none rounded-md pl-8 pr-4 py-3 text-on-surface font-bold text-lg focus:ring-0" placeholder="0.00"/>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-surface-container-lowest p-8 rounded-xl space-y-6">
+      <div class="space-y-1 mb-4">
+        <h3 class="text-lg font-bold tracking-tight text-primary">Classification & Inventory</h3>
+      </div>
+      <div class="space-y-5">
+        
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold uppercase tracking-widest text-outline">Category</label>
+          <select [(ngModel)]="product.categoryId" name="categoryId" required
+                  class="w-full bg-surface-container-low border-none rounded-md px-4 py-3 text-on-surface text-sm focus:ring-0 appearance-none">
+            <option value="" disabled selected>Select Category</option>
+            @for (cat of categories; track cat.id) {
+              <option [value]="cat.id">{{ cat.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold uppercase tracking-widest text-outline">Stock Quantity</label>
+          <input type="number" [(ngModel)]="product.stockQuantity" name="stockQuantity" required
+                 class="w-full bg-surface-container-low border-none rounded-md px-4 py-3 text-on-surface text-sm focus:ring-0"/>
+        </div>
+
+        <button type="submit" class="w-full mt-4 px-8 py-3 text-sm font-bold text-on-primary primary-gradient shadow-sm rounded-md active:scale-95 duration-200">
+            Publish Listing
+        </button>
+
+      </div>
+    </section>
+  </div>
+</form>

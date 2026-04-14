@@ -52,7 +52,7 @@
       }
 
       <label for="customer-password">Password</label>
-      <input id="customer-password" formControlName="password" type="password" placeholder="Minimum 8 characters" />
+      <input id="customer-password" formControlName="password" type="password" placeholder="Minimum 6 characters" />
       @if (customerControlInvalid('password')) {
       <small class="error">Password must be 8+ chars and include uppercase, lowercase, and a digit.</small>
       }
@@ -67,15 +67,13 @@
       <small class="error">Confirm password is required.</small>
       }
 
-      @if (customerForm.hasError('passwordMismatch') && (customerForm.touched || customerSubmitted)) {
+      @if (customerForm.hasError('passwordMismatch') && customerForm.touched) {
       <small class="error">Passwords do not match.</small>
       }
 
-      <button type="submit" class="btn solid" [disabled]="loading">
+      <button type="submit" class="btn solid" [disabled]="loading || customerForm.invalid">
         {{ loading ? 'Creating...' : 'Register Customer' }}
       </button>
-
-      <div class="google-button-host" #googleButtonHost></div>
     </form>
     }
 
@@ -88,7 +86,7 @@
       }
 
       <label for="seller-password">Password</label>
-      <input id="seller-password" formControlName="password" type="password" placeholder="Minimum 8 characters" />
+      <input id="seller-password" formControlName="password" type="password" placeholder="Minimum 6 characters" />
       @if (sellerControlInvalid('password')) {
       <small class="error">Password must be 8+ chars and include uppercase, lowercase, and a digit.</small>
       }
@@ -115,11 +113,11 @@
       <small class="error">Store description must be at least 10 characters.</small>
       }
 
-      @if (sellerForm.hasError('passwordMismatch') && (sellerForm.touched || sellerSubmitted)) {
+      @if (sellerForm.hasError('passwordMismatch') && sellerForm.touched) {
       <small class="error">Passwords do not match.</small>
       }
 
-      <button type="submit" class="btn solid" [disabled]="loading">
+      <button type="submit" class="btn solid" [disabled]="loading || sellerForm.invalid">
         {{ loading ? 'Creating...' : 'Register Seller' }}
       </button>
     </form>

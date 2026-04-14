@@ -11,7 +11,7 @@
     <form [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
       <label>Email Address</label>
       <input type="email" formControlName="email" placeholder="name@domain.com" />
-      @if ((submitted || loginForm.controls.email.touched) && loginForm.controls.email.invalid) {
+      @if (loginForm.controls.email.touched && loginForm.controls.email.invalid) {
       <small class="error">Please enter a valid email address.</small>
       }
 
@@ -26,7 +26,7 @@
           {{ showPassword ? 'Hide' : 'Show' }}
         </button>
       </div>
-      @if ((submitted || loginForm.controls.password.touched) && loginForm.controls.password.invalid) {
+      @if (loginForm.controls.password.touched && loginForm.controls.password.invalid) {
       <small class="error">Password is required.</small>
       }
 
@@ -37,11 +37,15 @@
       <button class="btn solid" type="submit" [disabled]="loading">
         {{ loading ? 'Signing in...' : 'Login' }}
       </button>
-    </form>
 
-    <p class="switch-link">
-      <a routerLink="/auth/forgot-password">Forgot password?</a>
-    </p>
+      <button class="btn google" type="button" (click)="loginWithGoogle()">
+        Continue with Google
+      </button>
+
+      @if (googleMessage) {
+      <p class="note">{{ googleMessage }}</p>
+      }
+    </form>
 
     <p class="switch-link">
       New here?

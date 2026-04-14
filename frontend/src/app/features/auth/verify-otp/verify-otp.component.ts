@@ -22,7 +22,6 @@ export class VerifyOtpComponent {
   protected resendLoading = false;
   protected message = '';
   protected errorMessage = '';
-  protected submitted = false;
 
   protected readonly otpForm = this.fb.nonNullable.group({
     email: [this.route.snapshot.queryParamMap.get('email') ?? '', [Validators.required, Validators.email]],
@@ -30,7 +29,6 @@ export class VerifyOtpComponent {
   });
 
   protected submit(): void {
-    this.submitted = true;
     this.errorMessage = '';
     this.message = '';
 
@@ -44,13 +42,13 @@ export class VerifyOtpComponent {
       .verifyEmailOtp(this.otpForm.getRawValue())
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: (response: string) => {
+        next: (response) => {
           this.message = response;
           this.router.navigate(['/auth/login'], {
             queryParams: { email: this.otpForm.controls.email.value },
           });
         },
-        error: (error: unknown) => {
+        error: (error) => {
           this.errorMessage = this.authService.extractErrorMessage(
             error,
             'OTP verification failed. Please check the code and try again.',
@@ -73,10 +71,10 @@ export class VerifyOtpComponent {
       .resendOtp({ email: this.otpForm.controls.email.value })
       .pipe(finalize(() => (this.resendLoading = false)))
       .subscribe({
-        next: (response: string) => {
+        next: (response) => {
           this.message = response;
         },
-        error: (error: unknown) => {
+        error: (error) => {
           this.errorMessage = this.authService.extractErrorMessage(
             error,
             'Unable to resend OTP right now.',

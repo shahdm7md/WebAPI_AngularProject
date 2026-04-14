@@ -10,10 +10,6 @@ export interface AuthResponse {
   fullName: string;
 }
 
-export interface GoogleLoginRequest {
-  idToken: string;
-}
-
 export interface RegisterCustomerRequest {
   email: string;
   password: string;
@@ -35,18 +31,4 @@ export interface VerifyEmailOtpRequest {
 
 export interface ResendOtpRequest {
   email: string;
-}
-
-export interface ForgotPasswordRequest {
-  email: string;
-}
-
-export interface ForgotPasswordResponse {
-  resetToken: string;
-}
-
-export interface ResetPasswordRequest {
-  email: string;
-  token: string;
-  newPassword: string;
 }
