@@ -5,6 +5,7 @@ using Infrastructure;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularClient", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("http://localhost:4200", "https://localhost:44395")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -90,8 +91,9 @@ if (app.Environment.IsDevelopment())
                         "text/html"));
 }
 
-app.UseHttpsRedirection();
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseCors("AngularClient");
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 

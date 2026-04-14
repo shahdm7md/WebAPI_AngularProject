@@ -4,8 +4,10 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { VerifyOtpComponent } from './features/auth/verify-otp/verify-otp.component';
 import { HomeComponent } from './features/home/home.component';
+import { AuthGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
+<<<<<<< Updated upstream
 	{ path: '', component: HomeComponent },
 	{ path: 'auth/login', component: LoginComponent },
 	{ path: 'auth/forgot-password', component: ForgotPasswordComponent },
@@ -13,3 +15,23 @@ export const routes: Routes = [
 	{ path: 'auth/verify-otp', component: VerifyOtpComponent },
 	{ path: '**', redirectTo: '' },
 ];
+=======
+  { path: '', component: HomeComponent },
+  { path: 'auth/login', component: LoginComponent },
+  { path: 'auth/register', component: RegisterComponent },
+  { path: 'auth/verify-otp', component: VerifyOtpComponent },
+  {
+    path: 'cart',
+    loadComponent: () =>
+      import('./features/Cart/cart.component').then(m => m.CartComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'checkout',
+    loadComponent: () =>
+      import('./features/checkout/checkout.component').then(m => m.CheckoutComponent),
+    canActivate: [AuthGuard]
+  },
+  { path: '**', redirectTo: '' },
+];
+>>>>>>> Stashed changes
