@@ -4,13 +4,20 @@ using API.Services;
 using Infrastructure;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+    options.AddOperationTransformer<AuthOperationTransformer>();
+});
 
 builder.Services.AddCors(options =>
 {
@@ -89,6 +96,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseCors("AngularClient");
 app.UseAuthentication();
 app.UseAuthorization();
@@ -96,3 +104,45 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+internal sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransformer
+{
+    public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
+    {
+        document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+        document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description = "Paste a valid JWT token in the format: Bearer {token}"
+        };
+
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class AuthOperationTransformer : IOpenApiOperationTransformer
+{
+    public Task TransformAsync(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
+    {
+        var requiresAuthorization = context.Description.ActionDescriptor.EndpointMetadata
+            .OfType<AuthorizeAttribute>()
+            .Any();
+
+        if (!requiresAuthorization)
+        {
+            return Task.CompletedTask;
+        }
+
+        operation.Security ??= new List<OpenApiSecurityRequirement>();
+        operation.Security.Add(new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecuritySchemeReference("Bearer", context.Document)] = []
+        });
+
+        return Task.CompletedTask;
+    }
+}

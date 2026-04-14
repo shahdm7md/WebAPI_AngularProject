@@ -1,6 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using API.Contracts.Auth;
 using API.Services;
 using API.Settings;
@@ -11,6 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.SqlServer.Server;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace API.Controllers;
 
@@ -68,15 +69,6 @@ public class AuthController : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
 
-        //var result = await _userManager.CreateAsync(user, request.Password);
-        //if (!result.Succeeded)
-        //{
-        //    return BadRequest(result.Errors.Select(error => error.Description));
-        //}
-
-        //await _userManager.AddToRoleAsync(user, "Customer");
-        //await SendOtpAsync(user, "Complete your customer registration");
-        // RegisterCustomer
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
@@ -123,16 +115,6 @@ public class AuthController : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
 
-        //var result = await _userManager.CreateAsync(user, request.Password);
-        //if (!result.Succeeded)
-        //{
-        //    return BadRequest(result.Errors.Select(error => error.Description));
-        //}
-
-        //await _userManager.AddToRoleAsync(user, "Seller");
-        //await SendOtpAsync(user, "Complete your seller registration");
-
-        // RegisterSeller
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
@@ -147,8 +129,6 @@ public class AuthController : ControllerBase
 
         await SendOtpAsync(user, "Complete your seller registration");
 
-        await SendOtpAsync(user, "Complete your seller registration"); // ← الأول
-        await _userManager.AddToRoleAsync(user, "Seller");             // ← التاني
         return Ok("Seller registration successful. Please verify your email with the OTP code sent to your inbox.");
     }
 
@@ -292,18 +272,18 @@ public class AuthController : ControllerBase
         GoogleJsonWebSignature.Payload payload;
         try
         {
-           payload = await GoogleJsonWebSignature.ValidateAsync(
-                request.IdToken,
-                new GoogleJsonWebSignature.ValidationSettings
-                {
-                    Audience = [_googleAuthOptions.ClientId],
-                    IssuedAtClockTolerance = TimeSpan.FromMinutes(5),
-                    ExpirationTimeClockTolerance = TimeSpan.FromMinutes(5)
-                });
+            payload = await GoogleJsonWebSignature.ValidateAsync(
+                 request.IdToken,
+                 new GoogleJsonWebSignature.ValidationSettings
+                 {
+                     Audience = [_googleAuthOptions.ClientId],
+                     IssuedAtClockTolerance = TimeSpan.FromMinutes(5),
+                     ExpirationTimeClockTolerance = TimeSpan.FromMinutes(5)
+                 });
         }
         catch (InvalidJwtException ex)
         {
-            return Unauthorized(new { message = ex.Message }); 
+            return Unauthorized(new { message = ex.Message });
         }
         catch (Exception ex)
         {

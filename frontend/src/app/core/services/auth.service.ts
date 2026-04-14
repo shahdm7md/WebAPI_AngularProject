@@ -4,10 +4,13 @@ import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
 import {
   AuthResponse,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
   LoginRequest,
   RegisterCustomerRequest,
   RegisterSellerRequest,
   ResendOtpRequest,
+  ResetPasswordRequest,
   VerifyEmailOtpRequest,
 } from '../models/auth.models';
 
@@ -45,6 +48,16 @@ export class AuthService {
 
   resendOtp(payload: ResendOtpRequest): Observable<string> {
     return this.http.post(`${this.baseUrl}/api/auth/resend-otp`, payload, {
+      responseType: 'text',
+    });
+  }
+
+  forgotPassword(payload: ForgotPasswordRequest): Observable<ForgotPasswordResponse> {
+    return this.http.post<ForgotPasswordResponse>(`${this.baseUrl}/api/auth/forgot-password`, payload);
+  }
+
+  resetPassword(payload: ResetPasswordRequest): Observable<string> {
+    return this.http.post(`${this.baseUrl}/api/auth/reset-password`, payload, {
       responseType: 'text',
     });
   }

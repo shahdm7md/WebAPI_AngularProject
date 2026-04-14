@@ -33,7 +33,7 @@
 // }
 
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -41,6 +41,16 @@ import { HttpClient } from '@angular/common/http';
 export class ProductService {
   private http = inject(HttpClient);
   private baseUrl = 'http://localhost:5199/api/';
+
+  private getAuthHeaders() {
+    const token = localStorage.getItem('auth_token');
+
+    return token
+      ? {
+          headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
+        }
+      : {};
+  }
 
   getProducts() {
     return this.http.get(`${this.baseUrl}Products`);
@@ -55,15 +65,15 @@ export class ProductService {
   }
 
   addProduct(data: any) {
-    return this.http.post(`${this.baseUrl}Products`, data);
+    return this.http.post(`${this.baseUrl}Products`, data, this.getAuthHeaders());
   }
 
   updateProduct(id: number, data: any) {
     // استخدمنا PUT بناءً على كود الباك إند بتاعك
-    return this.http.put(`${this.baseUrl}Products/${id}`, data);
+    return this.http.put(`${this.baseUrl}Products/${id}`, data, this.getAuthHeaders());
   }
 
   deleteProduct(id: number) {
-    return this.http.delete(`${this.baseUrl}Products/${id}`);
+    return this.http.delete(`${this.baseUrl}Products/${id}`, this.getAuthHeaders());
   }
 }

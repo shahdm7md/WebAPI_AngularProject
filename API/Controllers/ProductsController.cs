@@ -3,6 +3,7 @@ using Core.Entities;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace API.Controllers;
 
@@ -43,10 +44,18 @@ public class ProductsController : ControllerBase
     }
     [HttpPost]
     [Consumes("multipart/form-data")]
-    //  [Authorize(Roles = "Seller,Admin")]
+    [Authorize(Roles = "Seller,Admin")]
     public async Task<IActionResult> CreateProduct([FromForm] CreateProductRequest request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var sellerId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? User.FindFirstValue("userId");
+
+        if (string.IsNullOrWhiteSpace(sellerId))
+        {
+            return Unauthorized("Unable to determine the current user.");
+        }
 
        
         var product = new Product
@@ -56,7 +65,7 @@ public class ProductsController : ControllerBase
             Price = request.Price,
             StockQuantity = request.StockQuantity,
             CategoryId = request.CategoryId,
-            SellerId = "e0d0e5d8-72b6-4a08-8826-553b24bd8826"
+            SellerId = sellerId
         };
 
        
