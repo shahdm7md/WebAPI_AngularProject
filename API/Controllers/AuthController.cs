@@ -68,6 +68,15 @@ public class AuthController : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
 
+        //var result = await _userManager.CreateAsync(user, request.Password);
+        //if (!result.Succeeded)
+        //{
+        //    return BadRequest(result.Errors.Select(error => error.Description));
+        //}
+
+        //await _userManager.AddToRoleAsync(user, "Customer");
+        //await SendOtpAsync(user, "Complete your customer registration");
+        // RegisterCustomer
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
@@ -114,6 +123,16 @@ public class AuthController : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
 
+        //var result = await _userManager.CreateAsync(user, request.Password);
+        //if (!result.Succeeded)
+        //{
+        //    return BadRequest(result.Errors.Select(error => error.Description));
+        //}
+
+        //await _userManager.AddToRoleAsync(user, "Seller");
+        //await SendOtpAsync(user, "Complete your seller registration");
+
+        // RegisterSeller
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
@@ -128,6 +147,8 @@ public class AuthController : ControllerBase
 
         await SendOtpAsync(user, "Complete your seller registration");
 
+        await SendOtpAsync(user, "Complete your seller registration"); // ← الأول
+        await _userManager.AddToRoleAsync(user, "Seller");             // ← التاني
         return Ok("Seller registration successful. Please verify your email with the OTP code sent to your inbox.");
     }
 

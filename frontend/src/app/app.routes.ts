@@ -11,10 +11,10 @@ import { ProductEditComponent } from './product-edit/product-edit';
 
 export const routes: Routes = [
   
-    { path: '', component: HomeComponent },
-    { path: 'auth/login', component: LoginComponent },
-    { path: 'auth/register', component: RegisterComponent },
-    { path: 'auth/verify-otp', component: VerifyOtpComponent },
+	{ path: '', component: HomeComponent },
+	{ path: 'auth/login', component: LoginComponent },
+	{ path: 'auth/register', component: RegisterComponent },
+	{ path: 'auth/verify-otp', component: VerifyOtpComponent },
 
   
     { path: 'products', component: ProductListComponent },
@@ -22,5 +22,5 @@ export const routes: Routes = [
     { path: 'products/edit/:id', component: ProductEditComponent },
 
 
-    { path: '**', redirectTo: '' },
+	{ path: '**', redirectTo: '' },
 ];
