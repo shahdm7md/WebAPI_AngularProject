@@ -12,6 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularClient", policy =>
@@ -26,6 +27,11 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(EmailSettings.SectionName));
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IAdminProductService, AdminProductService>();
+builder.Services.AddScoped<IAdminOrderService, AdminOrderService>();
+builder.Services.AddScoped<ICouponService, CouponService>();
+builder.Services.AddScoped<IBannerService, BannerService>();
+
 
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
     ?? throw new InvalidOperationException("JWT settings are not configured.");
@@ -52,6 +58,7 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.FromMinutes(2)
     };
 });
+
 
 var app = builder.Build();
 
@@ -95,5 +102,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseStaticFiles();
+
 
 app.Run();

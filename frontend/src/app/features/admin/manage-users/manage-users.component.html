@@ -1,0 +1,259 @@
+<div class="admin-shell">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">A</div>
+      <div>
+        <h1 class="brand-name">E-Commerce</h1>
+        <p class="brand-sub">Enterprise Console</p>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a *ngFor="let item of navItems"
+         [routerLink]="item.route"
+         class="nav-link"
+         [class.active]="item.active">
+        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    </nav>
+     <div class="sidebar-footer">
+      <button class="invite-btn">
+        <span class="material-symbols-outlined">rocket_launch</span>
+        Launch Storefront
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main-area">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="search-wrap">
+        <span class="material-symbols-outlined si">search</span>
+        <input class="search-input" type="text" placeholder="Search across all users and vendors..." />
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+        <button class="icon-btn"><span class="material-symbols-outlined">help_outline</span></button>
+        <div class="sep"></div>
+        <div class="user-wrap">
+          <div class="user-text">
+            <p class="uname">Admin User</p>
+            <p class="urole">System Admin</p>
+          </div>
+          <div class="uavatar">A</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- HEADING + STATS -->
+      <div class="page-heading">
+        <div>
+          <h2 class="page-title">User Ecosystem</h2>
+          <p class="page-sub">Manage permissions, monitor activity, and oversee registration status for all users.</p>
+        </div>
+        <div class="heading-stats">
+          <div class="stat-box">
+            <p class="stat-box-label">Total Active</p>
+            <p class="stat-box-val blue">{{ totalCount | number }}</p>
+          </div>
+          <div class="stat-box">
+            <p class="stat-box-label">Pending Approval</p>
+            <p class="stat-box-val orange">{{ pendingCount }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOAST MESSAGES -->
+      <div *ngIf="successMessage" class="toast toast-success">
+        <span class="material-symbols-outlined">check_circle</span>
+        {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="toast toast-error">
+        <span class="material-symbols-outlined">error</span>
+        {{ errorMessage }}
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs-bar">
+        <button class="tab" [class.active]="activeTab === 'all'"             (click)="setTab('all')">
+          All Users
+        </button>
+        <button class="tab" [class.active]="activeTab === 'customers'"       (click)="setTab('customers')">
+          Customers
+        </button>
+        <button class="tab pending-tab" [class.active]="activeTab === 'sellers-pending'" (click)="setTab('sellers-pending')">
+          Sellers Pending
+          <span *ngIf="pendingCount > 0" class="pending-badge">{{ pendingCount }}</span>
+        </button>
+        <button class="tab" [class.active]="activeTab === 'sellers-active'"  (click)="setTab('sellers-active')">
+          Sellers Active
+        </button>
+      </div>
+
+      <!-- TABLE CARD -->
+      <div class="card table-card">
+
+        <!-- LOADING -->
+        <div *ngIf="isLoading" class="loading-wrap">
+          <div class="spinner"></div>
+          <p>Loading users...</p>
+        </div>
+
+        <!-- PENDING SELLERS TAB -->
+        <div *ngIf="!isLoading && activeTab === 'sellers-pending'">
+          <div *ngIf="pendingSellers.length === 0" class="empty-state">
+            <span class="material-symbols-outlined">check_circle</span>
+            <p>No pending sellers — all caught up!</p>
+          </div>
+          <div class="table-scroll" *ngIf="pendingSellers.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Seller Info</th>
+                  <th>Store Name</th>
+                  <th>Status</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let seller of pendingSellers">
+                  <td>
+                    <div class="user-cell">
+                      <div class="avatar">{{ getInitials(seller.fullName) }}</div>
+                      <div>
+                        <p class="uname-cell">{{ seller.fullName }}</p>
+                        <p class="uemail-cell">{{ seller.email }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="muted">{{ seller.storeName ?? '—' }}</td>
+                  <td>
+                    <span class="status-badge status-pending">Pending</span>
+                  </td>
+                  <td class="text-right">
+                    <div class="actions-wrap">
+                      <button class="action-btn approve"
+                              [disabled]="isActionLoading(seller.userId)"
+                              (click)="approveSeller(seller.userId)">
+                        <span class="material-symbols-outlined">check</span>
+                        Approve
+                      </button>
+                      <button class="action-btn reject"
+                              [disabled]="isActionLoading(seller.userId)"
+                              (click)="rejectSeller(seller.userId)">
+                        <span class="material-symbols-outlined">close</span>
+                        Reject
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ALL / CUSTOMERS / SELLERS-ACTIVE TABS -->
+        <div *ngIf="!isLoading && activeTab !== 'sellers-pending'">
+          <div *ngIf="users.length === 0" class="empty-state">
+            <span class="material-symbols-outlined">person_off</span>
+            <p>No users found.</p>
+          </div>
+          <div class="table-scroll" *ngIf="users.length > 0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>User Information</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Joined</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let user of users">
+                  <td>
+                    <div class="user-cell">
+                      <div class="avatar">{{ getInitials(user.fullName) }}</div>
+                      <div>
+                        <p class="uname-cell">{{ user.fullName }}</p>
+                        <p class="uemail-cell">{{ user.email }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="role-badge" [ngClass]="getRoleClass(user.role)">
+                      {{ user.role }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="status-cell" [class.active]="user.isActive" [class.blocked]="!user.isActive">
+                      <span class="status-dot"></span>
+                      <span>{{ user.isActive ? 'Active' : 'Blocked' }}</span>
+                    </div>
+                  </td>
+                  <td class="muted">{{ user.createdAt | date:'MMM dd, yyyy' }}</td>
+                  <td class="text-right">
+                    <div class="actions-wrap">
+                      <button class="icon-action"
+                              [title]="user.isActive ? 'Block User' : 'Activate User'"
+                              [class.danger]="user.isActive"
+                              [class.success]="!user.isActive"
+                              [disabled]="isActionLoading(user.id)"
+                              (click)="toggleActive(user.id)">
+                        <span class="material-symbols-outlined">
+                          {{ user.isActive ? 'block' : 'check_circle' }}
+                        </span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- PAGINATION -->
+          <div class="pagination" *ngIf="totalPages > 1">
+            <p class="pagination-info">
+              Showing <strong>{{ (currentPage - 1) * pageSize + 1 }} - {{ Math.min(currentPage * pageSize, totalCount) }}</strong>
+              of {{ totalCount | number }} users
+            </p>
+            <div class="pagination-btns">
+              <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+                <span class="material-symbols-outlined">chevron_left</span>
+              </button>
+              <button *ngFor="let p of pageNumbers"
+                      class="page-btn"
+                      [class.active]="p === currentPage"
+                      (click)="goToPage(p)">
+                {{ p }}
+              </button>
+              <button class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+                <span class="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <a *ngFor="let item of navItems.slice(0,5)"
+     [routerLink]="item.route"
+     class="mob-item"
+     [class.active]="item.active">
+    <span class="material-symbols-outlined">{{ item.icon }}</span>
+    <span>{{ item.label }}</span>
+  </a>
+</nav>
