@@ -29,4 +29,8 @@ public class Product
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
 
     public ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
+
+    public bool IsActive { get; set; } = true;
+     public bool IsAvailable { get; set; } = true;
+    public int Stock { get; init; }
 }

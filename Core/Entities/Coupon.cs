@@ -17,4 +17,7 @@ public class Coupon
     public int UsageLimit { get; set; }
 
     public ICollection<CouponUsage> Usages { get; set; } = new List<CouponUsage>();
+    public decimal? MinOrderAmount { get; set; }
+    public bool IsActive { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

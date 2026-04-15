@@ -1,0 +1,315 @@
+<div class="admin-shell">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">A</div>
+      <div>
+        <h1 class="brand-name">E-Commerce</h1>
+        <p class="brand-sub">Enterprise Console</p>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a *ngFor="let item of navItems"
+         [routerLink]="item.route"
+         class="nav-link"
+         [class.active]="item.active">
+        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="invite-btn">
+        <span class="material-symbols-outlined">rocket_launch</span>
+        Launch Storefront
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main-area">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="search-wrap">
+        <span class="material-symbols-outlined si">search</span>
+        <input class="search-input" type="text"
+               placeholder="Search coupon codes..."
+               [(ngModel)]="searchTerm" />
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+        <button class="icon-btn"><span class="material-symbols-outlined">help_outline</span></button>
+        <div class="sep"></div>
+        <div class="user-wrap">
+          <div class="user-text">
+            <p class="uname">Admin User</p>
+            <p class="urole">System Admin</p>
+          </div>
+          <div class="uavatar">A</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- HEADING -->
+      <div class="page-heading">
+        <div>
+          <p class="page-eyebrow">Overview</p>
+          <h1 class="page-title">Coupons</h1>
+          <p class="page-sub">Create and manage discount coupons across the platform.</p>
+        </div>
+        <button class="btn-primary" (click)="openCreate()">
+          <span class="material-symbols-outlined">add</span>
+          Create New Coupon
+        </button>
+      </div>
+
+      <!-- TOAST -->
+      <div *ngIf="successMessage" class="toast toast-success">
+        <span class="material-symbols-outlined">check_circle</span>
+        {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="toast toast-error">
+        <span class="material-symbols-outlined">error</span>
+        {{ errorMessage }}
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-icon blue"><span class="material-symbols-outlined">sell</span></div>
+          <p class="stat-label">Total Coupons</p>
+          <p class="stat-val blue">{{ totalCount }}</p>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon green"><span class="material-symbols-outlined">check_circle</span></div>
+          <p class="stat-label">Active</p>
+          <p class="stat-val green">{{ activeCount }}</p>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon red"><span class="material-symbols-outlined">history_toggle_off</span></div>
+          <p class="stat-label">Expired</p>
+          <p class="stat-val red">{{ expiredCount }}</p>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon orange"><span class="material-symbols-outlined">bolt</span></div>
+          <p class="stat-label">Used Today</p>
+          <p class="stat-val orange">{{ usedToday }}</p>
+        </div>
+      </div>
+
+      <!-- TABLE CARD -->
+      <div class="card">
+
+        <!-- LOADING -->
+        <div *ngIf="isLoading" class="loading-wrap">
+          <div class="spinner"></div>
+          <p>Loading coupons...</p>
+        </div>
+
+        <!-- EMPTY -->
+        <div *ngIf="!isLoading && filtered.length === 0" class="empty-state">
+          <span class="material-symbols-outlined">sell</span>
+          <p>No coupons found.</p>
+          <button class="btn-primary sm" (click)="openCreate()">
+            <span class="material-symbols-outlined">add</span>
+            Create First Coupon
+          </button>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-scroll" *ngIf="!isLoading && filtered.length > 0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Coupon Code</th>
+                <th>Type</th>
+                <th>Value</th>
+                <th>Min Order</th>
+                <th>Usage / Limit</th>
+                <th>Expiry</th>
+                <th>Status</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of filtered" [class.row-expired]="isExpired(c)">
+
+                <!-- Code -->
+                <td>
+                  <span class="coupon-code" [class.expired-code]="isExpired(c)">
+                    {{ c.code }}
+                  </span>
+                </td>
+
+                <!-- Type — resolveType يتعامل مع 0/1 أو string -->
+                <td class="type-cell">{{ getTypeLabel(c) }}</td>
+
+                <!-- Value -->
+                <td class="value-cell">{{ formatValue(c) }}</td>
+
+                <!-- Min Order -->
+                <td class="muted">
+                  {{ c.minOrderAmount ? ('$' + c.minOrderAmount) : '—' }}
+                </td>
+
+                <!-- Usage bar -->
+                <td>
+                  <div class="usage-wrap">
+                    <div class="usage-text">
+                      <span>{{ c.usedCount }} used</span>
+                      <span>{{ c.usageLimit || '∞' }}</span>
+                    </div>
+                    <div class="usage-bar">
+                      <div class="usage-fill"
+                           [style.width.%]="getUsagePercent(c)"
+                           [class.full]="getUsagePercent(c) >= 100">
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Expiry -->
+                <td class="muted">{{ c.expiryDate | date:'MMM dd, yyyy' }}</td>
+
+                <!-- Status -->
+                <td>
+                  <span class="status-badge" [ngClass]="getStatusClass(c)">
+                    {{ getStatusLabel(c) }}
+                  </span>
+                </td>
+
+                <!-- Actions -->
+                <td class="text-right">
+                  <div class="actions-wrap">
+                    <button class="icon-action edit" title="Edit" (click)="openEdit(c)">
+                      <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <button class="icon-action delete" title="Delete" (click)="deleteCoupon(c.id, c.code)">
+                      <span class="material-symbols-outlined">delete</span>
+                    </button>
+                  </div>
+                </td>
+
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <a *ngFor="let item of navItems.slice(0,5)"
+     [routerLink]="item.route" class="mob-item" [class.active]="item.active">
+    <span class="material-symbols-outlined">{{ item.icon }}</span>
+    <span>{{ item.label }}</span>
+  </a>
+</nav>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h3 class="modal-title">{{ editMode ? 'Edit Coupon' : 'Create New Coupon' }}</h3>
+      <button class="modal-close" (click)="closeModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div *ngIf="modalError" class="modal-error">
+      <span class="material-symbols-outlined">error</span>
+      {{ modalError }}
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Code -->
+      <div class="form-group">
+        <label class="form-label">Coupon Code <span class="req">*</span></label>
+        <input class="form-input mono" type="text"
+               placeholder="e.g. SUMMER24"
+               [(ngModel)]="form.code"
+               [disabled]="editMode"
+               style="text-transform:uppercase" />
+        <span class="form-hint" *ngIf="!editMode">Letters and numbers only, will be uppercased.</span>
+      </div>
+
+      <!-- Type + Value -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Discount Type <span class="req">*</span></label>
+          <select class="form-input" [(ngModel)]="form.discountType">
+            <option value="Percentage">Percentage (%)</option>
+            <option value="Fixed">Fixed Amount ($)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">
+            {{ form.discountType === 'Percentage' ? 'Percentage (%)' : 'Amount ($)' }}
+            <span class="req">*</span>
+          </label>
+          <input class="form-input" type="number" min="0"
+                 [max]="form.discountType === 'Percentage' ? 100 : 99999"
+                 [placeholder]="form.discountType === 'Percentage' ? '0 – 100' : '0.00'"
+                 [(ngModel)]="form.Value" />
+        </div>
+      </div>
+
+      <!-- Min Order + Usage Limit -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Min Order Amount ($)</label>
+          <input class="form-input" type="number" min="0" placeholder="0.00"
+                 [(ngModel)]="form.minOrderAmount" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Usage Limit <span class="req">*</span></label>
+          <input class="form-input" type="number" min="1" placeholder="100"
+                 [(ngModel)]="form.usageLimit" />
+        </div>
+      </div>
+
+      <!-- Expiry -->
+      <div class="form-group">
+        <label class="form-label">Expiry Date <span class="req">*</span></label>
+        <input class="form-input" type="date"
+               [(ngModel)]="form.expiryDate" />
+      </div>
+
+      <!-- Preview card -->
+      <div class="preview-card" *ngIf="form.code || form.Value">
+        <div class="preview-left">
+          <p class="preview-label">Preview</p>
+          <span class="preview-code">{{ form.code?.toUpperCase() || 'CODE' }}</span>
+        </div>
+        <div class="preview-right">
+          <p class="preview-val">
+            {{ form.discountType === 'Percentage' ? form.Value + '%' : '$' + form.Value }}
+          </p>
+          <p class="preview-sub">{{ form.discountType === 'Percentage' ? 'off total' : 'off order' }}</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeModal()">Cancel</button>
+      <button class="btn-primary" [disabled]="isSubmitting" (click)="submit()">
+        <span class="material-symbols-outlined" *ngIf="!isSubmitting">
+          {{ editMode ? 'save' : 'add' }}
+        </span>
+        <div class="btn-spinner" *ngIf="isSubmitting"></div>
+        {{ isSubmitting ? 'Saving...' : (editMode ? 'Save Changes' : 'Create Coupon') }}
+      </button>
+    </div>
+
+  </div>
+</div>

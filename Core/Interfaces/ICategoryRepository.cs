@@ -1,12 +1,16 @@
 ﻿using Core.Entities;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Core.Interfaces;
-
-public interface ICategoryRepository
+namespace Core.Interfaces
 {
-    Task<IEnumerable<Category>> GetAllAsync();
+    public interface ICategoryRepository
+    {
+        Task<IEnumerable<Category>> GetAllAsync();
 
 
-    Task AddAsync(Category category);
-    Task<bool> SaveChangesAsync();
+        Task AddAsync(Category category);
+        Task<bool> SaveChangesAsync();
+    }
 }
