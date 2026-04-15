@@ -30,7 +30,7 @@ public class ExceptionMiddleware
         {
             await WriteErrorAsync(context, HttpStatusCode.Unauthorized, ex.Message);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             await WriteErrorAsync(context, HttpStatusCode.InternalServerError,
                 "An unexpected error occurred.");

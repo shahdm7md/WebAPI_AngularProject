@@ -2,7 +2,6 @@ using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.Persistence;
 using Infrastructure.Repositories;
-using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -20,8 +19,6 @@ public static class DependencyInjection
 
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
-        services.AddScoped<IProductRepository, ProductRepository>();
-        services.AddScoped<ICategoryRepository, CategoryRepository>();
 
         services.AddIdentityCore<ApplicationUser>(options =>
         {
