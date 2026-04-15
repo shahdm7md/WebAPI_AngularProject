@@ -13,15 +13,12 @@ public class ProductsController : ControllerBase
 {
     private readonly IProductRepository _productRepo;
     private readonly IWebHostEnvironment _env;
-    //public ProductsController(IProductRepository productRepo)
-    //{
-    //    _productRepo = productRepo;
-    //}
-    public ProductsController(IProductRepository productRepo, IWebHostEnvironment env)
-    {
-        _productRepo = productRepo;
-        _env = env;
-    }
+public ProductsController(IProductRepository productRepo, IWebHostEnvironment env)
+{
+    _productRepo = productRepo;
+    _env = env;
+}
+
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] string? search, [FromQuery] int? categoryId, int page = 1, int size = 10)
@@ -104,7 +101,7 @@ public class ProductsController : ControllerBase
 
 
     [HttpPut("{id}")]
-    //[Authorize(Roles = "Seller,Admin")]
+    [Authorize(Roles = "Seller,Admin")]
     public async Task<IActionResult> UpdateProduct(int id, [FromBody] CreateProductRequest request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -129,7 +126,7 @@ public class ProductsController : ControllerBase
 
 
     [HttpDelete("{id}")]
-    //[Authorize(Roles = "Admin,Seller")]
+    [Authorize(Roles = "Admin,Seller")]
     public async Task<IActionResult> DeleteProduct(int id)
     {
        
