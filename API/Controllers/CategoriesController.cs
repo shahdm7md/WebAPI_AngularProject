@@ -2,41 +2,44 @@
 using Core.Entities;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class CategoriesController : ControllerBase
+namespace API.Controllers
 {
-    private readonly ICategoryRepository _categoryRepo;
 
-    public CategoriesController(ICategoryRepository categoryRepo)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class CategoriesController : ControllerBase
     {
-        _categoryRepo = categoryRepo;
-    }
+        private readonly ICategoryRepository _categoryRepo;
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var categories = await _categoryRepo.GetAllAsync();
-        var response = categories.Select(c => new CategoryResponse(c.Id, c.Name));
-        return Ok(response);
-    }
+        public CategoriesController(ICategoryRepository categoryRepo)
+        {
+            _categoryRepo = categoryRepo;
+        }
 
-    [HttpPost]
-     //[Authorize(Roles = "Admin")] 
-    public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryRequest request)
-    {
-        if (string.IsNullOrWhiteSpace(request.Name))
-            return BadRequest("Category name is required.");
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var categories = await _categoryRepo.GetAllAsync();
+            var response = categories.Select(c => new CategoryResponse(c.Id, c.Name));
+            return Ok(response);
+        }
 
-        var category = new Category { Name = request.Name };
+        [HttpPost]
+        //[Authorize(Roles = "Admin")] 
+        public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Name))
+                return BadRequest("Category name is required.");
 
-        await _categoryRepo.AddAsync(category);
-        await _categoryRepo.SaveChangesAsync();
+            var category = new Category { Name = request.Name };
 
-        return Ok(new { Message = "Category created successfully!", Id = category.Id });
+            await _categoryRepo.AddAsync(category);
+            await _categoryRepo.SaveChangesAsync();
+
+            return Ok(new { Message = "Category created successfully!", Id = category.Id });
+        }
     }
 }

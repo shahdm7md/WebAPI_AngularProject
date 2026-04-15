@@ -1,0 +1,314 @@
+<div class="min-h-screen bg-surface pt-24 pb-20 px-6">
+  <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12">
+
+    <!-- Left: Steps -->
+    <div class="lg:col-span-8 space-y-12">
+
+      <!-- Progress Bar -->
+      <div class="flex items-center justify-between max-w-2xl mx-auto mb-16">
+        @for (step of [{n:1,label:'Shipping'},{n:2,label:'Payment'},{n:3,label:'Review'}]; track step.n) {
+          <div class="flex flex-col items-center gap-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all"
+                 [class.bg-primary]="currentStep >= step.n"
+                 [class.text-on-primary]="currentStep >= step.n"
+                 [class.bg-surface-container-highest]="currentStep < step.n"
+                 [class.text-on-surface-variant]="currentStep < step.n">
+              {{ step.n }}
+            </div>
+            <span class="text-xs font-bold uppercase tracking-widest transition-all"
+                  [class.text-primary]="currentStep >= step.n"
+                  [class.text-on-surface-variant]="currentStep < step.n">
+              {{ step.label }}
+            </span>
+          </div>
+          @if (step.n < 3) {
+            <div class="flex-1 h-[2px] mx-4 self-center -translate-y-3 transition-all"
+                 [class.bg-primary]="currentStep > step.n"
+                 [class.bg-surface-container-high]="currentStep <= step.n">
+            </div>
+          }
+        }
+      </div>
+
+      <!-- ═══ Step 1: Shipping ═══ -->
+      @if (currentStep === 1) {
+        <div class="bg-surface-container-lowest p-10 rounded-xl space-y-8">
+          <header>
+            <h1 class="text-4xl font-extrabold tracking-tighter text-primary mb-2">Shipping Information</h1>
+            <p class="text-on-surface-variant leading-relaxed">Where should we deliver your curated pieces?</p>
+          </header>
+
+          <form [formGroup]="shippingForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant">First Name</label>
+              <input formControlName="firstName"
+                class="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-secondary/20 focus:bg-surface-container-highest transition-all outline-none"
+                [class.ring-2]="isFieldInvalid(shippingForm,'firstName')"
+                [class.ring-error]="isFieldInvalid(shippingForm,'firstName')"
+                placeholder="Julian" type="text"/>
+              @if (isFieldInvalid(shippingForm, 'firstName')) {
+                <p class="text-error text-xs">Required</p>
+              }
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant">Last Name</label>
+              <input formControlName="lastName"
+                class="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-secondary/20 focus:bg-surface-container-highest transition-all outline-none"
+                [class.ring-2]="isFieldInvalid(shippingForm,'lastName')"
+                [class.ring-error]="isFieldInvalid(shippingForm,'lastName')"
+                placeholder="Beck" type="text"/>
+              @if (isFieldInvalid(shippingForm, 'lastName')) {
+                <p class="text-error text-xs">Required</p>
+              }
+            </div>
+
+            <div class="md:col-span-2 space-y-2">
+              <label class="text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant">Address</label>
+              <input formControlName="address"
+                class="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-secondary/20 focus:bg-surface-container-highest transition-all outline-none"
+                [class.ring-2]="isFieldInvalid(shippingForm,'address')"
+                [class.ring-error]="isFieldInvalid(shippingForm,'address')"
+                placeholder="1285 Avenue of the Americas, Floor 32" type="text"/>
+              @if (isFieldInvalid(shippingForm, 'address')) {
+                <p class="text-error text-xs">At least 5 characters</p>
+              }
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant">City</label>
+              <input formControlName="city"
+                class="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-secondary/20 focus:bg-surface-container-highest transition-all outline-none"
+                placeholder="New York" type="text"/>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label class="text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant">State</label>
+                <input formControlName="state"
+                  class="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-secondary/20 focus:bg-surface-container-highest transition-all outline-none"
+                  placeholder="NY" type="text"/>
+              </div>
+              <div class="space-y-2">
+                <label class="text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant">ZIP Code</label>
+                <input formControlName="zip"
+                  class="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-secondary/20 focus:bg-surface-container-highest transition-all outline-none"
+                  placeholder="10019" type="text"/>
+              </div>
+            </div>
+          </form>
+
+          <div class="pt-6">
+            <button (click)="goToStep(2)" class="primary-gradient text-on-primary w-full md:w-auto px-12 py-4 rounded-lg font-bold text-sm tracking-widest uppercase transition-all hover:scale-[1.02] active:scale-95 shadow-xl">
+              Continue to Payment
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- ═══ Step 2: Payment ═══ -->
+      @if (currentStep === 2) {
+        <div class="bg-surface-container-lowest p-10 rounded-xl space-y-8">
+          <header>
+            <h1 class="text-4xl font-extrabold tracking-tighter text-primary mb-2">Payment Method</h1>
+            <p class="text-on-surface-variant leading-relaxed">Choose your preferred payment option.</p>
+          </header>
+
+          <div class="grid grid-cols-3 gap-3">
+            @for (pm of paymentMethods; track pm.value) {
+              <button type="button" (click)="selectPayment(pm.value)"
+                class="flex flex-col items-center gap-2 p-5 border-2 rounded-xl text-sm font-medium transition-all"
+                [class.border-primary]="paymentForm.value.paymentMethod === pm.value"
+                [class.bg-surface-container-low]="paymentForm.value.paymentMethod === pm.value"
+                [class.border-surface-container-highest]="paymentForm.value.paymentMethod !== pm.value">
+                <span class="text-2xl">
+                  @if (pm.value === PaymentMethod.Card)   { 💳 }
+                  @if (pm.value === PaymentMethod.PayPal) { 🅿️ }
+                  @if (pm.value === PaymentMethod.Cash)   { 💵 }
+                </span>
+                <span class="text-xs font-bold text-on-surface-variant">{{ pm.label }}</span>
+              </button>
+            }
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant">
+              Coupon Code <span class="font-normal normal-case">(optional)</span>
+            </label>
+            <input [formControl]="couponCodeControl"
+              class="w-full bg-surface-container-low border-none rounded-lg p-4 focus:ring-2 focus:ring-secondary/20 focus:bg-surface-container-highest transition-all outline-none uppercase tracking-widest"
+              placeholder="e.g. SAVE20" type="text"/>
+          </div>
+
+          <div class="flex gap-4 pt-2">
+            <button (click)="goToStep(1)"
+              class="px-8 py-4 rounded-lg font-bold text-sm border border-outline-variant hover:bg-surface-container transition-all">
+              ← Back
+            </button>
+            <button (click)="goToStep(3)"
+              class="primary-gradient text-on-primary px-12 py-4 rounded-lg font-bold text-sm tracking-widest uppercase transition-all hover:scale-[1.02] active:scale-95 shadow-xl">
+              Review Order →
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- ═══ Step 3: Review ═══ -->
+      @if (currentStep === 3) {
+        <div class="bg-surface-container-lowest p-10 rounded-xl space-y-8">
+          <header>
+            <h1 class="text-4xl font-extrabold tracking-tighter text-primary mb-2">Final Review</h1>
+            <p class="text-on-surface-variant leading-relaxed">Please confirm your order details before placing.</p>
+          </header>
+
+          <!-- Shipping Summary -->
+          <div class="bg-surface-container p-6 rounded-xl">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant mb-2">Shipping To</p>
+                <p class="font-bold text-primary">
+                  {{ shippingForm.value.firstName }} {{ shippingForm.value.lastName }}
+                </p>
+                <p class="text-sm text-on-surface-variant mt-1">{{ getFullAddress() }}</p>
+              </div>
+              <button (click)="goToStep(1)"
+                class="text-xs text-secondary font-bold hover:underline uppercase tracking-widest">
+                Edit
+              </button>
+            </div>
+          </div>
+
+          <!-- Payment Summary -->
+          <div class="bg-surface-container p-6 rounded-xl">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant mb-2">Payment Method</p>
+                <p class="font-bold text-primary">
+                  @if (paymentForm.value.paymentMethod === PaymentMethod.Card)   { 💳 Credit / Debit Card }
+                  @if (paymentForm.value.paymentMethod === PaymentMethod.PayPal) { 🅿️ PayPal }
+                  @if (paymentForm.value.paymentMethod === PaymentMethod.Cash)   { 💵 Cash on Delivery }
+                </p>
+              </div>
+              <button (click)="goToStep(2)"
+                class="text-xs text-secondary font-bold hover:underline uppercase tracking-widest">
+                Edit
+              </button>
+            </div>
+          </div>
+
+          @if (error) {
+            <div class="bg-red-50 border border-error/20 text-error px-4 py-3 rounded-lg text-sm">
+              ⚠️ {{ error }}
+            </div>
+          }
+
+          <div class="flex gap-4 pt-2">
+            <button (click)="goToStep(2)"
+              class="px-8 py-4 rounded-lg font-bold text-sm border border-outline-variant hover:bg-surface-container transition-all">
+              ← Back
+            </button>
+            <button (click)="placeOrder()" [disabled]="submitting"
+              class="flex-1 primary-gradient text-on-primary py-4 rounded-lg font-bold text-sm tracking-widest uppercase hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-xl">
+              @if (submitting) {
+                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+                Processing...
+              } @else {
+                Place Order
+              }
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Inactive Steps Preview -->
+      @if (currentStep < 2) {
+        <div class="space-y-4 opacity-50 pointer-events-none">
+          <div class="bg-surface-container p-6 rounded-xl flex items-center justify-between">
+            <span class="font-bold text-sm uppercase tracking-widest">Payment Method</span>
+            <span class="text-on-surface-variant">›</span>
+          </div>
+          <div class="bg-surface-container p-6 rounded-xl flex items-center justify-between">
+            <span class="font-bold text-sm uppercase tracking-widest">Final Review</span>
+            <span class="text-on-surface-variant">›</span>
+          </div>
+        </div>
+      }
+      @if (currentStep === 2) {
+        <div class="space-y-4 opacity-50 pointer-events-none">
+          <div class="bg-surface-container p-6 rounded-xl flex items-center justify-between">
+            <span class="font-bold text-sm uppercase tracking-widest">Final Review</span>
+            <span class="text-on-surface-variant">›</span>
+          </div>
+        </div>
+      }
+
+    </div>
+
+    <!-- Right: Order Summary Sidebar -->
+    <aside class="lg:col-span-4">
+      <div class="bg-surface-container-low p-8 rounded-xl sticky top-28">
+        <h2 class="text-xl font-extrabold tracking-tighter text-primary mb-6">Order Summary</h2>
+
+        @if (loading) {
+          <div class="space-y-4">
+            @for (i of [1,2]; track i) {
+              <div class="h-20 bg-surface-container rounded-lg animate-pulse"></div>
+            }
+          </div>
+        }
+
+        @if (summary && !loading) {
+          <div class="space-y-6 mb-8">
+            @for (item of summary.items; track item.productId) {
+              <div class="flex gap-4">
+                <div class="w-20 h-20 bg-surface-container rounded-lg overflow-hidden flex-shrink-0">
+                  <div class="w-full h-full bg-surface-container-highest flex items-center justify-center">
+                    <svg class="w-8 h-8 text-outline-variant" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="flex flex-col justify-between py-1">
+                  <div>
+                    <h4 class="text-sm font-bold text-primary">{{ item.productName }}</h4>
+                    <p class="text-xs text-on-surface-variant">Qty: {{ item.quantity }}</p>
+                  </div>
+                  <span class="text-sm font-medium">{{ item.subTotal | currency }}</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="space-y-3 pt-6 border-t border-outline-variant/30">
+            <div class="flex justify-between text-sm">
+              <span class="text-on-surface-variant">Subtotal</span>
+              <span class="font-medium">{{ summary.totalAmount | currency }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-on-surface-variant">Shipping</span>
+              <span class="font-medium text-secondary">Free</span>
+            </div>
+            <div class="flex justify-between text-lg font-black pt-4 text-primary">
+              <span>Total</span>
+              <span>{{ summary.totalAmount | currency }}</span>
+            </div>
+          </div>
+        }
+
+        <div class="mt-8 p-4 bg-surface-container-highest/50 rounded-lg flex items-start gap-3">
+          <span class="text-secondary text-xl">✓</span>
+          <div>
+            <p class="text-xs font-bold text-primary uppercase tracking-wider mb-1">Curation Guarantee</p>
+            <p class="text-[11px] text-on-surface-variant leading-tight">
+              Every piece is inspected by our senior architectural team before dispatch.
+            </p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</div>

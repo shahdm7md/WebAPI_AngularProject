@@ -1,10 +1,11 @@
-﻿namespace API.Contracts.Products;
-
-public record ProductResponse(
-    int Id,
-    string Name,
-    string? Description,
-    decimal Price,
-    int StockQuantity,
-    string CategoryName,
-    string? MainImageUrl);
+﻿namespace API.Contracts.Products
+{
+    public record ProductResponse(
+     int Id,
+     string Name,
+     string? Description,
+     decimal Price,
+     int StockQuantity,
+     string CategoryName,
+     string? MainImageUrl);
+}

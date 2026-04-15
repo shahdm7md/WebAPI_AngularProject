@@ -1,0 +1,257 @@
+<div class="admin-shell">
+ 
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">A</div>
+      <div>
+        <h1 class="brand-name">E-Commerce</h1>
+        <p class="brand-sub">Enterprise Console</p>
+      </div>
+    </div>
+ 
+    <nav class="sidebar-nav">
+      <a *ngFor="let item of navItems"
+         [routerLink]="item.route"
+         class="nav-link"
+         [class.active]="item.active">
+        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    </nav>
+ 
+    <div class="sidebar-footer">
+      <button class="invite-btn">
+        <span class="material-symbols-outlined">rocket_launch</span>
+        Launch Storefront
+      </button>
+    </div>
+  </aside>
+ 
+  <!-- ===== MAIN ===== -->
+  <main class="main-area">
+ 
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="search-wrap">
+        <span class="material-symbols-outlined si">search</span>
+        <input class="search-input" type="text" placeholder="Search sellers, orders, or data..." />
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn notif">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="dot"></span>
+        </button>
+        <button class="icon-btn">
+          <span class="material-symbols-outlined">help_outline</span>
+        </button>
+        <div class="sep"></div>
+        <div class="user-wrap">
+          <div class="user-text">
+            <p class="uname">Admin User</p>
+            <p class="urole">System Admin</p>
+          </div>
+          <div class="uavatar">A</div>
+        </div>
+      </div>
+    </header>
+ 
+    <!-- PAGE BODY -->
+    <div class="page-body">
+ 
+      <!-- HEADING -->
+      <div class="page-heading">
+        <div>
+          <h2 class="page-title">Dashboard Overview</h2>
+          <p class="page-sub">Welcome back. Here's what's happening with the platform today.</p>
+        </div>
+        <div class="heading-btns">
+          <button class="btn-sec">Export Report</button>
+          <button class="btn-pri">Generate Invoice</button>
+        </div>
+      </div>
+ 
+      <!-- LOADING STATE -->
+      <div *ngIf="isLoading" class="loading-wrap">
+        <div class="spinner"></div>
+        <p>Loading dashboard stats...</p>
+      </div>
+ 
+      <!-- ERROR STATE -->
+      <div *ngIf="hasError && !isLoading" class="error-wrap">
+        <span class="material-symbols-outlined">error</span>
+        <p>Failed to load stats. Make sure the API is running.</p>
+        <button class="btn-pri" (click)="loadStats()">Retry</button>
+      </div>
+ 
+      <!-- CONTENT -->
+      <div *ngIf="!isLoading && !hasError">
+ 
+        <!-- STATS GRID -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon si-blue"><span class="material-symbols-outlined">group</span></div>
+              <span class="badge badge-green">+12%</span>
+            </div>
+            <p class="stat-label">Total Users</p>
+            <h3 class="stat-val">{{ stats.totalUsers | number }}</h3>
+          </div>
+ 
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon si-indigo"><span class="material-symbols-outlined">storefront</span></div>
+              <span class="badge badge-green">+5.2%</span>
+            </div>
+            <p class="stat-label">Active Sellers</p>
+            <h3 class="stat-val">{{ stats.activeSellers | number }}</h3>
+          </div>
+ 
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon si-amber"><span class="material-symbols-outlined">shopping_bag</span></div>
+              <span class="badge badge-blue">+18%</span>
+            </div>
+            <p class="stat-label">Total Orders</p>
+            <h3 class="stat-val">{{ stats.totalOrders | number }}</h3>
+          </div>
+ 
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-icon si-green"><span class="material-symbols-outlined">payments</span></div>
+              <span class="badge badge-green">+24%</span>
+            </div>
+            <p class="stat-label">Net Revenue</p>
+            <h3 class="stat-val">${{ stats.netRevenue | number }}</h3>
+          </div>
+        </div>
+ 
+        <!-- PENDING ALERT -->
+        <div *ngIf="stats.pendingSellers > 0" class="alert-banner">
+          <span class="material-symbols-outlined">pending_actions</span>
+          <div>
+            <p class="alert-title">{{ stats.pendingSellers }} Sellers Pending Approval</p>
+            <p class="alert-sub">Review applications to maintain seller SLA.</p>
+          </div>
+          <button class="alert-btn" [routerLink]="'/admin/users'">Review Now</button>
+        </div>
+ 
+        <!-- CHART + TOP SELLERS -->
+        <div class="mid-row">
+ 
+          <!-- CHART -->
+          <div class="card chart-card">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">Sales Trends</h3>
+                <p class="card-sub">Performance across all categories</p>
+              </div>
+              <div class="chart-tabs">
+                <button class="ctab active">Daily</button>
+                <button class="ctab">Weekly</button>
+                <button class="ctab">Monthly</button>
+              </div>
+            </div>
+            <div class="chart-area">
+              <div *ngFor="let bar of chartBars; let i = index"
+                   class="cbar"
+                   [style.height.%]="bar"
+                   [class.highlight]="bar === 95">
+              </div>
+            </div>
+            <div class="chart-days">
+              <span *ngFor="let d of chartDays">{{ d }}</span>
+            </div>
+          </div>
+ 
+          <!-- TOP SELLERS -->
+          <div class="card sellers-card">
+            <h3 class="card-title">Top Sellers</h3>
+            <div class="sellers-list">
+              <div *ngFor="let s of topSellers" class="seller-row">
+                <div class="rank" [class]="s.rankColor">{{ s.rank }}</div>
+                <div class="seller-info">
+                  <p class="sname">{{ s.name }}</p>
+                  <p class="scat">{{ s.category }}</p>
+                </div>
+                <div class="seller-stats">
+                  <p class="srev">{{ s.revenue }}</p>
+                  <p class="sgrowth">{{ s.growth }}</p>
+                </div>
+              </div>
+            </div>
+            <button class="view-all" [routerLink]="'/admin/users'">View All Sellers</button>
+          </div>
+ 
+        </div>
+ 
+        <!-- RECENT ORDERS TABLE -->
+        <div class="card table-card">
+          <div class="table-head">
+            <h3 class="card-title">Recent Orders</h3>
+            <div class="table-actions">
+              <button class="icon-btn"><span class="material-symbols-outlined">filter_list</span></button>
+              <button class="icon-btn"><span class="material-symbols-outlined">download</span></button>
+            </div>
+          </div>
+ 
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th class="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let o of recentOrders">
+                  <td class="order-id">{{ o.id }}</td>
+                  <td>
+                    <div class="customer-cell">
+                      <div class="cav" [ngClass]="getAvatarClass(o.avatarColor)">{{ o.initials }}</div>
+                      <span>{{ o.customerName }}</span>
+                    </div>
+                  </td>
+                  <td class="muted">{{ o.date }}</td>
+                  <td class="bold">${{ o.amount | number:'1.2-2' }}</td>
+                  <td>
+                    <span class="status-badge" [ngClass]="getStatusClass(o.status)">
+                      {{ o.status }}
+                    </span>
+                  </td>
+                  <td class="text-right">
+                    <button class="icon-btn">
+                      <span class="material-symbols-outlined">more_horiz</span>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+ 
+          <div class="table-footer">
+            <a [routerLink]="'/admin/orders'" class="view-link">View All Orders →</a>
+          </div>
+        </div>
+ 
+      </div>
+    </div><!-- end page-body -->
+  </main>
+ 
+</div>
+ 
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <a *ngFor="let item of navItems.slice(0,5)"
+     [routerLink]="item.route"
+     class="mob-item"
+     [class.active]="item.active">
+    <span class="material-symbols-outlined">{{ item.icon }}</span>
+    <span>{{ item.label }}</span>
+  </a>
+</nav>
+ 

@@ -1,0 +1,309 @@
+<div class="admin-shell">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">A</div>
+      <div>
+        <h1 class="brand-name">E-Commerce</h1>
+        <p class="brand-sub">Enterprise Console</p>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a *ngFor="let item of navItems"
+         [routerLink]="item.route"
+         class="nav-link"
+         [class.active]="item.active">
+        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="invite-btn">
+        <span class="material-symbols-outlined">rocket_launch</span>
+        Launch Storefront
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main-area">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="search-wrap">
+        <span class="material-symbols-outlined si">search</span>
+        <input class="search-input" type="text"
+               placeholder="Search products, categories or sellers..."
+               [(ngModel)]="searchTerm" />
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+        <button class="icon-btn"><span class="material-symbols-outlined">help_outline</span></button>
+        <div class="sep"></div>
+        <div class="user-wrap">
+          <div class="user-text">
+            <p class="uname">Admin User</p>
+            <p class="urole">System Admin</p>
+          </div>
+          <div class="uavatar">A</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- HEADING -->
+      <div class="page-heading">
+        <div>
+          <h1 class="page-title">Product Inventory</h1>
+          <p class="page-sub">Manage all products across all sellers from a single authoritative view.</p>
+        </div>
+        <button class="btn-primary" (click)="openAddModal()">
+          <span class="material-symbols-outlined">add</span>
+          Add New Product
+        </button>
+      </div>
+
+      <!-- TOAST -->
+      <div *ngIf="successMessage" class="toast toast-success">
+        <span class="material-symbols-outlined">check_circle</span>
+        {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="toast toast-error">
+        <span class="material-symbols-outlined">error</span>
+        {{ errorMessage }}
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-box">
+          <p class="stat-label">Total Items</p>
+          <p class="stat-val blue">{{ totalCount | number }}</p>
+        </div>
+        <div class="stat-box">
+          <p class="stat-label">Low Stock</p>
+          <p class="stat-val orange">{{ lowStockCount }}</p>
+        </div>
+        <div class="stat-box">
+          <p class="stat-label">Out of Stock</p>
+          <p class="stat-val red">{{ outOfStockCount }}</p>
+        </div>
+        <div class="stat-box">
+          <p class="stat-label">Active Products</p>
+          <p class="stat-val green">{{ activeCount }}</p>
+        </div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <div class="filter-search">
+          <span class="material-symbols-outlined fsi">search</span>
+          <input class="filter-input" type="text"
+                 placeholder="Filter by name, category or seller..."
+                 [(ngModel)]="searchTerm" />
+        </div>
+        <div class="filter-btns">
+          <input class="filter-input seller-filter"
+                 type="text"
+                 placeholder="Seller ID (optional)..."
+                 [(ngModel)]="filterSellerId"
+                 (keyup.enter)="loadProducts()" />
+          <button class="filter-btn" (click)="loadProducts()">
+            <span class="material-symbols-outlined">filter_list</span>
+            Apply
+          </button>
+        </div>
+      </div>
+
+      <!-- TABLE CARD -->
+      <div class="card table-card">
+
+        <!-- LOADING -->
+        <div *ngIf="isLoading" class="loading-wrap">
+          <div class="spinner"></div>
+          <p>Loading products...</p>
+        </div>
+
+        <!-- EMPTY -->
+        <div *ngIf="!isLoading && filteredProducts.length === 0" class="empty-state">
+          <span class="material-symbols-outlined">inventory_2</span>
+          <p>No products found.</p>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-scroll" *ngIf="!isLoading && filteredProducts.length > 0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Seller</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Status</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let product of filteredProducts"
+                  [class.inactive-row]="!product.isActive">
+                <td>
+                  <div class="product-cell">
+                    <div class="product-thumb">
+                      <span class="material-symbols-outlined">inventory_2</span>
+                    </div>
+                    <div>
+                      <p class="product-name">{{ product.name }}</p>
+                      <p class="product-id">ID: {{ product.id }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="category-badge">{{ product.categoryName }}</span></td>
+                <td class="muted">{{ product.sellerName }}</td>
+                <td class="price-cell">${{ product.price | number:'1.2-2' }}</td>
+                <td>
+                  <div class="stock-cell" [ngClass]="getStockClass(product)">
+                    <span class="stock-dot"></span>
+                    <span>{{ getStockLabel(product) }}</span>
+                    <span class="stock-count" *ngIf="product.stock > 0">({{ product.stock }})</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="active-badge" [class.inactive]="!product.isActive">
+                    {{ product.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td class="text-right">
+                  <div class="actions-wrap">
+                    <button class="icon-action deactivate"
+                            *ngIf="product.isActive"
+                            title="Deactivate Product"
+                            [disabled]="isActionLoading(product.id)"
+                            (click)="deactivate(product.id)">
+                      <span class="material-symbols-outlined">
+                        {{ isActionLoading(product.id) ? 'hourglass_empty' : 'block' }}
+                      </span>
+                    </button>
+                    <span class="deactivated-label" *ngIf="!product.isActive">Deactivated</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="pagination" *ngIf="!isLoading && totalPages > 1">
+          <p class="pagination-info">
+            Showing
+            <strong>{{ (currentPage - 1) * pageSize + 1 }} –
+              {{ Math.min(currentPage * pageSize, totalCount) }}</strong>
+            of {{ totalCount | number }} products
+          </p>
+          <div class="pagination-btns">
+            <button class="page-btn" [disabled]="currentPage === 1"
+                    (click)="goToPage(currentPage - 1)">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button *ngFor="let p of pageNumbers"
+                    class="page-btn" [class.active]="p === currentPage"
+                    (click)="goToPage(p)">{{ p }}</button>
+            <button class="page-btn" [disabled]="currentPage === totalPages"
+                    (click)="goToPage(currentPage + 1)">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <a *ngFor="let item of navItems.slice(0,5)"
+     [routerLink]="item.route" class="mob-item" [class.active]="item.active">
+    <span class="material-symbols-outlined">{{ item.icon }}</span>
+    <span>{{ item.label }}</span>
+  </a>
+</nav>
+
+<!-- ===== ADD PRODUCT MODAL ===== -->
+<div class="modal-overlay" *ngIf="showAddModal" (click)="closeAddModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h3 class="modal-title">Add New Product</h3>
+      <button class="modal-close" (click)="closeAddModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Modal Error -->
+    <div *ngIf="modalError" class="toast toast-error modal-toast">
+      <span class="material-symbols-outlined">error</span>
+      {{ modalError }}
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Name -->
+      <div class="form-group">
+        <label class="form-label">Product Name <span class="required">*</span></label>
+        <input class="form-input" type="text"
+               placeholder="e.g. Eames Heritage Lounge"
+               [(ngModel)]="newProduct.name" />
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-input form-textarea"
+                  placeholder="Product description..."
+                  [(ngModel)]="newProduct.description"
+                  rows="3"></textarea>
+      </div>
+
+      <!-- Price + Stock -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Price ($) <span class="required">*</span></label>
+          <input class="form-input" type="number" min="0" step="0.01"
+                 placeholder="0.00"
+                 [(ngModel)]="newProduct.price" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stock Quantity <span class="required">*</span></label>
+          <input class="form-input" type="number" min="0"
+                 placeholder="0"
+                 [(ngModel)]="newProduct.stock" />
+        </div>
+      </div>
+
+      <!-- Category -->
+      <div class="form-group">
+        <label class="form-label">Category <span class="required">*</span></label>
+        <select class="form-input form-select" [(ngModel)]="newProduct.categoryId">
+          <option [value]="0" disabled>Select a category...</option>
+          <option *ngFor="let cat of categories" [value]="cat.id">
+            {{ cat.name }}
+          </option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeAddModal()">Cancel</button>
+      <button class="btn-primary" [disabled]="isSubmitting" (click)="submitAddProduct()">
+        <span class="material-symbols-outlined" *ngIf="!isSubmitting">add</span>
+        <div class="btn-spinner" *ngIf="isSubmitting"></div>
+        {{ isSubmitting ? 'Adding...' : 'Add Product' }}
+      </button>
+    </div>
+
+  </div>
+</div>

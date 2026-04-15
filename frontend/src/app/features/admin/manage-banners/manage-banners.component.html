@@ -1,0 +1,319 @@
+<div class="admin-shell">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">A</div>
+      <div>
+        <h1 class="brand-name">E-Commerce</h1>
+        <p class="brand-sub">Enterprise Console</p>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a *ngFor="let item of navItems"
+         [routerLink]="item.route"
+         class="nav-link"
+         [class.active]="item.active">
+        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="invite-btn">
+        <span class="material-symbols-outlined">rocket_launch</span>
+        Launch Storefront
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main-area">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="material-symbols-outlined si">search</span>
+        <input class="search-input" type="text" placeholder="Search across console..." />
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+        <button class="icon-btn"><span class="material-symbols-outlined">help_outline</span></button>
+        <div class="sep"></div>
+        <div class="user-wrap">
+          <div class="user-text">
+            <p class="uname">Admin User</p>
+            <p class="urole">System Admin</p>
+          </div>
+          <div class="uavatar">A</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- HEADING -->
+      <div class="page-heading">
+        <div>
+          <nav class="breadcrumb">
+            <span>Console</span>
+            <span class="material-symbols-outlined">chevron_right</span>
+            <span>Marketing</span>
+            <span class="material-symbols-outlined">chevron_right</span>
+            <span class="bc-active">Banners</span>
+          </nav>
+          <h1 class="page-title">Homepage Banners</h1>
+          <p class="page-sub">Manage high-impact visual banners for the storefront landing page.</p>
+        </div>
+        <button class="btn-primary" (click)="openCreate()">
+          <span class="material-symbols-outlined">add</span>
+          Add New Banner
+        </button>
+      </div>
+
+      <!-- TOAST -->
+      <div *ngIf="successMessage" class="toast toast-success">
+        <span class="material-symbols-outlined">check_circle</span>
+        {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="toast toast-error">
+        <span class="material-symbols-outlined">error</span>
+        {{ errorMessage }}
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-icon blue"><span class="material-symbols-outlined">ad_units</span></div>
+          <p class="stat-label">Total Banners</p>
+          <p class="stat-val blue">{{ banners.length }}</p>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon green"><span class="material-symbols-outlined">visibility</span></div>
+          <p class="stat-label">Active</p>
+          <p class="stat-val green">{{ activeCount }}</p>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon gray"><span class="material-symbols-outlined">visibility_off</span></div>
+          <p class="stat-label">Inactive</p>
+          <p class="stat-val gray">{{ inactiveCount }}</p>
+        </div>
+        <div class="stat-box add-card" (click)="openCreate()">
+          <div class="stat-icon dashed"><span class="material-symbols-outlined">add_photo_alternate</span></div>
+          <p class="stat-label">Quick Add</p>
+          <p class="stat-val blue">New Banner</p>
+        </div>
+      </div>
+
+      <!-- BANNER CARDS GRID -->
+      <div class="section-header">
+        <h3 class="section-title">Active Banner Grid</h3>
+      </div>
+
+      <!-- LOADING -->
+      <div *ngIf="isLoading" class="loading-wrap">
+        <div class="spinner"></div>
+        <p>Loading banners...</p>
+      </div>
+
+      <!-- EMPTY -->
+      <div *ngIf="!isLoading && banners.length === 0" class="empty-full">
+        <div class="empty-icon"><span class="material-symbols-outlined">add_photo_alternate</span></div>
+        <h4>No banners yet</h4>
+        <p>Create your first banner to promote products on the homepage.</p>
+        <button class="btn-primary" (click)="openCreate()">
+          <span class="material-symbols-outlined">add</span>
+          Add First Banner
+        </button>
+      </div>
+
+      <!-- CARDS -->
+      <div class="banner-grid" *ngIf="!isLoading && banners.length > 0">
+        <div class="banner-card" *ngFor="let b of sortedBanners" [class.inactive-card]="!b.isActive">
+          <div class="banner-img-wrap">
+            <img *ngIf="b.imageUrl" [src]="baseUrl+ b.imageUrl" [alt]="b.title" class="banner-img" />
+            <div *ngIf="!b.imageUrl" class="banner-img-placeholder">
+              <span class="material-symbols-outlined">image</span>
+            </div>
+            <div class="order-badge">Order: {{ b.displayOrder }}</div>
+            <div class="inactive-overlay" *ngIf="!b.isActive">
+              <span>Inactive</span>
+            </div>
+          </div>
+          <div class="banner-body">
+            <div class="banner-info">
+              <h4 class="banner-title">{{ b.title }}</h4>
+              <p class="banner-link">{{ b.link || 'No link' }}</p>
+            </div>
+            <div class="banner-actions-row">
+              <label class="toggle-wrap" [title]="b.isActive ? 'Deactivate' : 'Activate'">
+                <input type="checkbox" [checked]="b.isActive" (change)="toggleActive(b)" />
+                <span class="toggle-track">
+                  <span class="toggle-thumb"></span>
+                </span>
+              </label>
+              <div class="banner-btns">
+                <button class="icon-action edit" (click)="openEdit(b)" title="Edit">
+                  <span class="material-symbols-outlined">edit</span>
+                </button>
+                <button class="icon-action delete" (click)="deleteBanner(b.id, b.title)" title="Delete">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add card -->
+        <div class="banner-card add-new-card" (click)="openCreate()">
+          <div class="add-new-inner">
+            <div class="add-new-icon">
+              <span class="material-symbols-outlined">add_photo_alternate</span>
+            </div>
+            <h4>Create New Banner</h4>
+            <p>Recommended: 1920×1080px</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="section-header" *ngIf="!isLoading && banners.length > 0">
+        <h3 class="section-title">Banner Registry</h3>
+      </div>
+
+      <div class="card" *ngIf="!isLoading && banners.length > 0">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Preview</th>
+                <th>Banner Title</th>
+                <th>Target Link</th>
+                <th>Order</th>
+                <th>Status</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let b of sortedBanners" [class.row-inactive]="!b.isActive">
+                <td>
+                  <div class="thumb-wrap">
+                    <img *ngIf="baseUrl + b.imageUrl" [src]="baseUrl + b.imageUrl" [alt]="b.title" class="thumb-img" />
+                    <div *ngIf="!b.imageUrl" class="thumb-placeholder">
+                      <span class="material-symbols-outlined">image</span>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="banner-name">{{ b.title }}</span></td>
+                <td><span class="link-mono">{{ b.link || '—' }}</span></td>
+                <td><span class="order-num">{{ b.displayOrder }}</span></td>
+                <td>
+                  <span class="status-badge" [class.status-active]="b.isActive" [class.status-inactive]="!b.isActive">
+                    {{ b.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td class="text-right">
+                  <div class="actions-wrap">
+                    <button class="icon-action edit" (click)="openEdit(b)" title="Edit">
+                      <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <button class="icon-action toggle"
+                            [title]="b.isActive ? 'Deactivate' : 'Activate'"
+                            (click)="toggleActive(b)">
+                      <span class="material-symbols-outlined">
+                        {{ b.isActive ? 'visibility_off' : 'visibility' }}
+                      </span>
+                    </button>
+                    <button class="icon-action delete" (click)="deleteBanner(b.id, b.title)" title="Delete">
+                      <span class="material-symbols-outlined">delete</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <a *ngFor="let item of navItems.slice(0,5)"
+     [routerLink]="item.route" class="mob-item" [class.active]="item.active">
+    <span class="material-symbols-outlined">{{ item.icon }}</span>
+    <span>{{ item.label }}</span>
+  </a>
+</nav>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h3 class="modal-title">{{ editMode ? 'Edit Banner' : 'Add New Banner' }}</h3>
+      <button class="modal-close" (click)="closeModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div *ngIf="modalError" class="modal-error">
+      <span class="material-symbols-outlined">error</span>
+      {{ modalError }}
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Image Upload -->
+      <div class="form-group">
+        <label class="form-label">Banner Image <span class="req" *ngIf="!editMode">*</span></label>
+        <div class="upload-area" (click)="fileInput.click()">
+          <img *ngIf="previewUrl" [src]="previewUrl" alt="Preview" class="upload-preview" />
+          <div *ngIf="!previewUrl" class="upload-placeholder">
+            <span class="material-symbols-outlined">add_photo_alternate</span>
+            <p>Click to upload image</p>
+            <p class="upload-hint">PNG, JPG — recommended 1920×1080px</p>
+          </div>
+        </div>
+        <input #fileInput type="file" accept="image/*" style="display:none"
+               (change)="onFileChange($event)" />
+      </div>
+
+      <!-- Title -->
+      <div class="form-group">
+        <label class="form-label">Title <span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="e.g. Summer Collection"
+               [(ngModel)]="form.title" />
+      </div>
+
+      <!-- Link -->
+      <div class="form-group">
+        <label class="form-label">Target Link</label>
+        <input class="form-input" type="text" placeholder="/collections/summer"
+               [(ngModel)]="form.link" />
+      </div>
+
+      <!-- Display Order -->
+      <div class="form-group">
+        <label class="form-label">Display Order</label>
+        <input class="form-input" type="number" min="1"
+               [(ngModel)]="form.displayOrder" />
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeModal()">Cancel</button>
+      <button class="btn-primary" [disabled]="isSubmitting" (click)="submit()">
+        <span class="material-symbols-outlined" *ngIf="!isSubmitting">
+          {{ editMode ? 'save' : 'add' }}
+        </span>
+        <div class="btn-spinner" *ngIf="isSubmitting"></div>
+        {{ isSubmitting ? 'Saving...' : (editMode ? 'Save Changes' : 'Add Banner') }}
+      </button>
+    </div>
+
+  </div>
+</div>

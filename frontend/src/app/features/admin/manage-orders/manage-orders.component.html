@@ -1,0 +1,220 @@
+<div class="admin-shell">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">A</div>
+      <div>
+        <h1 class="brand-name">E-Commerce</h1>
+        <p class="brand-sub">Enterprise Console</p>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a *ngFor="let item of navItems"
+         [routerLink]="item.route"
+         class="nav-link"
+         [class.active]="item.active">
+        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="invite-btn">
+        <span class="material-symbols-outlined">rocket_launch</span>
+        Launch Storefront
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main-area">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="search-wrap">
+        <span class="material-symbols-outlined si">search</span>
+        <input class="search-input" type="text"
+               placeholder="Search by customer name, email or order ID..."
+               [(ngModel)]="searchTerm" />
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+        <button class="icon-btn"><span class="material-symbols-outlined">help_outline</span></button>
+        <div class="sep"></div>
+        <div class="user-wrap">
+          <div class="user-text">
+            <p class="uname">Admin User</p>
+            <p class="urole">System Admin</p>
+          </div>
+          <div class="uavatar">A</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- HEADING -->
+      <div class="page-heading">
+        <div>
+          <h1 class="page-title">Order Management</h1>
+          <p class="page-sub">View and manage all customer orders across the platform.</p>
+        </div>
+      </div>
+
+      <!-- TOAST -->
+      <div *ngIf="successMessage" class="toast toast-success">
+        <span class="material-symbols-outlined">check_circle</span>
+        {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="toast toast-error">
+        <span class="material-symbols-outlined">error</span>
+        {{ errorMessage }}
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-box">
+          <p class="stat-label">Total Orders</p>
+          <p class="stat-val blue">{{ totalCount | number }}</p>
+        </div>
+        <div class="stat-box">
+          <p class="stat-label">Pending</p>
+          <p class="stat-val orange">{{ pendingCount }}</p>
+        </div>
+        <div class="stat-box">
+          <p class="stat-label">Delivered</p>
+          <p class="stat-val green">{{ deliveredCount }}</p>
+        </div>
+        <div class="stat-box">
+          <p class="stat-label">Cancelled</p>
+          <p class="stat-val red">{{ cancelledCount }}</p>
+        </div>
+      </div>
+
+      <!-- STATUS TABS -->
+      <div class="tabs-bar">
+        <button *ngFor="let s of statusOptions"
+                class="tab"
+                [class.active]="selectedStatus === s"
+                (click)="setStatus(s)">
+          {{ s }}
+        </button>
+      </div>
+
+      <!-- TABLE CARD -->
+      <div class="card table-card">
+
+        <!-- LOADING -->
+        <div *ngIf="isLoading" class="loading-wrap">
+          <div class="spinner"></div>
+          <p>Loading orders...</p>
+        </div>
+
+        <!-- EMPTY -->
+        <div *ngIf="!isLoading && filteredOrders.length === 0" class="empty-state">
+          <span class="material-symbols-outlined">shopping_cart_off</span>
+          <p>No orders found.</p>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-scroll" *ngIf="!isLoading && filteredOrders.length > 0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of filteredOrders">
+                <td>
+                  <div class="order-id-cell">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                    #{{ order.id }}
+                  </div>
+                </td>
+                <td>
+                  <div class="customer-cell">
+                    <div class="avatar-sm">{{ order.customerName.charAt(0).toUpperCase() }}</div>
+                    <div>
+                      <p class="customer-name">{{ order.customerName }}</p>
+                      <p class="customer-email">{{ order.customerEmail }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="amount-cell">${{ order.totalAmount | number:'1.2-2' }}</td>
+                <td>
+                  <span class="payment-badge">{{ order.paymentMethod }}</span>
+                </td>
+                <td>
+                  <span class="status-badge" [ngClass]="getStatusClass(order.status)">
+                    {{ order.status }}
+                  </span>
+                </td>
+                <td class="muted">{{ order.createdAt | date:'MMM dd, yyyy' }}</td>
+                <td class="text-right">
+                  <div class="actions-wrap">
+                    <ng-container *ngIf="getNextStatuses(order.status).length > 0; else noActions">
+                      <select class="status-select"
+                              [disabled]="isActionLoading(order.id)"
+                              (change)="updateStatus(order.id, $any($event.target).value)"
+                              [value]="order.status">
+                        <option [value]="order.status" disabled>{{ order.status }}</option>
+                        <option *ngFor="let s of getNextStatuses(order.status)" [value]="s">
+                          → {{ s }}
+                        </option>
+                      </select>
+                      <div class="action-spinner" *ngIf="isActionLoading(order.id)"></div>
+                    </ng-container>
+                    <ng-template #noActions>
+                      <span class="final-label">{{ order.status }}</span>
+                    </ng-template>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="pagination" *ngIf="!isLoading && totalPages > 1">
+          <p class="pagination-info">
+            Showing
+            <strong>{{ (currentPage - 1) * pageSize + 1 }} –
+              {{ Math.min(currentPage * pageSize, totalCount) }}</strong>
+            of {{ totalCount | number }} orders
+          </p>
+          <div class="pagination-btns">
+            <button class="page-btn" [disabled]="currentPage === 1"
+                    (click)="goToPage(currentPage - 1)">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button *ngFor="let p of pageNumbers"
+                    class="page-btn" [class.active]="p === currentPage"
+                    (click)="goToPage(p)">{{ p }}</button>
+            <button class="page-btn" [disabled]="currentPage === totalPages"
+                    (click)="goToPage(currentPage + 1)">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <a *ngFor="let item of navItems.slice(0,5)"
+     [routerLink]="item.route" class="mob-item" [class.active]="item.active">
+    <span class="material-symbols-outlined">{{ item.icon }}</span>
+    <span>{{ item.label }}</span>
+  </a>
+</nav>

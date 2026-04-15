@@ -1,7 +1,8 @@
 using Core.Entities;
-using SharedKernel.Enums;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SharedKernel.Enums;
+using System.Reflection;
 
 namespace Infrastructure.Persistence;
 
@@ -15,10 +16,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Category> Categories => Set<Category>();
 
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<Banner> Banners => Set<Banner>();
 
     public DbSet<ProductImage> ProductImages => Set<ProductImage>();
 
     public DbSet<Cart> Carts => Set<Cart>();
+
 
     public DbSet<CartItem> CartItems => Set<CartItem>();
 
@@ -305,6 +308,25 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 
             entity.HasIndex(payment => payment.OrderId)
                 .IsUnique();
+        });
+
+        modelBuilder.Entity<Coupon>(entity =>
+        {
+            entity.Property(c => c.Code)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.Property(c => c.Value)
+                .HasPrecision(18, 2);
+
+            entity.Property(c => c.MinOrderAmount)
+                .HasPrecision(18, 2);
+
+            entity.Property(c => c.DiscountType)
+                .HasConversion<int>();
+
+            entity.Property(c => c.CreatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
         });
     }
 }
