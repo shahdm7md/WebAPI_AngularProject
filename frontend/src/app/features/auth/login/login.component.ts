@@ -20,7 +20,7 @@ export class LoginComponent {
   protected showPassword = false;
   protected loading = false;
   protected errorMessage = '';
-  protected submitted = false;
+  protected googleMessage = '';
 
   protected readonly loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -32,8 +32,8 @@ export class LoginComponent {
   }
 
   protected submit(): void {
-    this.submitted = true;
     this.errorMessage = '';
+    this.googleMessage = '';
 
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -68,5 +68,10 @@ export class LoginComponent {
           this.errorMessage = message;
         },
       });
+  }
+
+  protected loginWithGoogle(): void {
+    this.googleMessage =
+      'To enable Google login, configure Google OAuth in backend and expose an endpoint like /api/auth/google-login, then redirect from this button.';
   }
 }

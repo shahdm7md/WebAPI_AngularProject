@@ -56,11 +56,11 @@ export class ForgotPasswordComponent {
         finalize(() => (this.resettingPassword = false)),
       )
       .subscribe({
-        next: (responseMessage) => {
+        next: (responseMessage: string) => {
           this.message = responseMessage || 'Password reset successful.';
           this.resetForm.controls.newPassword.reset('');
         },
-        error: (error) => {
+        error: (error: unknown) => {
           this.errorMessage = this.authService.extractErrorMessage(
             error,
             'Password reset failed.',

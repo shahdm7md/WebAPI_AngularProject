@@ -1,6 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using API.Contracts.Auth;
 using API.Services;
 using API.Settings;
@@ -11,6 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.SqlServer.Server;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace API.Controllers;
 
@@ -271,18 +272,18 @@ public class AuthController : ControllerBase
         GoogleJsonWebSignature.Payload payload;
         try
         {
-           payload = await GoogleJsonWebSignature.ValidateAsync(
-                request.IdToken,
-                new GoogleJsonWebSignature.ValidationSettings
-                {
-                    Audience = [_googleAuthOptions.ClientId],
-                    IssuedAtClockTolerance = TimeSpan.FromMinutes(5),
-                    ExpirationTimeClockTolerance = TimeSpan.FromMinutes(5)
-                });
+            payload = await GoogleJsonWebSignature.ValidateAsync(
+                 request.IdToken,
+                 new GoogleJsonWebSignature.ValidationSettings
+                 {
+                     Audience = [_googleAuthOptions.ClientId],
+                     IssuedAtClockTolerance = TimeSpan.FromMinutes(5),
+                     ExpirationTimeClockTolerance = TimeSpan.FromMinutes(5)
+                 });
         }
         catch (InvalidJwtException ex)
         {
-            return Unauthorized(new { message = ex.Message }); 
+            return Unauthorized(new { message = ex.Message });
         }
         catch (Exception ex)
         {

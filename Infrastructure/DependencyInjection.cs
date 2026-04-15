@@ -1,19 +1,12 @@
 using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.Persistence;
-<<<<<<< Updated upstream
-=======
 using Infrastructure.Repositories;
 using Infrastructure.Services;
->>>>>>> Stashed changes
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-<<<<<<< Updated upstream
-=======
-//using Infrastructure.Repositories; 
->>>>>>> Stashed changes
 
 namespace Infrastructure;
 
@@ -37,17 +30,16 @@ public static class DependencyInjection
             options.User.RequireUniqueEmail = true;
         })
         .AddRoles<IdentityRole>()
-<<<<<<< Updated upstream
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
-=======
-        .AddEntityFrameworkStores<AppDbContext>();
+
+        // Repositories
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
+
+        // Services
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<ICheckoutService, CheckoutService>();
-
->>>>>>> Stashed changes
 
         return services;
     }

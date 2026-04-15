@@ -6,12 +6,11 @@ import {
   AuthResponse,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
-  GoogleLoginRequest,
   LoginRequest,
   RegisterCustomerRequest,
   RegisterSellerRequest,
-  ResetPasswordRequest,
   ResendOtpRequest,
+  ResetPasswordRequest,
   VerifyEmailOtpRequest,
 } from '../models/auth.models';
 
@@ -27,10 +26,6 @@ export class AuthService {
 
   login(payload: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.baseUrl}/api/auth/login`, payload);
-  }
-
-  googleLogin(payload: GoogleLoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/api/auth/google-login`, payload);
   }
 
   registerCustomer(payload: RegisterCustomerRequest): Observable<string> {
@@ -104,17 +99,7 @@ export class AuthService {
     }
 
     if (payload && typeof payload === 'object') {
-      const record = payload as Record<string, unknown>;
-
-      if (typeof record['message'] === 'string' && record['message'].trim().length > 0) {
-        return record['message'];
-      }
-
-      if (typeof record['title'] === 'string' && record['title'].trim().length > 0) {
-        return record['title'];
-      }
-
-      const values = Object.values(record).flatMap((value) =>
+      const values = Object.values(payload as Record<string, unknown>).flatMap((value) =>
         Array.isArray(value) ? value : [value],
       );
       const messages = values.filter(

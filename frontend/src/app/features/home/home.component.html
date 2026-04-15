@@ -1,5 +1,30 @@
 <div class="home-shell">
   
+  <nav class="top-nav">
+    <div class="brand">Architectural Curator</div>
+    <div class="nav-links desktop-only">
+      <a href="#">Shop</a>
+      <a href="#">Collections</a>
+      <a routerLink="/products" routerLinkActive="active" style="font-weight: bold;">Products</a>
+      <a href="#">About</a>
+      
+    </div>
+
+    @if (!isLoggedIn()) {
+    <div class="auth-actions">
+      <a routerLink="/auth/login" class="btn ghost">Login</a>
+      <a routerLink="/auth/register" class="btn solid">Register</a>
+    </div>
+    } @else {
+    <div class="account-actions">
+      <button type="button" class="icon-pill" aria-label="Search">Search</button>
+      <button type="button" class="icon-pill" aria-label="Wishlist">Wishlist</button>
+      <button type="button" class="icon-pill" aria-label="Cart">Cart</button>
+      <div class="profile-pill">{{ currentUserName() }}</div>
+      <button type="button" class="btn ghost" (click)="logout()">Logout</button>
+    </div>
+    }
+  </nav>
 
   <section class="hero">
     <img

@@ -3,6 +3,7 @@ using Core.Entities;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace API.Controllers;
 
@@ -12,15 +13,12 @@ public class ProductsController : ControllerBase
 {
     private readonly IProductRepository _productRepo;
     private readonly IWebHostEnvironment _env;
-    public ProductsController(IProductRepository productRepo)
-    {
-        _productRepo = productRepo;
-    }
-    public ProductsController(IProductRepository productRepo, IWebHostEnvironment env)
-    {
-        _productRepo = productRepo;
-        _env = env;
-    }
+public ProductsController(IProductRepository productRepo, IWebHostEnvironment env)
+{
+    _productRepo = productRepo;
+    _env = env;
+}
+
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] string? search, [FromQuery] int? categoryId, int page = 1, int size = 10)
@@ -48,6 +46,14 @@ public class ProductsController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
+        var sellerId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? User.FindFirstValue("userId");
+
+        if (string.IsNullOrWhiteSpace(sellerId))
+        {
+            return Unauthorized("Unable to determine the current user.");
+        }
+
        
         var product = new Product
         {
@@ -56,7 +62,7 @@ public class ProductsController : ControllerBase
             Price = request.Price,
             StockQuantity = request.StockQuantity,
             CategoryId = request.CategoryId,
-            SellerId = "e0d0e5d8-72b6-4a08-8826-553b24bd8826"
+            SellerId = sellerId
         };
 
        

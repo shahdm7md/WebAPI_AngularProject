@@ -10,10 +10,6 @@ export interface AuthResponse {
   fullName: string;
 }
 
-export interface GoogleLoginRequest {
-  idToken: string;
-}
-
 export interface RegisterCustomerRequest {
   email: string;
   password: string;
