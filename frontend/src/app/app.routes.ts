@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { VerifyOtpComponent } from './features/auth/verify-otp/verify-otp.component';
+import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
 import { HomeComponent } from './features/home/home.component';
 import { AdminDashboardComponent } from './features/admin/dashboard/dashboard.component';
 import { ManageUsersComponent } from './features/admin/manage-users/manage-users.component';
@@ -21,6 +22,7 @@ export const routes: Routes = [
   { path: 'auth/login', component: LoginComponent },
   { path: 'auth/register', component: RegisterComponent },
   { path: 'auth/verify-otp', component: VerifyOtpComponent },
+  { path: 'auth/forgot-password', component: ForgotPasswordComponent },
 
   // Products
   { path: 'products', component: ProductListComponent },

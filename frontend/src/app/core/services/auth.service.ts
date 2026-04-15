@@ -6,6 +6,7 @@ import {
   AuthResponse,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
+  GoogleLoginRequest,
   LoginRequest,
   RegisterCustomerRequest,
   RegisterSellerRequest,
@@ -26,6 +27,10 @@ export class AuthService {
 
   login(payload: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.baseUrl}/api/auth/login`, payload);
+  }
+
+  googleLogin(payload: GoogleLoginRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.baseUrl}/api/auth/google-login`, payload);
   }
 
   registerCustomer(payload: RegisterCustomerRequest): Observable<string> {
