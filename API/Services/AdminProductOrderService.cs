@@ -15,7 +15,7 @@ namespace API.Services
         {
             var query = _context.Products
                 .Include(p => p.Category)
-                .Where(p => p.IsActive)
+                //.Where(p => p.IsActive)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(sellerId))

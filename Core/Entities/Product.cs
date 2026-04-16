@@ -31,6 +31,6 @@ public class Product
     public ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
 
     public bool IsActive { get; set; } = true;
-     public bool IsAvailable { get; set; } = true;
+    public bool IsAvailable { get; set; } = true;
     public int Stock { get; init; }
 }

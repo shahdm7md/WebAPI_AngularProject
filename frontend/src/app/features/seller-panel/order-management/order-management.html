@@ -1,0 +1,226 @@
+<div class="min-h-screen bg-[#f9f9fc] text-[#1a1c1e]">
+
+  <!-- Sidebar Overlay -->
+  <div *ngIf="sidebarOpen" class="fixed inset-0 bg-black/40 z-30 md:hidden" (click)="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside class="h-screen w-64 fixed left-0 top-0 bg-slate-50 pt-16 flex flex-col p-4 space-y-2 z-40 transition-transform duration-300">
+    <div class="mb-6 px-2">
+      <h2 class="text-lg font-black text-blue-900">Seller Portal</h2>
+      <p class="text-xs text-slate-500 truncate">{{ profile?.storeName || 'Loading...' }}</p>
+    </div>
+    <nav class="flex-1 space-y-1">
+      <a routerLink="/seller/overview" routerLinkActive="text-blue-700 font-bold bg-white shadow-sm"
+         class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-all">
+        <span class="material-symbols-outlined">dashboard</span><span class="text-sm">Overview</span>
+      </a>
+      <a routerLink="/seller/products" routerLinkActive="text-blue-700 font-bold bg-white shadow-sm"
+         class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-all">
+        <span class="material-symbols-outlined">inventory_2</span><span class="text-sm">Products</span>
+      </a>
+      <a routerLink="/seller/orders" routerLinkActive="text-blue-700 font-bold bg-white shadow-sm"
+         class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-all">
+        <span class="material-symbols-outlined">shopping_cart</span><span class="text-sm">Orders</span>
+      </a>
+      <a routerLink="/seller/earnings" routerLinkActive="text-blue-700 font-bold bg-white shadow-sm"
+         class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-all">
+        <span class="material-symbols-outlined">payments</span><span class="text-sm">Earnings</span>
+      </a>
+      <a routerLink="/seller/settings" routerLinkActive="text-blue-700 font-bold bg-white shadow-sm"
+         class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-all">
+        <span class="material-symbols-outlined">settings</span><span class="text-sm">Settings</span>
+      </a>
+    </nav>
+    <div class="mt-auto pb-4">
+      <button class="w-full bg-[#0045a3] text-white py-3 px-4 rounded-full font-semibold flex items-center justify-center gap-2 shadow-lg shadow-blue-200/50 hover:opacity-90">
+        <span class="material-symbols-outlined text-sm">rocket_launch</span>Launch Storefront
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="md:ml-64 pt-20 px-4 md:px-8 pb-20 md:pb-12">
+    <div class="max-w-7xl mx-auto">
+
+      <!-- Header -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+        <div>
+          <h1 class="text-2xl md:text-4xl font-extrabold tracking-tighter leading-tight">Order Management</h1>
+          <p class="text-slate-500 mt-1 text-sm md:text-base">Track and manage your customer orders.</p>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
+          <p class="text-xs font-bold text-slate-500 tracking-widest uppercase mb-2">Total Orders</p>
+          <div class="flex items-baseline gap-2">
+            <span class="text-2xl md:text-3xl font-bold">{{ totalOrders | number }}</span>
+          </div>
+        </div>
+        <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
+          <p class="text-xs font-bold text-slate-500 tracking-widest uppercase mb-2">Pending</p>
+          <div class="flex items-baseline gap-2">
+            <span class="text-2xl md:text-3xl font-bold text-[#0045a3]">{{ pendingCount }}</span>
+            <span class="material-symbols-outlined text-sm text-[#0045a3]">schedule</span>
+          </div>
+        </div>
+        <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
+          <p class="text-xs font-bold text-slate-500 tracking-widest uppercase mb-2">Shipped</p>
+          <div class="flex items-baseline gap-2">
+            <span class="text-2xl md:text-3xl font-bold text-blue-600">{{ shippedCount }}</span>
+          </div>
+        </div>
+        <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm">
+          <p class="text-xs font-bold text-slate-500 tracking-widest uppercase mb-2">Avg Value</p>
+          <div class="flex items-baseline gap-2">
+            <span class="text-2xl md:text-3xl font-bold">{{ avgValue | currency:'USD':'symbol':'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="bg-[#f3f3f6] rounded-2xl p-1.5 mb-6 flex gap-1 overflow-x-auto">
+        <button *ngFor="let opt of filterOptions"
+                (click)="selectedStatus = opt.value; onStatusFilterChange()"
+                [ngClass]="selectedStatus === opt.value
+                  ? 'bg-white shadow-sm text-[#0045a3] font-bold'
+                  : 'text-slate-500 hover:text-slate-700'"
+                class="px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all">
+          {{ opt.label }}
+        </button>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loading" class="flex items-center justify-center h-48">
+        <div class="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl text-sm mb-4">
+        {{ error }}
+      </div>
+
+      <!-- Orders Table -->
+      <div *ngIf="!loading" class="bg-[#f3f3f6] rounded-2xl p-1 overflow-hidden">
+        <div class="bg-white rounded-[14px] overflow-hidden">
+
+          <!-- Mobile Cards -->
+          <div class="md:hidden divide-y divide-slate-100">
+            <div *ngFor="let order of orders" class="p-4 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                     [ngClass]="getAvatarBg(order.customerName)">
+                  {{ getInitials(order.customerName) }}
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold truncate">{{ order.customerName }}</p>
+                  <p class="text-xs text-slate-400">#ORD-{{ order.id }} · {{ order.createdAt | date:'MMM dd' }}</p>
+                </div>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="text-sm font-bold">{{ order.totalAmount | currency }}</p>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase"
+                      [ngClass]="getStatusClass(order.status)">
+                  {{ order.status }}
+                </span>
+              </div>
+            </div>
+            <!-- Empty -->
+            <div *ngIf="orders.length === 0" class="py-16 text-center text-slate-400">
+              <span class="material-symbols-outlined text-5xl mb-3 block text-slate-200">shopping_cart</span>
+              <p class="text-sm font-medium">No orders found</p>
+            </div>
+          </div>
+
+          <!-- Desktop Table -->
+          <div class="hidden md:block overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50/50">
+                  <th class="px-6 py-5 text-xs font-bold tracking-widest uppercase text-slate-400">Order ID</th>
+                  <th class="px-6 py-5 text-xs font-bold tracking-widest uppercase text-slate-400">Date</th>
+                  <th class="px-6 py-5 text-xs font-bold tracking-widest uppercase text-slate-400">Customer</th>
+                  <th class="px-6 py-5 text-xs font-bold tracking-widest uppercase text-slate-400">Total</th>
+                  <th class="px-6 py-5 text-xs font-bold tracking-widest uppercase text-slate-400">Status</th>
+                  <th class="px-6 py-5 text-xs font-bold tracking-widest uppercase text-slate-400 text-right">Update</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr *ngFor="let order of orders" class="hover:bg-slate-50/50 transition-colors">
+                  <td class="px-6 py-6 font-medium text-[#0045a3] font-mono text-sm">#ORD-{{ order.id }}</td>
+                  <td class="px-6 py-6 text-sm text-slate-400">{{ order.createdAt | date:'MMM dd, yyyy' }}</td>
+                  <td class="px-6 py-6">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                           [ngClass]="getAvatarBg(order.customerName)">
+                        {{ getInitials(order.customerName) }}
+                      </div>
+                      <div>
+                        <p class="text-sm font-semibold">{{ order.customerName }}</p>
+                        <p class="text-xs text-slate-400">{{ order.customerEmail }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-6 font-bold">{{ order.totalAmount | currency }}</td>
+                  <td class="px-6 py-6">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                          [ngClass]="getStatusClass(order.status)">
+                      <span class="w-1.5 h-1.5 rounded-full" [ngClass]="getStatusDot(order.status)"></span>
+                      {{ order.status }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-6 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <div *ngIf="updatingOrderId === order.id"
+                           class="w-5 h-5 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                      <select *ngIf="updatingOrderId !== order.id"
+                              class="text-xs font-semibold border border-slate-200 bg-white rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 py-1.5 pl-3 pr-8 cursor-pointer outline-none"
+                              [value]="''"
+                              (change)="updateOrderStatus(order, $any($event.target).value)">
+                        <option value="" disabled selected>Update Status</option>
+                        <option *ngFor="let s of getAvailableStatuses(order.status)" [value]="s">
+                          {{ s }}
+                        </option>
+                      </select>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- Empty Desktop -->
+            <div *ngIf="orders.length === 0" class="py-16 text-center text-slate-400">
+              <span class="material-symbols-outlined text-5xl mb-3 block text-slate-200">shopping_cart</span>
+              <p class="text-sm font-medium">No orders found</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Bottom Nav Mobile -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 flex justify-around items-center py-2">
+    <a routerLink="/seller/overview" routerLinkActive="text-[#0045a3]"
+       class="flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1">
+      <span class="material-symbols-outlined text-[22px]">dashboard</span>
+      <span class="text-[10px] font-bold">Overview</span>
+    </a>
+    <a routerLink="/seller/products" routerLinkActive="text-[#0045a3]"
+       class="flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1">
+      <span class="material-symbols-outlined text-[22px]">inventory_2</span>
+      <span class="text-[10px] font-bold">Products</span>
+    </a>
+    <a routerLink="/seller/orders" routerLinkActive="text-[#0045a3]"
+       class="flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1">
+      <span class="material-symbols-outlined text-[22px]">shopping_cart</span>
+      <span class="text-[10px] font-bold">Orders</span>
+    </a>
+    <a routerLink="/seller/settings" routerLinkActive="text-[#0045a3]"
+       class="flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1">
+      <span class="material-symbols-outlined text-[22px]">settings</span>
+      <span class="text-[10px] font-bold">Settings</span>
+    </a>
+  </nav>
+</div>
