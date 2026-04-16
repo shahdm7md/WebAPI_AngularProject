@@ -15,6 +15,10 @@ import { ProductListComponent } from './product-list/product-list';
 import { ProductAddComponent } from './product-add/product-add';
 import { ProductEditComponent } from './product-edit/product-edit';
 
+import { SellerOrdersComponent } from './features/seller-panel/order-management/order-management';
+import { SellerProductsComponent } from './features/seller-panel/product-management/product-management';
+// import { SettingsComponent } from './features/seller-panel/store-settings/store-settings';
+import { SellerOverviewComponent } from './features/seller-panel/seller-overview/seller-overview';
 export const routes: Routes = [
   { path: '', component: HomeComponent },
 
@@ -27,6 +31,23 @@ export const routes: Routes = [
   { path: 'products/add', component: ProductAddComponent },
   { path: 'products/edit/:id', component: ProductEditComponent },
 
+
+  // Seller Dashboard
+  { path: 'seller/dashboard', component: SellerOverviewComponent },
+  { path: 'seller/orders', component: SellerOrdersComponent },
+  { path: 'seller/products', component: SellerProductsComponent },
+  // { path: 'seller/settings', component: SettingsComponent },
+
+
+
+  // Admin Dashboard
+  { path: 'admin/dashboard', component: AdminDashboardComponent },
+	{ path: 'admin/users', component: ManageUsersComponent },
+	{ path: 'admin/products', component: ManageProductsComponent },
+	{ path: 'admin/orders', component: ManageOrdersComponent },
+	{ path: 'admin/coupons', component: ManageCouponsComponent },
+	{ path: 'admin/banners', component: ManageBannersComponent },
+  
   // Cart & Checkout
   {
     path: 'cart',

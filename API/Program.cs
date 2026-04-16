@@ -1,14 +1,18 @@
-using System.Text;
-using API.Settings;
+using API.Middleware;
 using API.Services;
+using API.Settings;
+using Application.Services;
+using Core.Interfaces.Repositories;
+using Core.Interfaces.Services;
 using Infrastructure;
 using Infrastructure.Identity;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.IdentityModel.Tokens;
-using API.Middleware;
 using Microsoft.OpenApi;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +43,13 @@ builder.Services.AddScoped<IAdminProductService, AdminProductService>();
 builder.Services.AddScoped<IAdminOrderService, AdminOrderService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IBannerService, BannerService>();
+builder.Services.AddScoped<ISellerService, SellerService>();
+builder.Services.AddScoped<ISellerRepository, SellerRepository>();
+builder.Services.AddSingleton<IFileStorageService>(_ =>
+    new LocalFileStorageService(
+        rootPath: builder.Environment.WebRootPath,
+        baseUrl: "https://yourdomain.com/uploads"
+    ));
 
 
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
