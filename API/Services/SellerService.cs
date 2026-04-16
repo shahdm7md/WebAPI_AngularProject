@@ -56,7 +56,10 @@ public class SellerService : ISellerService
     public async Task<SellerProductResponse> GetProductByIdAsync(int productId, string sellerId)
     {
         var product = await _sellerRepo.GetSellerProductByIdAsync(productId, sellerId);
-            //?? throw new KeyNotFoundException("Product not found or does not belong to you.");
+        if (product is null)
+        {
+            throw new KeyNotFoundException("Product not found or does not belong to you.");
+        }
 
         return MapToProductResponse(product);
     }

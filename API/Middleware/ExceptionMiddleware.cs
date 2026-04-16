@@ -32,7 +32,7 @@ public class ExceptionMiddleware
         {
             await WriteErrorAsync(context, HttpStatusCode.Unauthorized, ex.Message);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Unhandled exception: {Message}", ex.Message);
 
