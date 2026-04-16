@@ -95,7 +95,7 @@ export class ProductListComponent implements OnInit {
   
   products: any[] = [];
   // شيلنا السلاش (/) اللي في الآخر عشان الباك إند بيبعتها في أول المسار
-  readonly imageBaseUrl = 'https://localhost:44395/api/'; 
+  readonly imageBaseUrl = 'http://localhost:5199/'; 
 
   ngOnInit() {
     this.productService.getProducts().subscribe({
