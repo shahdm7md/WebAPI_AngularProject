@@ -1,102 +1,29 @@
 <div class="min-h-screen bg-surface pt-24 pb-20 px-6">
-  <div class="max-w-5xl mx-auto">
-    <div class="bg-surface-container-lowest rounded-3xl shadow-2xl overflow-hidden border border-outline-variant/20">
-      <div class="p-10 md:p-14">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
-          <div>
-            <p class="text-xs font-bold uppercase tracking-[0.3em] text-secondary mb-3">Order Confirmed</p>
-            <h1 class="text-4xl md:text-5xl font-black tracking-tighter text-primary">Thank you for your order</h1>
-            <p class="text-on-surface-variant mt-3 max-w-2xl">
-              Your order has been placed successfully and the payment details have been recorded.
-            </p>
-          </div>
-          <div class="rounded-2xl bg-secondary/10 text-secondary px-6 py-4 font-bold text-sm uppercase tracking-[0.18em]">
-            Order #{{ order?.id ?? orderId }}
-          </div>
-        </div>
+  <div class="max-w-2xl mx-auto">
+    <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-10 text-center space-y-5">
+      @if (loading) {
+        <p class="text-on-surface-variant">Confirming your payment...</p>
+      }
 
-        @if (order) {
-          <div class="grid gap-6 lg:grid-cols-3">
-            <div class="lg:col-span-2 space-y-6">
-              <div class="bg-surface-container p-6 rounded-2xl">
-                <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant mb-3">Shipping Details</p>
-                <div class="grid md:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span class="block text-on-surface-variant mb-1">Recipient</span>
-                    <span class="font-semibold text-primary">{{ order.shippingFirstName }} {{ order.shippingLastName }}</span>
-                  </div>
-                  <div>
-                    <span class="block text-on-surface-variant mb-1">Phone</span>
-                    <span class="font-semibold text-primary">{{ order.shippingPhone }}</span>
-                  </div>
-                  <div class="md:col-span-2">
-                    <span class="block text-on-surface-variant mb-1">Address</span>
-                    <span class="font-semibold text-primary">{{ order.shippingAddress }}, {{ order.shippingCity }}, {{ order.shippingState }} {{ order.shippingZipCode }}</span>
-                  </div>
-                </div>
-              </div>
+      @if (!loading && isSuccess) {
+        <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary">Payment Successful</p>
+        <h1 class="text-4xl font-black tracking-tighter text-primary">Payment Successful</h1>
+        <p class="text-on-surface-variant">Your order #{{ orderId }} has been confirmed successfully.</p>
+      }
 
-              <div class="bg-surface-container p-6 rounded-2xl">
-                <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant mb-4">Items</p>
-                <div class="space-y-4">
-                  @for (item of order.items; track item.productId) {
-                    <div class="flex justify-between gap-4 border-b border-outline-variant/20 pb-4 last:border-none last:pb-0">
-                      <div>
-                        <p class="font-semibold text-primary">{{ item.productName }}</p>
-                        <p class="text-sm text-on-surface-variant">Qty: {{ item.quantity }}</p>
-                      </div>
-                      <p class="font-semibold text-primary">{{ item.subTotal | currency }}</p>
-                    </div>
-                  }
-                </div>
-              </div>
-            </div>
+      @if (!loading && error) {
+        <p class="text-xs font-bold uppercase tracking-[0.2em] text-error">Payment Confirmation Failed</p>
+        <h1 class="text-4xl font-black tracking-tighter text-primary">We could not confirm payment</h1>
+        <p class="text-on-surface-variant">{{ error }}</p>
+      }
 
-            <aside class="space-y-6">
-              <div class="bg-surface-container p-6 rounded-2xl">
-                <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant mb-4">Order Summary</p>
-                <div class="space-y-3 text-sm">
-                  <div class="flex justify-between">
-                    <span class="text-on-surface-variant">Subtotal</span>
-                    <span class="font-semibold">{{ order.subtotalAmount | currency }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-on-surface-variant">Shipping</span>
-                    <span class="font-semibold">{{ order.shippingCost | currency }}</span>
-                  </div>
-                  @if (order.discountAmount > 0) {
-                    <div class="flex justify-between">
-                      <span class="text-on-surface-variant">Discount</span>
-                      <span class="font-semibold text-success">-{{ order.discountAmount | currency }}</span>
-                    </div>
-                  }
-                  <div class="border-t border-outline-variant/20 pt-3 flex justify-between text-base font-black text-primary">
-                    <span>Total</span>
-                    <span>{{ order.totalAmount | currency }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="flex flex-col gap-3">
-                <a routerLink="/shop" class="primary-gradient text-on-primary text-center py-4 rounded-xl font-bold uppercase tracking-widest shadow-xl">
-                  Continue Shopping
-                </a>
-                <a routerLink="/checkout" class="bg-surface-container text-center py-4 rounded-xl font-bold uppercase tracking-widest text-primary border border-outline-variant/30">
-                  New Order
-                </a>
-              </div>
-            </aside>
-          </div>
-        } @else {
-          <div class="bg-surface-container p-8 rounded-2xl">
-            <p class="text-on-surface-variant mb-4">
-              We could not load the order summary from navigation state, but your order number is still available.
-            </p>
-            <a routerLink="/shop" class="primary-gradient text-on-primary inline-flex px-8 py-4 rounded-xl font-bold uppercase tracking-widest shadow-xl">
-              Back to Shop
-            </a>
-          </div>
-        }
+      <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+        <a routerLink="/shop" class="primary-gradient text-on-primary px-8 py-3 rounded-xl font-bold uppercase tracking-widest">
+          Continue Shopping
+        </a>
+        <a routerLink="/checkout" class="bg-surface-container border border-outline-variant/30 px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-primary">
+          Back to Checkout
+        </a>
       </div>
     </div>
   </div>

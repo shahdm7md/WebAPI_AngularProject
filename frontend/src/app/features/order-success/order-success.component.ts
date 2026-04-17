@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { OrderResponse } from '../../core/models/order.model';
+import { PaymentService } from '../../core/services/payment.service';
 
 @Component({
   selector: 'app-order-success',
@@ -11,20 +11,39 @@ import { OrderResponse } from '../../core/models/order.model';
   styleUrls: ['./order-success.component.scss']
 })
 export class OrderSuccessComponent implements OnInit {
-  order: OrderResponse | null = null;
-  orderId: string | null = null;
+  orderId: number | null = null;
+  loading = true;
+  isSuccess = false;
+  error: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private paymentService: PaymentService
   ) {}
 
   ngOnInit(): void {
-    this.orderId = this.route.snapshot.paramMap.get('id');
-    this.order = history.state?.order ?? null;
+    const orderIdParam = this.route.snapshot.queryParamMap.get('orderId');
+    const sessionId = this.route.snapshot.queryParamMap.get('session_id') ?? undefined;
+    const parsedOrderId = Number(orderIdParam);
 
-    if (!this.order && !this.orderId) {
+    if (!orderIdParam || Number.isNaN(parsedOrderId) || parsedOrderId <= 0) {
+      this.loading = false;
+      this.error = 'Missing order id.';
       this.router.navigate(['/checkout']);
+      return;
     }
+
+    this.orderId = parsedOrderId;
+    this.paymentService.confirmPayment(parsedOrderId, sessionId).subscribe({
+      next: () => {
+        this.loading = false;
+        this.isSuccess = true;
+      },
+      error: err => {
+        this.loading = false;
+        this.error = err.error?.error ?? 'Payment could not be confirmed yet.';
+      }
+    });
   }
 }

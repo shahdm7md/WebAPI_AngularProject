@@ -1,0 +1,20 @@
+<div class="min-h-screen bg-surface pt-24 pb-20 px-6">
+  <div class="max-w-2xl mx-auto">
+    <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-10 text-center space-y-5">
+      <p class="text-xs font-bold uppercase tracking-[0.2em] text-error">Payment Cancelled</p>
+      <h1 class="text-4xl font-black tracking-tighter text-primary">Your payment was cancelled</h1>
+      <p class="text-on-surface-variant">
+        No worries, your order was not confirmed by Stripe. You can return to checkout and try again.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+        <a routerLink="/checkout" class="primary-gradient text-on-primary px-8 py-3 rounded-xl font-bold uppercase tracking-widest">
+          Back to Checkout
+        </a>
+        <a routerLink="/cart" class="bg-surface-container border border-outline-variant/30 px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-primary">
+          Go to Cart
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
