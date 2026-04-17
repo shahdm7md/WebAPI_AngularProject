@@ -6,7 +6,7 @@
         Architectural Curator
       </a>
       <div class="hidden md:flex gap-6">
-        <a routerLink="/" class="text-sm text-slate-600 hover:text-slate-900 transition-colors">Shop</a>
+        <a routerLink="/shop" class="text-sm text-slate-600 hover:text-slate-900 transition-colors">Shop</a>
         <a href="#" class="text-sm text-slate-600 hover:text-slate-900 transition-colors">Collections</a>
         <a href="#" class="text-sm text-slate-600 hover:text-slate-900 transition-colors">About</a>
       </div>
@@ -14,6 +14,25 @@
 
     @if (!isLoggedIn()) {
       <div class="flex items-center gap-3">
+        <a routerLink="/wishlist" class="relative p-2 text-slate-600 hover:text-slate-900 transition-colors" aria-label="Wishlist">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M21.752 7.241c0 3.958-3.123 6.344-7.84 10.13a2.928 2.928 0 01-3.65 0c-4.717-3.786-7.84-6.172-7.84-10.13a4.752 4.752 0 019.504 0 4.752 4.752 0 019.826 0z"/>
+          </svg>
+        </a>
+
+        <a routerLink="/cart" class="relative p-2 text-slate-600 hover:text-slate-900 transition-colors" aria-label="Cart">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/>
+          </svg>
+          @if (cartService.itemCount() > 0) {
+            <span class="absolute -top-1 -right-1 w-5 h-5 bg-slate-900 text-white text-xs font-bold rounded-full flex items-center justify-center">
+              {{ cartService.itemCount() }}
+            </span>
+          }
+        </a>
+
         <a routerLink="/auth/login"
            class="px-4 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors">
           Login
@@ -25,6 +44,13 @@
       </div>
     } @else {
       <div class="flex items-center gap-3">
+        <a routerLink="/wishlist" class="relative p-2 text-slate-600 hover:text-slate-900 transition-colors" aria-label="Wishlist">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M21.752 7.241c0 3.958-3.123 6.344-7.84 10.13a2.928 2.928 0 01-3.65 0c-4.717-3.786-7.84-6.172-7.84-10.13a4.752 4.752 0 019.504 0 4.752 4.752 0 019.826 0z"/>
+          </svg>
+        </a>
+
         <a routerLink="/cart" class="relative p-2 text-slate-600 hover:text-slate-900 transition-colors">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"

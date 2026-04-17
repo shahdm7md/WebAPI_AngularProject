@@ -16,6 +16,7 @@ export class CartComponent implements OnInit {
   loading = false;
   error: string | null = null;
   removingId: number | null = null;
+  private readonly imageBaseUrl = 'http://localhost:5199';
 
   constructor(private cartService: CartService) {}
 
@@ -61,5 +62,17 @@ export class CartComponent implements OnInit {
 
   trackByProduct(_: number, item: CartItemResponse): number {
     return item.productId;
+  }
+
+  imageUrl(item: CartItemResponse): string {
+    if (!item.productImage) {
+      return 'https://placehold.co/400x500?text=No+Image';
+    }
+
+    if (item.productImage.startsWith('http://') || item.productImage.startsWith('https://')) {
+      return item.productImage;
+    }
+
+    return `${this.imageBaseUrl}${item.productImage}`;
   }
 }

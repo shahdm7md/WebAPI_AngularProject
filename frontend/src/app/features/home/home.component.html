@@ -1,25 +1,36 @@
 <div class="home-shell">
-  
   <nav class="top-nav">
-    <div class="brand">Architectural Curator</div>
+    <div class="brand">NexaMart</div>
     <div class="nav-links desktop-only">
-      <a href="#">Shop</a>
-      <a href="#">Collections</a>
-      <a routerLink="/products" routerLinkActive="active" style="font-weight: bold;">Products</a>
-      <a href="#">About</a>
-      
+      <a routerLink="/" class="active">Home</a>
+      <a routerLink="/shop">Shop</a>
+      <a routerLink="/products">Seller Products</a>
+      <a routerLink="/cart">Cart</a>
     </div>
 
     @if (!isLoggedIn()) {
     <div class="auth-actions">
+      <a routerLink="/wishlist" class="icon-pill icon-link" aria-label="Wishlist">
+        <span class="material-symbols-outlined">favorite</span>
+        <span class="badge">{{ wishlistCount() }}</span>
+      </a>
+      <a routerLink="/cart" class="icon-pill icon-link" aria-label="Cart">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <span class="badge">{{ cartService.itemCount() }}</span>
+      </a>
       <a routerLink="/auth/login" class="btn ghost">Login</a>
       <a routerLink="/auth/register" class="btn solid">Register</a>
     </div>
     } @else {
     <div class="account-actions">
-      <button type="button" class="icon-pill" aria-label="Search">Search</button>
-      <button type="button" class="icon-pill" aria-label="Wishlist">Wishlist</button>
-      <button type="button" class="icon-pill" aria-label="Cart">Cart</button>
+      <a routerLink="/wishlist" class="icon-pill icon-link" aria-label="Wishlist">
+        <span class="material-symbols-outlined">favorite</span>
+        <span class="badge">{{ wishlistCount() }}</span>
+      </a>
+      <a routerLink="/cart" class="icon-pill icon-link" aria-label="Cart">
+        <span class="material-symbols-outlined">shopping_cart</span>
+        <span class="badge">{{ cartService.itemCount() }}</span>
+      </a>
       <div class="profile-pill">{{ currentUserName() }}</div>
       <button type="button" class="btn ghost" (click)="logout()">Logout</button>
     </div>
@@ -34,37 +45,93 @@
     />
     <div class="hero-overlay"></div>
     <div class="hero-copy">
-      <p class="kicker">Summer Collection 2024</p>
-      <h1>Structural Sophistication.</h1>
+      <p class="kicker">Fresh Picks</p>
+      <h1>Everything you need in one marketplace.</h1>
       <p>
-        Curating the world's most evocative architectural elements for modern
-        spaces.
+        Shop active products instantly, save favorites, and keep your cart even before login.
       </p>
       <div class="hero-cta">
-        @if (!isLoggedIn()) {
-        <a routerLink="/auth/register" class="btn solid">Join as Customer</a>
-        <a routerLink="/auth/register" class="btn ghost light">Become a Seller</a>
-        } @else {
-        <a href="#" class="btn solid">Go to Dashboard</a>
-        <a href="#" class="btn ghost light">Continue Shopping</a>
-        }
+        <a routerLink="/shop" class="btn solid">Shop Collection</a>
+        <a routerLink="/cart" class="btn solid">Open Cart</a>
+        <a routerLink="/products" class="btn ghost light">Seller Workspace</a>
       </div>
     </div>
   </section>
 
   <section class="products">
-    <h2>The Seasonal Edit</h2>
-    <div class="product-grid">
-      @for (item of featuredProducts; track item.name) {
-      <article class="product-card">
-        <img [src]="item.image" [alt]="item.name" />
-        <div class="content">
-          <small>{{ item.label }}</small>
-          <h3>{{ item.name }}</h3>
-          <p>{{ item.price }}</p>
-        </div>
-      </article>
-      }
+    <div class="section-heading">
+      <h2>Active Products</h2>
+      <p>Live inventory from the database</p>
     </div>
+
+    @if (notice) {
+      <div class="notice success">{{ notice }}</div>
+    }
+
+    @if (error) {
+      <div class="notice error">{{ error }}</div>
+    }
+
+    @if (loading) {
+      <div class="skeleton-grid">
+        @for (_ of [1,2,3,4,5,6,7,8]; track _) {
+        <div class="skeleton-card"></div>
+        }
+      </div>
+    } @else if (products.length === 0) {
+      <div class="empty-state">No active products found yet.</div>
+    } @else {
+      <div class="product-grid">
+        @for (item of products; track item.id) {
+        <article class="product-card">
+          <button
+            type="button"
+            class="wishlist-btn"
+            [class.active]="isInWishlist(item.id)"
+            (click)="toggleWishlist(item)"
+            aria-label="Toggle wishlist"
+          >
+            ♥
+          </button>
+
+          <img [src]="productImageUrl(item)" [alt]="item.name" />
+
+          <div class="content">
+            <small>{{ item.categoryName || 'General' }}</small>
+            <h3>{{ item.name }}</h3>
+            <p class="description">{{ item.description || 'No description available.' }}</p>
+
+            <div class="meta-row">
+              <div class="rating">
+                @for (star of stars(item.averageRating); track $index) {
+                  <span [class.full]="star === 'full'">★</span>
+                }
+                <span class="count">({{ item.reviewCount }})</span>
+              </div>
+              <div class="stock" [class.out]="item.stockQuantity === 0">
+                {{ item.stockQuantity > 0 ? (item.stockQuantity + ' in stock') : 'Out of stock' }}
+              </div>
+            </div>
+
+            <div class="action-row">
+              <p class="price">{{ item.price | currency:'USD' }}</p>
+              <div class="home-card-actions">
+                <a [routerLink]="['/shop/product', item.id]" class="btn ghost details-link">Details</a>
+                <button
+                  type="button"
+                  class="btn solid add-cart-icon-btn"
+                  (click)="addToCart(item)"
+                  [disabled]="!item.isAvailable || !item.isActive || item.stockQuantity === 0"
+                  aria-label="Add to cart"
+                >
+                  <span class="material-symbols-outlined">shopping_cart</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </article>
+        }
+      </div>
+    }
   </section>
 </div>

@@ -1,0 +1,224 @@
+<div class="details-shell">
+  @if (loading) {
+    <div class="state-panel">
+      <div class="spinner"></div>
+    </div>
+  } @else if (!product) {
+    <div class="state-panel error">
+      <h2>Product not found</h2>
+      <p>{{ error || 'The requested item is unavailable.' }}</p>
+      <a routerLink="/shop" class="btn solid">Back to Shop</a>
+    </div>
+  } @else {
+    <div class="top-actions">
+      <a routerLink="/shop" class="chip-link">
+        <span class="material-symbols-outlined">arrow_back</span>
+        Back to Shop
+      </a>
+      <div class="quick-actions">
+        <a routerLink="/wishlist" class="chip-link" aria-label="Wishlist">
+          <span class="material-symbols-outlined">favorite</span>
+        </a>
+        <a routerLink="/cart" class="chip-link" aria-label="Cart">
+          <span class="material-symbols-outlined">shopping_cart</span>
+        </a>
+      </div>
+    </div>
+
+    @if (notice) {
+      <div class="notice success">{{ notice }}</div>
+    }
+    @if (error) {
+      <div class="notice error">{{ error }}</div>
+    }
+
+    <section class="hero-grid">
+      <div class="gallery-panel">
+        <div class="main-image">
+          <img [src]="activeImageUrl()" [alt]="product.name" />
+          <div class="image-overlay"></div>
+
+          <div class="image-badges">
+            <span class="badge" [class.off]="!canBuy(product)">{{ currentBadge() }}</span>
+            <span class="badge alt">{{ product.categoryName || 'General' }}</span>
+          </div>
+
+          @if (images.length > 1) {
+            <div class="gallery-nav left">
+              <button type="button" (click)="prevImage()" aria-label="Previous image">
+                <span class="material-symbols-outlined">chevron_left</span>
+              </button>
+            </div>
+            <div class="gallery-nav right">
+              <button type="button" (click)="nextImage()" aria-label="Next image">
+                <span class="material-symbols-outlined">chevron_right</span>
+              </button>
+            </div>
+          }
+        </div>
+
+        @if (images.length > 1) {
+          <div class="thumb-strip">
+            @for (image of images; track image.id; let index = $index) {
+              <button
+                type="button"
+                class="thumb"
+                [class.active]="index === currentImageIndex"
+                (click)="setImage(index)"
+              >
+                <img [src]="thumbUrl(image.imageUrl)" [alt]="product.name + ' thumbnail ' + (index + 1)" />
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="info-panel">
+        <p class="eyebrow">Architectural Curator</p>
+        <h1>{{ product.name }}</h1>
+
+        <div class="rating-row">
+          <div class="stars">
+            @for (star of stars(product.averageRating); track $index) {
+              <span [class.full]="star === 'full'">★</span>
+            }
+          </div>
+          <span>{{ product.averageRating | number:'1.1-1' }} ({{ product.reviewCount }} reviews)</span>
+        </div>
+
+        <div class="price-card">
+          <div>
+            <span class="price">{{ product.price | currency:'USD' }}</span>
+            <small>USD</small>
+          </div>
+          <div class="stock-copy" [class.out]="!canBuy(product)">{{ currentBadge() }}</div>
+        </div>
+
+        <p class="description">{{ product.description || 'No description available for this product.' }}</p>
+
+        <div class="meta-grid">
+          <div class="meta-box">
+            <span class="material-symbols-outlined">grid_view</span>
+            <div>
+              <small>Category</small>
+              <strong>{{ product.categoryName || 'General' }}</strong>
+            </div>
+          </div>
+          <div class="meta-box">
+            <span class="material-symbols-outlined">inventory_2</span>
+            <div>
+              <small>Availability</small>
+              <strong>{{ product.isAvailable ? 'Available' : 'Unavailable' }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-stack">
+          <button type="button" class="btn solid" (click)="addToCart()" [disabled]="!canBuy(product)">
+            <span class="material-symbols-outlined">shopping_cart</span>
+            Add to Cart
+          </button>
+          <button type="button" class="btn ghost" (click)="toggleWishlist()">
+            <span class="material-symbols-outlined">favorite</span>
+            {{ isInWishlist() ? 'Remove from Wishlist' : 'Add to Wishlist' }}
+          </button>
+        </div>
+
+        <div class="shipping-card">
+          <div>
+            <strong>Fast delivery</strong>
+            <p>Tracked shipping and secure packaging for every order.</p>
+          </div>
+          <span class="material-symbols-outlined">local_shipping</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-grid">
+      <div class="content-card">
+        <h2>Product Story</h2>
+        <p>
+          This piece is selected from the active catalog and presented with live inventory, rating data, and a
+          purchase-aware review flow.
+        </p>
+        <p>
+          The gallery above lets you move through product imagery easily on desktop and mobile without losing context.
+        </p>
+      </div>
+
+      <div class="content-card specs">
+        <h2>Technical Notes</h2>
+        <ul>
+          <li><span>Stock</span><strong>{{ product.stockQuantity }}</strong></li>
+          <li><span>Status</span><strong>{{ product.isActive ? 'Active' : 'Inactive' }}</strong></li>
+          <li><span>Review count</span><strong>{{ product.reviewCount }}</strong></li>
+          <li><span>Rating</span><strong>{{ product.averageRating | number:'1.1-1' }}/5</strong></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="reviews-section">
+      <div class="section-head">
+        <div>
+          <h2>Reviews</h2>
+          <p>Only customers who purchased this product can submit a rating or comment.</p>
+        </div>
+        <span class="review-lock" [class.open]="hasPurchased">{{ hasPurchased ? 'Verified buyer' : 'Locked for buyers only' }}</span>
+      </div>
+
+      <div class="review-layout">
+        <div class="review-form card">
+          <h3>Write a Review</h3>
+
+          @if (!authService.isLoggedIn()) {
+            <p class="helper">Please log in to rate or comment.</p>
+            <a routerLink="/auth/login" class="btn solid full">Login</a>
+          } @else if (!hasPurchased) {
+            <p class="helper">You can only review this product after completing a purchase.</p>
+          } @else {
+            <label>
+              Rating
+              <select [(ngModel)]="reviewRating">
+                <option [ngValue]="5">5 - Excellent</option>
+                <option [ngValue]="4">4 - Good</option>
+                <option [ngValue]="3">3 - Average</option>
+                <option [ngValue]="2">2 - Fair</option>
+                <option [ngValue]="1">1 - Poor</option>
+              </select>
+            </label>
+
+            <label>
+              Comment
+              <textarea [(ngModel)]="reviewComment" rows="5" placeholder="Share your thoughts..."></textarea>
+            </label>
+
+            <button type="button" class="btn solid full" (click)="submitReview()" [disabled]="savingReview">
+              {{ savingReview ? 'Submitting...' : 'Submit Review' }}
+            </button>
+          }
+        </div>
+
+        <div class="review-list card">
+          @if (product.reviews.length === 0) {
+            <div class="empty-review">No reviews yet. Be the first verified buyer to share feedback.</div>
+          } @else {
+            @for (review of product.reviews; track review.id) {
+              <article class="review-item">
+                <div class="review-top">
+                  <strong>{{ review.userName }}</strong>
+                  <span>{{ review.createdAt | date:'mediumDate' }}</span>
+                </div>
+                <div class="stars small">
+                  @for (star of stars(review.rating); track $index) {
+                    <span [class.full]="star === 'full'">★</span>
+                  }
+                </div>
+                <p>{{ review.comment || 'No comment left.' }}</p>
+              </article>
+            }
+          }
+        </div>
+      </div>
+    </section>
+  }
+</div>

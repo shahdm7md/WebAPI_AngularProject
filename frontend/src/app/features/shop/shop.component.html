@@ -1,0 +1,181 @@
+<div class="shop-shell">
+  <header class="shop-hero">
+    <div class="hero-copy">
+      <p class="kicker">Shop Collections</p>
+      <h1>The Brutalist Collection</h1>
+      <p>Explore active pieces from your database with live stock-aware actions.</p>
+    </div>
+  </header>
+
+  <section class="toolbar">
+    <div class="search-wrap">
+      <span class="material-symbols-outlined">search</span>
+      <input
+        type="text"
+        [ngModel]="searchTerm"
+        (ngModelChange)="updateSearch($event)"
+        placeholder="Search by product, description, or category"
+      />
+    </div>
+
+    <div class="toolbar-actions">
+      <button type="button" class="btn ghost mobile-filter" (click)="toggleFiltersOnMobile()">
+        <span class="material-symbols-outlined">tune</span>
+        Filters
+      </button>
+
+      <label class="sort-wrap">
+        <span>Sort</span>
+        <select [ngModel]="sortBy" (ngModelChange)="updateSort($event)">
+          <option value="popularity">Popularity</option>
+          <option value="rating">Top rated</option>
+          <option value="priceAsc">Price: Low to High</option>
+          <option value="priceDesc">Price: High to Low</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  @if (notice) {
+    <div class="notice success">{{ notice }}</div>
+  }
+
+  @if (error) {
+    <div class="notice error">{{ error }}</div>
+  }
+
+  <section class="layout">
+    <aside class="filters" [class.show-mobile]="showFiltersOnMobile">
+      <div class="filter-head">
+        <h3>Filters</h3>
+        <button type="button" class="btn ghost" (click)="clearFilters()">Reset</button>
+      </div>
+
+      <div class="filter-block">
+        <h4>Category</h4>
+        <div class="check-list">
+          @for (category of categories(); track category) {
+            <label>
+              <input
+                type="checkbox"
+                [checked]="selectedCategories.has(category)"
+                (change)="toggleCategory(category)"
+              />
+              <span>{{ category }}</span>
+            </label>
+          }
+        </div>
+      </div>
+
+      <div class="filter-block">
+        <h4>Price Range</h4>
+        <input
+          type="range"
+          [min]="0"
+          [max]="maxPriceCap"
+          [value]="maxPriceFilter"
+          (input)="updatePriceFilter(($any($event.target)).value)"
+        />
+        <div class="range-values">
+          <span>{{ 0 | currency:'USD' }}</span>
+          <span>{{ maxPriceFilter | currency:'USD' }}</span>
+        </div>
+      </div>
+
+      <div class="filter-block">
+        <h4>Minimum Rating</h4>
+        <div class="rating-options">
+          @for (rating of [0, 3, 4, 5]; track rating) {
+            <button
+              type="button"
+              [class.active]="minRating === rating"
+              (click)="updateRating(rating)"
+            >
+              {{ rating === 0 ? 'All ratings' : rating + ' stars & up' }}
+            </button>
+          }
+        </div>
+      </div>
+    </aside>
+
+    <div class="results">
+      <div class="results-head">
+        <p>Showing {{ filteredProducts().length }} products</p>
+        <a routerLink="/" class="btn ghost">Back to Home</a>
+      </div>
+
+      @if (loading) {
+        <div class="skeleton-grid">
+          @for (x of [1,2,3,4,5,6]; track x) {
+            <div class="skeleton-card"></div>
+          }
+        </div>
+      } @else if (filteredProducts().length === 0) {
+        <div class="empty-state">
+          <h3>No products match your filters</h3>
+          <p>Try changing search text or resetting filters.</p>
+        </div>
+      } @else {
+        <div class="product-grid">
+          @for (item of pagedProducts(); track item.id) {
+            <article class="product-card" [class.out]="!canAddToCart(item)">
+              <button
+                type="button"
+                class="wishlist-btn"
+                [class.active]="isInWishlist(item.id)"
+                (click)="toggleWishlist(item)"
+                aria-label="Toggle wishlist"
+              >
+                <span class="material-symbols-outlined">favorite</span>
+              </button>
+
+              <img [src]="productImageUrl(item)" [alt]="item.name" />
+
+              <div class="card-body">
+                <small>{{ item.categoryName || 'General' }}</small>
+                <h3>{{ item.name }}</h3>
+                <p class="description">{{ item.description || 'No description available.' }}</p>
+
+                <div class="meta-row">
+                  <div class="rating">
+                    @for (star of stars(item.averageRating); track $index) {
+                      <span [class.full]="star === 'full'">★</span>
+                    }
+                    <span class="count">({{ item.reviewCount }})</span>
+                  </div>
+                  <span class="stock" [class.out]="!canAddToCart(item)">{{ stockLabel(item) }}</span>
+                </div>
+
+                <div class="action-row">
+                  <p class="price">{{ item.price | currency:'USD' }}</p>
+                  <div class="card-actions">
+                    <a [routerLink]="['/shop/product', item.id]" class="btn ghost details-btn">View</a>
+                    <button
+                      type="button"
+                      class="btn solid icon-btn"
+                      (click)="addToCart(item)"
+                      [disabled]="!canAddToCart(item)"
+                      aria-label="Add to cart"
+                    >
+                      <span class="material-symbols-outlined">shopping_cart</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+
+        <div class="pagination">
+          <button type="button" (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1">Prev</button>
+
+          @for (page of pageNumbers(); track page) {
+            <button type="button" (click)="setPage(page)" [class.active]="page === currentPage">{{ page }}</button>
+          }
+
+          <button type="button" (click)="setPage(currentPage + 1)" [disabled]="currentPage === totalPages()">Next</button>
+        </div>
+      }
+    </div>
+  </section>
+</div>

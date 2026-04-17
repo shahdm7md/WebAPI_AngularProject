@@ -22,6 +22,16 @@ import { SellerProductsComponent } from './features/seller-panel/product-managem
 import { SellerOverviewComponent } from './features/seller-panel/seller-overview/seller-overview';
 export const routes: Routes = [
   { path: '', component: HomeComponent },
+  {
+    path: 'shop',
+    loadComponent: () =>
+      import('./features/shop/shop.component').then(m => m.ShopComponent)
+  },
+  {
+    path: 'shop/product/:id',
+    loadComponent: () =>
+      import('./features/product-details/product-details.component').then(m => m.ProductDetailsComponent)
+  },
 
   { path: 'auth/login', component: LoginComponent },
   { path: 'auth/register', component: RegisterComponent },
@@ -54,8 +64,12 @@ export const routes: Routes = [
   {
     path: 'cart',
     loadComponent: () =>
-      import('./features/Cart/cart.component').then(m => m.CartComponent),
-    canActivate: [AuthGuard]
+      import('./features/Cart/cart.component').then(m => m.CartComponent)
+  },
+  {
+    path: 'wishlist',
+    loadComponent: () =>
+      import('./features/wishlist/wishlist.component').then(m => m.WishlistComponent)
   },
   {
     path: 'checkout',

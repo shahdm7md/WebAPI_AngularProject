@@ -7,5 +7,9 @@
      decimal Price,
      int StockQuantity,
      string CategoryName,
-     string? MainImageUrl);
+    string? MainImageUrl,
+    bool IsActive,
+     bool IsAvailable,
+    double AverageRating,
+    int ReviewCount);
 }

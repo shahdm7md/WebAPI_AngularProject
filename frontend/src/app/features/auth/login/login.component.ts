@@ -2,10 +2,12 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, forkJoin } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { GoogleIdentityService } from '../../../core/services/google-identity.service';
 import { AuthResponse } from '../../../core/models/auth.models';
+import { CartService } from '../../../core/services/cart.service';
+import { WishlistService } from '../../../core/services/wishlist.service';
 
 const GOOGLE_CLIENT_ID = '429102089004-op47mj85bbe9s278h9bc8vld6v9o9ugs.apps.googleusercontent.com';
 
@@ -21,6 +23,8 @@ export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly googleIdentityService = inject(GoogleIdentityService);
   private readonly router = inject(Router);
+  private readonly cartService = inject(CartService);
+  private readonly wishlistService = inject(WishlistService);
   @ViewChild('googleButtonHost') private googleButtonHost?: ElementRef<HTMLDivElement>;
 
   protected showPassword = false;
@@ -58,8 +62,7 @@ export class LoginComponent {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (response) => {
-          this.authService.storeSession(response);
-          this.router.navigateByUrl('/');
+          this.handlePostLogin(response);
         },
         error: (error) => {
           const message = this.authService.extractErrorMessage(
@@ -95,8 +98,7 @@ export class LoginComponent {
 
       this.authService.googleLogin({ idToken: response.credential }).subscribe({
         next: (loginResponse: AuthResponse) => {
-          this.authService.storeSession(loginResponse);
-          this.router.navigateByUrl('/');
+          this.handlePostLogin(loginResponse);
         },
         error: (error: unknown) => {
           this.googleMessage = this.authService.extractErrorMessage(
@@ -127,6 +129,18 @@ export class LoginComponent {
       shape: 'rectangular',
       logo_alignment: 'left',
       width: host.clientWidth > 0 ? host.clientWidth : 360,
+    });
+  }
+
+  private handlePostLogin(response: AuthResponse): void {
+    this.authService.storeSession(response);
+
+    forkJoin([
+      this.cartService.mergeGuestCartIntoUserCart(),
+      this.wishlistService.mergeGuestWishlistIntoUserWishlist(),
+    ]).subscribe({
+      next: () => this.router.navigateByUrl('/'),
+      error: () => this.router.navigateByUrl('/'),
     });
   }
 }

@@ -1,3 +1,47 @@
 .primary-gradient {
   background: linear-gradient(135deg, #030813 0%, #1a202c 100%);
 }
+
+.cart-page-shell {
+  background: radial-gradient(circle at top left, #fbf7ec 0%, #f5f8fc 44%, #eef3f9 100%);
+}
+
+.cart-item-card {
+  border: 1px solid #dbe2ec;
+  box-shadow: 0 8px 20px -20px rgba(8, 35, 62, 0.6);
+  animation: cartCardIn 320ms ease both;
+}
+
+.cart-item-card:hover {
+  transform: translateY(-3px) translateX(2px);
+  box-shadow: 0 16px 28px -24px rgba(8, 35, 62, 0.55);
+  border-color: #cad4e2;
+}
+
+.cart-item-image-wrap {
+  position: relative;
+}
+
+.cart-item-image {
+  transition: transform 320ms ease;
+}
+
+.cart-item-card:hover .cart-item-image {
+  transform: scale(1.06);
+}
+
+.summary-panel {
+  border: 1px solid #d7dee9;
+  box-shadow: 0 14px 24px -24px rgba(10, 33, 59, 0.55);
+}
+
+@keyframes cartCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

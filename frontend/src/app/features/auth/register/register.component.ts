@@ -9,10 +9,12 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, forkJoin } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { AuthResponse } from '../../../core/models/auth.models';
 import { GoogleIdentityService } from '../../../core/services/google-identity.service';
+import { CartService } from '../../../core/services/cart.service';
+import { WishlistService } from '../../../core/services/wishlist.service';
 
 type AccountType = 'customer' | 'seller';
 // register.component.ts
@@ -55,6 +57,8 @@ export class RegisterComponent {
   private readonly authService = inject(AuthService);
   private readonly googleIdentityService = inject(GoogleIdentityService);
   private readonly router = inject(Router);
+  private readonly cartService = inject(CartService);
+  private readonly wishlistService = inject(WishlistService);
   @ViewChild('googleButtonHost') private googleButtonHost?: ElementRef<HTMLDivElement>;
 
   protected accountType: AccountType = 'customer';
@@ -71,8 +75,7 @@ export class RegisterComponent {
 
     this.authService.googleLogin({ idToken: response.credential }).subscribe({
       next: (loginResponse: AuthResponse) => {
-        this.authService.storeSession(loginResponse);
-        this.router.navigateByUrl('/');
+        this.handlePostLogin(loginResponse);
       },
       error: (error: unknown) => {
         this.errorMessage = this.authService.extractErrorMessage(
@@ -218,6 +221,18 @@ export class RegisterComponent {
       shape: 'rectangular',
       logo_alignment: 'left',
       width: host.clientWidth > 0 ? host.clientWidth : 360,
+    });
+  }
+
+  private handlePostLogin(response: AuthResponse): void {
+    this.authService.storeSession(response);
+
+    forkJoin([
+      this.cartService.mergeGuestCartIntoUserCart(),
+      this.wishlistService.mergeGuestWishlistIntoUserWishlist(),
+    ]).subscribe({
+      next: () => this.router.navigateByUrl('/'),
+      error: () => this.router.navigateByUrl('/'),
     });
   }
 }

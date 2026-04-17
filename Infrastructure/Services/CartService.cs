@@ -18,6 +18,30 @@ namespace Infrastructure.Services
         public async Task<CartResponseDto> GetCartAsync(string userId)
         {
             var cart = await GetOrCreateCartAsync(userId);
+
+            var changed = false;
+            foreach (var item in cart.Items.ToList())
+            {
+                var product = item.Product;
+                if (product is null || product.StockQuantity <= 0 || !product.IsActive)
+                {
+                    _context.CartItems.Remove(item);
+                    changed = true;
+                    continue;
+                }
+
+                if (item.Quantity > product.StockQuantity)
+                {
+                    item.Quantity = product.StockQuantity;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                await _context.SaveChangesAsync();
+            }
+
             return MapToDto(cart);
         }
 
@@ -28,21 +52,23 @@ namespace Infrastructure.Services
             var product = await _context.Products.FindAsync(dto.ProductId)
                 ?? throw new KeyNotFoundException("Product not found.");
 
-            if (product.StockQuantity < dto.Quantity)
-                throw new InvalidOperationException("Not enough stock available.");
+            if (product.StockQuantity <= 0 || !product.IsActive)
+                throw new InvalidOperationException("Product is out of stock.");
 
             var existingItem = cart.Items.FirstOrDefault(i => i.ProductId == dto.ProductId);
+            var desiredQuantity = (existingItem?.Quantity ?? 0) + dto.Quantity;
+            var finalQuantity = Math.Min(desiredQuantity, product.StockQuantity);
 
             if (existingItem is not null)
             {
-                existingItem.Quantity += dto.Quantity;
+                existingItem.Quantity = finalQuantity;
             }
             else
             {
                 cart.Items.Add(new CartItem
                 {
                     ProductId = dto.ProductId,
-                    Quantity = dto.Quantity
+                    Quantity = Math.Min(dto.Quantity, product.StockQuantity)
                 });
             }
 
@@ -67,8 +93,15 @@ namespace Infrastructure.Services
                 var product = await _context.Products.FindAsync(productId)
                     ?? throw new KeyNotFoundException("Product not found.");
 
+                if (product.StockQuantity <= 0 || !product.IsActive)
+                {
+                    _context.CartItems.Remove(item);
+                    await _context.SaveChangesAsync();
+                    return await GetCartAsync(userId);
+                }
+
                 if (product.StockQuantity < quantity)
-                    throw new InvalidOperationException("Not enough stock.");
+                    throw new InvalidOperationException("Requested quantity exceeds available stock.");
 
                 item.Quantity = quantity;
             }

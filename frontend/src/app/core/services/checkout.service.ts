@@ -5,7 +5,7 @@ import { CheckoutRequest, OrderResponse } from '../models/order.model';
 import { DEFAULT_API_BASE_URL  } from '../config/api.config';
 @Injectable({ providedIn: 'root' })
 export class CheckoutService {
-  private readonly baseUrl = `${DEFAULT_API_BASE_URL }/checkout`;
+  private readonly baseUrl = `${DEFAULT_API_BASE_URL}/api/checkout`;
 
   constructor(private http: HttpClient) {}
 

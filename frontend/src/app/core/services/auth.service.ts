@@ -80,7 +80,40 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem(this.tokenStorageKey);
+    const token = localStorage.getItem(this.tokenStorageKey);
+
+    if (!token) {
+      return false;
+    }
+
+    if (this.isTokenExpired(token)) {
+      this.clearSession();
+      return false;
+    }
+
+    return true;
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payloadPart = token.split('.')[1];
+
+      if (!payloadPart) {
+        return true;
+      }
+
+      const base64 = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+      const payload = JSON.parse(atob(padded)) as { exp?: unknown };
+
+      if (typeof payload.exp !== 'number') {
+        return true;
+      }
+
+      return Date.now() >= payload.exp * 1000;
+    } catch {
+      return true;
+    }
   }
 
   getCurrentUserEmail(): string {

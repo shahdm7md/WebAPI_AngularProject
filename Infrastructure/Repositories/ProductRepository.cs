@@ -23,6 +23,8 @@ namespace Infrastructure.Repositories
             var query = _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Images)
+                .Include(p => p.Reviews)
+                .Where(p => p.IsActive)
                 .AsQueryable();
 
             // الفلترة بالقسم
@@ -44,7 +46,11 @@ namespace Infrastructure.Repositories
         }
 
         public async Task<Product?> GetProductByIdAsync(int id) =>
-            await _context.Products.Include(p => p.Category).Include(p => p.Images).FirstOrDefaultAsync(p => p.Id == id);
+            await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Images)
+                .Include(p => p.Reviews)
+                .FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
 
         public async Task AddProductAsync(Product product) => await _context.Products.AddAsync(product);
 
