@@ -1,18 +1,19 @@
 <div class="wishlist-shell">
-  <div class="wishlist-header">
+  <header class="wishlist-header">
     <div>
-      <h1>Your Wishlist</h1>
-      <p>Items you saved for later shopping.</p>
+      <h1>Your Curations</h1>
+      <p>A personalized selection of architectural pieces and design essentials saved for your future spaces.</p>
     </div>
-    <div class="actions">
+    <div class="header-actions">
       <a routerLink="/cart" class="btn ghost">Open Cart</a>
-      <button type="button" class="btn ghost" (click)="clearAll()" [disabled]="actionLoading || items.length === 0">Clear All</button>
+      <button type="button" class="btn ghost" (click)="clearAll()" [disabled]="actionLoading || items.length === 0">Clear Wishlist</button>
     </div>
-  </div>
+  </header>
 
   @if (notice) {
     <div class="notice success">{{ notice }}</div>
   }
+
   @if (error) {
     <div class="notice error">{{ error }}</div>
   }
@@ -25,33 +26,103 @@
     <div class="state-card empty">
       <h3>Wishlist is empty</h3>
       <p>Discover products and save your favorites.</p>
-      <a routerLink="/" class="btn solid">Browse Products</a>
+      <a routerLink="/shop" class="btn solid">Browse Collection</a>
     </div>
   } @else {
-    <div class="wishlist-grid">
-      @for (item of items; track item.id) {
-      <article class="wishlist-card" [class.disabled]="actionLoading">
-        <img [src]="imageUrl(item)" [alt]="item.name" />
-        <div class="content">
-          <h3>{{ item.name }}</h3>
-          <p class="desc">{{ item.description || 'No description available.' }}</p>
-          <div class="meta">
-            <span class="price">{{ item.price | currency:'USD' }}</span>
-            <span class="stock" [class.out]="item.stockQuantity === 0">
-              {{ item.stockQuantity > 0 ? 'In stock' : 'Out of stock' }}
-            </span>
-          </div>
-          <div class="row-actions">
-            <button type="button" class="btn solid icon-btn" (click)="moveToCart(item)" [disabled]="!item.isAvailable || !item.isActive || item.stockQuantity === 0 || actionLoading" aria-label="Move to cart">
-              <span class="material-symbols-outlined">shopping_cart</span>
-            </button>
-            <button type="button" class="btn ghost icon-btn" (click)="remove(item.id)" [disabled]="actionLoading" aria-label="Remove from wishlist">
-              <span class="material-symbols-outlined">delete</span>
-            </button>
-          </div>
+    <div class="wishlist-layout">
+      <aside class="filters-panel" [class.disabled]="actionLoading">
+        <div class="panel-block">
+          <h3>Categories</h3>
+          <ul>
+            <li>
+              <button type="button" class="filter-btn" [class.active]="selectedCategory === 'All Items'" (click)="setCategory('All Items')">
+                <span>All Items</span>
+                <span>{{ items.length }}</span>
+              </button>
+            </li>
+            @for (entry of categoryEntries(); track entry.name) {
+              <li>
+                <button type="button" class="filter-btn" [class.active]="selectedCategory === entry.name" (click)="setCategory(entry.name)">
+                  <span>{{ entry.name }}</span>
+                  <span>{{ entry.count }}</span>
+                </button>
+              </li>
+            }
+          </ul>
         </div>
-      </article>
-      }
+
+        <div class="panel-block with-border">
+          <h3>Availability</h3>
+          <label class="check-row" for="inStockOnly">
+            <input id="inStockOnly" type="checkbox" [checked]="inStockOnly" (change)="onStockFilterChange($event)" />
+            <span>In Stock Only</span>
+          </label>
+        </div>
+      </aside>
+
+      <section class="wishlist-content">
+        @if (filteredItems().length === 0) {
+          <div class="state-card empty compact">
+            <h3>No items match your filter</h3>
+            <p>Try another category or disable in-stock filtering.</p>
+          </div>
+        } @else {
+          <div class="wishlist-grid">
+            @for (item of filteredItems(); track item.id) {
+              <article class="wishlist-card" [class.disabled]="actionLoading">
+                <div class="image-wrap">
+                  <img [src]="imageUrl(item)" [alt]="item.name" />
+                  <button
+                    type="button"
+                    class="remove-btn"
+                    (click)="remove(item.id)"
+                    [disabled]="actionLoading"
+                    aria-label="Remove from wishlist"
+                  >
+                    <span class="material-symbols-outlined">delete</span>
+                  </button>
+                </div>
+
+                <div class="content">
+                  <small>{{ categoryLabel(item) }}</small>
+                  <h3>{{ item.name }}</h3>
+                  <p class="desc">{{ item.description || 'No description available.' }}</p>
+
+                  <div class="meta-row">
+                    <span class="price">{{ item.price | currency:'USD' }}</span>
+                    <span class="stock" [class.out]="item.stockQuantity === 0">
+                      {{ item.stockQuantity > 0 ? (item.stockQuantity + ' in stock') : 'Out of stock' }}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="btn solid move-btn"
+                    (click)="moveToCart(item)"
+                    [disabled]="!item.isAvailable || !item.isActive || item.stockQuantity === 0 || actionLoading"
+                  >
+                    <span class="material-symbols-outlined">shopping_bag</span>
+                    Add to Cart
+                  </button>
+                </div>
+              </article>
+            }
+          </div>
+        }
+
+        <section class="recommendation-band">
+          <div class="band-main">
+            <h3>The Artisan Collection</h3>
+            <p>Hand-selected pieces from our newest European collaborators, focused on raw materials and honest craftsmanship.</p>
+            <a routerLink="/shop" class="btn solid">Explore Now</a>
+          </div>
+          <div class="band-aside">
+            <h4>Curator's Choice</h4>
+            <p>Unlock 15% off your first wishlist purchase with code <span>CURATE15</span></p>
+            <a routerLink="/cart" class="btn ghost">Apply in Cart</a>
+          </div>
+        </section>
+      </section>
     </div>
   }
 </div>

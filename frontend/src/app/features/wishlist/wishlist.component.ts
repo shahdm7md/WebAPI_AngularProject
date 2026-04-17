@@ -15,6 +15,8 @@ import { WishlistService } from '../../core/services/wishlist.service';
 })
 export class WishlistComponent implements OnInit {
   items: StoreProduct[] = [];
+  selectedCategory = 'All Items';
+  inStockOnly = false;
   loading = false;
   actionLoading = false;
   error = '';
@@ -104,6 +106,41 @@ export class WishlistComponent implements OnInit {
           this.error = 'Unable to clear wishlist.';
         },
       });
+  }
+
+  filteredItems(): StoreProduct[] {
+    return this.items.filter((item) => {
+      const category = this.categoryLabel(item);
+      const categoryMatches =
+        this.selectedCategory === 'All Items' || this.selectedCategory === category;
+      const stockMatches = !this.inStockOnly || item.stockQuantity > 0;
+      return categoryMatches && stockMatches;
+    });
+  }
+
+  categoryEntries(): Array<{ name: string; count: number }> {
+    const counts = new Map<string, number>();
+
+    for (const item of this.items) {
+      const category = this.categoryLabel(item);
+      counts.set(category, (counts.get(category) ?? 0) + 1);
+    }
+
+    return Array.from(counts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  setCategory(category: string): void {
+    this.selectedCategory = category;
+  }
+
+  onStockFilterChange(event: Event): void {
+    this.inStockOnly = (event.target as HTMLInputElement).checked;
+  }
+
+  categoryLabel(item: StoreProduct): string {
+    return (item.categoryName || 'General').trim();
   }
 
   imageUrl(item: StoreProduct): string {

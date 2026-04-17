@@ -129,7 +129,15 @@ export const routes: Routes = [
     path: 'checkout',
     loadComponent: () =>
       import('./features/checkout/checkout.component').then(m => m.CheckoutComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['Customer'] }
+  },
+  {
+    path: 'order-success/:id',
+    loadComponent: () =>
+      import('./features/order-success/order-success.component').then(m => m.OrderSuccessComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['Customer'] }
   },
 
   { path: '**', redirectTo: '' },

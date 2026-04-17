@@ -3,6 +3,7 @@ using Core.Entities;
 using Infrastructure.Persistence;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Core.DTOs.Order;
 
 namespace API.Services
 {
@@ -107,6 +108,52 @@ namespace API.Services
                 Success = true,
                 StatusCode = StatusCodes.Status200OK,
                 Message = "Coupon deleted successfully."
+            };
+        }
+
+        public async Task<CouponValidationResponseDto> ValidateAsync(string userId, string code)
+        {
+            var normalizedCode = code.Trim().ToUpper();
+            var cart = await _context.Carts
+                .Include(c => c.Items)
+                    .ThenInclude(i => i.Product)
+                .FirstOrDefaultAsync(c => c.UserId == userId)
+                ?? throw new InvalidOperationException("No cart found.");
+
+            var subtotal = cart.Items.Sum(item => item.Product!.Price * item.Quantity);
+
+            var coupon = await _context.Coupons
+                .Include(c => c.Usages)
+                .FirstOrDefaultAsync(c => c.Code == normalizedCode)
+                ?? throw new KeyNotFoundException("Coupon not found.");
+
+            if (!coupon.IsActive)
+                throw new InvalidOperationException("Coupon is inactive.");
+
+            if (coupon.ExpiryDate < DateTime.UtcNow)
+                throw new InvalidOperationException("Coupon has expired.");
+
+            if (coupon.Usages.Count >= coupon.UsageLimit)
+                throw new InvalidOperationException("Coupon usage limit reached.");
+
+            if (coupon.Usages.Any(usage => usage.UserId == userId))
+                throw new InvalidOperationException("You have already used this coupon.");
+
+            if (coupon.MinOrderAmount.HasValue && subtotal < coupon.MinOrderAmount.Value)
+                throw new InvalidOperationException($"Coupon requires minimum order of {coupon.MinOrderAmount}.");
+
+            var discount = coupon.DiscountType == SharedKernel.Enums.DiscountType.Percentage
+                ? subtotal * (coupon.Value / 100)
+                : coupon.Value;
+
+            discount = Math.Min(discount, subtotal);
+
+            return new CouponValidationResponseDto
+            {
+                IsValid = true,
+                Message = "Coupon is valid.",
+                CouponCode = coupon.Code,
+                DiscountAmount = discount
             };
         }
 

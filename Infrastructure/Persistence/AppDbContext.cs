@@ -39,6 +39,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Payment> Payments => Set<Payment>();
 
+    public DbSet<Governorate> Governorates => Set<Governorate>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -173,6 +175,45 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(order => order.TotalAmount)
                 .HasPrecision(18, 2);
 
+            entity.Property(order => order.ShippingCost)
+                .HasPrecision(18, 2)
+                .IsRequired();
+
+            entity.Property(order => order.DiscountAmount)
+                .HasPrecision(18, 2)
+                .IsRequired();
+
+            entity.Property(order => order.AppliedCouponCode)
+                .HasMaxLength(50);
+
+            entity.Property(order => order.ShippingFirstName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(order => order.ShippingLastName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(order => order.ShippingPhone)
+                .IsRequired()
+                .HasMaxLength(30);
+
+            entity.Property(order => order.ShippingAddress)
+                .IsRequired()
+                .HasMaxLength(500);
+
+            entity.Property(order => order.ShippingCity)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(order => order.ShippingState)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(order => order.ShippingZipCode)
+                .IsRequired()
+                .HasMaxLength(20);
+
             entity.Property(order => order.Status)
                 .HasConversion<int>()
                 .IsRequired();
@@ -183,6 +224,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             entity.HasOne(order => order.User)
                 .WithMany(user => user.Orders)
                 .HasForeignKey(order => order.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(order => order.Governorate)
+                .WithMany()
+                .HasForeignKey(order => order.GovernorateId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -327,6 +373,29 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 
             entity.Property(c => c.CreatedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
+        });
+
+        modelBuilder.Entity<Governorate>(entity =>
+        {
+            entity.Property(g => g.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(g => g.NameAr)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(g => g.ShippingCost)
+                .HasPrecision(18, 2)
+                .IsRequired();
+
+            entity.Property(g => g.IsActive)
+                .HasDefaultValue(true);
+
+            entity.Property(g => g.CreatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.HasIndex(g => g.Name).IsUnique();
         });
     }
 }

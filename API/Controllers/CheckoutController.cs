@@ -1,5 +1,6 @@
 ﻿using Core.DTOs.Order;
 using Core.Interfaces;
+using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -12,10 +13,12 @@ namespace API.Controllers;
 public class CheckoutController : ControllerBase
 {
     private readonly ICheckoutService _checkoutService;
+    private readonly ICouponService _couponService;
 
-    public CheckoutController(ICheckoutService checkoutService)
+    public CheckoutController(ICheckoutService checkoutService, ICouponService couponService)
     {
         _checkoutService = checkoutService;
+        _couponService = couponService;
     }
 
     private string GetUserId() =>
@@ -35,5 +38,20 @@ public class CheckoutController : ControllerBase
     {
         var order = await _checkoutService.CheckoutAsync(GetUserId(), dto);
         return Ok(order);
+    }
+
+    // POST api/checkout/validate-coupon
+    [HttpPost("validate-coupon")]
+    public async Task<IActionResult> ValidateCoupon([FromBody] CouponValidationRequestDto request)
+    {
+        try
+        {
+            var result = await _couponService.ValidateAsync(GetUserId(), request.CouponCode);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 }

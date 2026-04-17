@@ -6,6 +6,7 @@ using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Infrastructure;
 using Infrastructure.Identity;
+using Infrastructure.Persistence;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -83,6 +84,7 @@ builder.Services.AddAuthentication(options =>
 var app = builder.Build();
 
 await IdentitySeeder.SeedAsync(app.Services);
+await GovernorateSeeder.SeedAsync(app.Services);
 
 if (app.Environment.IsDevelopment())
 {

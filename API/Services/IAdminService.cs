@@ -1,4 +1,5 @@
 using API.Contracts.Admin;
+using Core.DTOs.Order;
 
 namespace API.Services;
 
@@ -32,6 +33,7 @@ public interface ICouponService
     Task<CouponResult> CreateAsync(CreateCouponRequest request);
     Task<CouponResult> UpdateAsync(int id, UpdateCouponRequest request);
     Task<CouponResult> DeleteAsync(int id);
+    Task<CouponValidationResponseDto> ValidateAsync(string userId, string code);
 }
 
 public interface IBannerService

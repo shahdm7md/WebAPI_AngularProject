@@ -18,8 +18,30 @@ export enum PaymentStatus {
  Failed = 3
 }
 
+export interface Governorate {
+  id: number;
+  name: string;
+  nameAr: string;
+  shippingCost: number;
+  isActive: boolean;
+}
+
+export interface CouponValidationResponse {
+  isValid: boolean;
+  message: string;
+  couponCode: string;
+  discountAmount: number;
+}
+
 export interface CheckoutRequest {
+  shippingFirstName: string;
+  shippingLastName: string;
+  shippingPhone: string;
   shippingAddress: string;
+  shippingCity: string;
+  shippingState: string;
+  shippingZipCode: string;
+  governorateId: number;
   paymentMethod: PaymentMethod;
   couponCode?: string;
 }
@@ -27,6 +49,7 @@ export interface CheckoutRequest {
 export interface OrderItemResponse {
   productId: number;
   productName: string;
+  productImage?: string | null;
   quantity: number;
   price: number;
   subTotal: number;
@@ -42,7 +65,18 @@ export interface PaymentResponse {
 
 export interface OrderResponse {
   id: number;
+  subtotalAmount: number;
   totalAmount: number;
+  shippingCost: number;
+  discountAmount: number;
+  shippingFirstName: string;
+  shippingLastName: string;
+  shippingPhone: string;
+  shippingAddress: string;
+  shippingCity: string;
+  shippingState: string;
+  shippingZipCode: string;
+  appliedCouponCode?: string;
   status: OrderStatus;
   createdAt: string;
   items: OrderItemResponse[];

@@ -63,7 +63,7 @@
         <div class="lg:col-span-8 space-y-6">
 
           @for (item of cart.items; track item.productId) {
-              <div class="bg-surface-container-lowest p-6 flex flex-col md:flex-row gap-6 items-center rounded-xl transition-all hover:translate-x-1 cart-item-card"
+                <div class="bg-surface-container-lowest p-6 flex flex-col md:flex-row gap-6 items-start rounded-xl transition-all hover:translate-x-1 cart-item-card"
                  [class.opacity-40]="removingId === item.productId"
                  [class.pointer-events-none]="removingId === item.productId">
 
@@ -77,7 +77,7 @@
               </div>
 
               <!-- Details -->
-              <div class="flex-grow space-y-2 text-center md:text-left">
+              <div class="flex-grow space-y-2 text-left">
                 <div>
                   <span class="text-[10px] uppercase tracking-widest text-secondary font-bold">Product</span>
                   <h3 class="text-lg font-bold text-primary">{{ item.productName }}</h3>
@@ -85,7 +85,7 @@
                 </div>
 
                 <!-- Qty Controls -->
-                <div class="flex items-center justify-center md:justify-start gap-4 mt-4">
+                <div class="flex items-center justify-start gap-4 mt-4">
                   <div class="flex items-center bg-surface-container-low rounded-lg p-1 border border-outline-variant/15">
                     <button (click)="updateQuantity(item, -1)"
                       class="p-1 hover:bg-surface-container-highest rounded-md transition-colors">
@@ -114,7 +114,7 @@
               </div>
 
               <!-- Price -->
-              <div class="text-right flex flex-col items-center md:items-end justify-between h-full py-2">
+              <div class="text-left md:text-right flex flex-col items-start md:items-end justify-between h-full py-2">
                 <span class="text-xl font-black text-primary">{{ item.subTotal | currency }}</span>
                 @if (item.quantity > 1) {
                   <span class="text-[10px] text-on-surface-variant font-bold">
@@ -152,10 +152,6 @@
               <div class="flex justify-between text-sm">
                 <span class="text-on-surface-variant">Subtotal</span>
                 <span class="font-bold text-primary">{{ cart.totalPrice | currency }}</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-on-surface-variant">Shipping (Insured)</span>
-                <span class="font-bold text-secondary">Free</span>
               </div>
             </div>
 

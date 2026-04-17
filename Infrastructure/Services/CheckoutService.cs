@@ -21,35 +21,63 @@ public class CheckoutService : ICheckoutService
         var cart = await _context.Carts
             .Include(c => c.Items)
                 .ThenInclude(i => i.Product)
+                    .ThenInclude(p => p!.Images)
             .FirstOrDefaultAsync(c => c.UserId == userId)
             ?? throw new InvalidOperationException("Cart is empty.");
 
         if (!cart.Items.Any())
             throw new InvalidOperationException("Cannot checkout with empty cart.");
 
-        decimal total = 0;
+        // Validate governorate
+        var governorate = await _context.Governorates.FindAsync(dto.GovernorateId)
+            ?? throw new KeyNotFoundException("Invalid governorate selected.");
+
+        if (!governorate.IsActive)
+            throw new InvalidOperationException("Selected governorate is not available.");
+
+        decimal subtotal = 0;
         foreach (var item in cart.Items)
         {
             var product = item.Product!;
             if (product.StockQuantity < item.Quantity)
                 throw new InvalidOperationException(
                     $"Insufficient stock for product: {product.Name}");
-            total += product.Price * item.Quantity;
+            subtotal += product.Price * item.Quantity;
         }
 
+        decimal discount = 0;
+        string? appliedCoupon = null;
         if (!string.IsNullOrEmpty(dto.CouponCode))
-            total = await ApplyCouponAsync(userId, dto.CouponCode, total);
+        {
+            var result = await ApplyCouponAsync(userId, dto.CouponCode, subtotal);
+            discount = result.Item1;
+            appliedCoupon = result.Item2;
+        }
+
+        decimal total = subtotal - discount + governorate.ShippingCost;
 
         var order = new Order
         {
             UserId = userId,
             TotalAmount = total,
+            ShippingCost = governorate.ShippingCost,
+            DiscountAmount = discount,
+            AppliedCouponCode = appliedCoupon,
+            GovernorateId = dto.GovernorateId,
+            ShippingFirstName = dto.ShippingFirstName,
+            ShippingLastName = dto.ShippingLastName,
+            ShippingPhone = dto.ShippingPhone,
+            ShippingAddress = dto.ShippingAddress,
+            ShippingCity = dto.ShippingCity,
+            ShippingState = dto.ShippingState,
+            ShippingZipCode = dto.ShippingZipCode,
             Status = OrderStatus.Pending,
             Items = cart.Items.Select(i => new OrderItem
             {
                 ProductId = i.ProductId,
                 Quantity = i.Quantity,
-                Price = i.Product!.Price
+                Price = i.Product!.Price,
+                Product = i.Product
             }).ToList()
         };
 
@@ -62,7 +90,7 @@ public class CheckoutService : ICheckoutService
         {
             Order = order,
             PaymentMethod = dto.PaymentMethod,
-            Status = PaymentStatus.Completed,       // Mock → دايمًا Completed
+            Status = PaymentStatus.Completed,
             TransactionId = Guid.NewGuid().ToString(),
             PaidAt = DateTime.UtcNow
         };
@@ -73,7 +101,7 @@ public class CheckoutService : ICheckoutService
 
         await _context.SaveChangesAsync();
 
-        return MapToDto(order, payment);
+        return MapToDto(order, payment, subtotal);
     }
 
     public async Task<OrderResponseDto> GetOrderSummaryAsync(string userId)
@@ -81,6 +109,7 @@ public class CheckoutService : ICheckoutService
         var cart = await _context.Carts
             .Include(c => c.Items)
                 .ThenInclude(i => i.Product)
+                    .ThenInclude(p => p!.Images)
             .FirstOrDefaultAsync(c => c.UserId == userId)
             ?? throw new InvalidOperationException("No cart found.");
 
@@ -88,20 +117,32 @@ public class CheckoutService : ICheckoutService
         {
             UserId = userId,
             TotalAmount = cart.Items.Sum(i => i.Product!.Price * i.Quantity),
+            ShippingCost = 0,
+            DiscountAmount = 0,
+            AppliedCouponCode = null,
+            GovernorateId = 0,
+            ShippingFirstName = string.Empty,
+            ShippingLastName = string.Empty,
+            ShippingPhone = string.Empty,
+            ShippingAddress = string.Empty,
+            ShippingCity = string.Empty,
+            ShippingState = string.Empty,
+            ShippingZipCode = string.Empty,
             Items = cart.Items.Select(i => new OrderItem
             {
                 ProductId = i.ProductId,
                 Quantity = i.Quantity,
-                Price = i.Product!.Price
+                Price = i.Product!.Price,
+                Product = i.Product
             }).ToList()
         };
 
-        return MapToDto(previewOrder, null);
+        return MapToDto(previewOrder, null, previewOrder.TotalAmount);
     }
 
     // ============ Private Helpers ============
 
-    private async Task<decimal> ApplyCouponAsync(string userId, string code, decimal total)
+    private async Task<(decimal, string)> ApplyCouponAsync(string userId, string code, decimal subtotal)
     {
         var coupon = await _context.Coupons
             .Include(c => c.Usages)
@@ -118,8 +159,11 @@ public class CheckoutService : ICheckoutService
         if (alreadyUsed)
             throw new InvalidOperationException("You have already used this coupon.");
 
+        if (coupon.MinOrderAmount.HasValue && subtotal < coupon.MinOrderAmount.Value)
+            throw new InvalidOperationException($"Coupon requires minimum order of {coupon.MinOrderAmount}.");
+
         decimal discount = coupon.DiscountType == SharedKernel.Enums.DiscountType.Percentage
-            ? total * (coupon.Value / 100)
+            ? subtotal * (coupon.Value / 100)
             : coupon.Value;
 
         _context.CouponUsages.Add(new CouponUsage
@@ -128,21 +172,33 @@ public class CheckoutService : ICheckoutService
             UserId = userId
         });
 
-        return Math.Max(0, total - discount);
+        return (Math.Max(0, discount), code);
     }
 
-    private static OrderResponseDto MapToDto(Order order, Payment? payment)
+    private static OrderResponseDto MapToDto(Order order, Payment? payment, decimal subtotalAmount)
     {
         return new OrderResponseDto
         {
             Id = order.Id,
+            SubtotalAmount = subtotalAmount,
             TotalAmount = order.TotalAmount,
+            ShippingCost = order.ShippingCost,
+            DiscountAmount = order.DiscountAmount,
+            AppliedCouponCode = order.AppliedCouponCode,
+            ShippingFirstName = order.ShippingFirstName,
+            ShippingLastName = order.ShippingLastName,
+            ShippingPhone = order.ShippingPhone,
+            ShippingAddress = order.ShippingAddress,
+            ShippingCity = order.ShippingCity,
+            ShippingState = order.ShippingState,
+            ShippingZipCode = order.ShippingZipCode,
             Status = order.Status,
             CreatedAt = order.CreatedAt,
             Items = order.Items.Select(i => new OrderItemResponseDto
             {
                 ProductId = i.ProductId,
                 ProductName = i.Product?.Name ?? string.Empty,
+                ProductImage = i.Product?.Images.FirstOrDefault(img => img.IsMain)?.ImageUrl,
                 Quantity = i.Quantity,
                 Price = i.Price
             }).ToList(),
