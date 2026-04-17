@@ -80,7 +80,7 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    const token = localStorage.getItem(this.tokenStorageKey);
+    const token = this.getAccessToken();
 
     if (!token) {
       return false;
@@ -94,25 +94,94 @@ export class AuthService {
     return true;
   }
 
+  getAccessToken(): string | null {
+    return localStorage.getItem(this.tokenStorageKey);
+  }
+
+  getCurrentUserRoles(): string[] {
+    const token = this.getAccessToken();
+
+    if (!token || this.isTokenExpired(token)) {
+      return [];
+    }
+
+    const payload = this.decodeTokenPayload(token);
+    if (!payload) {
+      return [];
+    }
+
+    const roleKeys = ['role', 'roles', 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+    const roles = roleKeys.flatMap((key) => {
+      const value = payload[key];
+
+      if (typeof value === 'string') {
+        return [value];
+      }
+
+      if (Array.isArray(value)) {
+        return value.filter((role): role is string => typeof role === 'string');
+      }
+
+      return [];
+    });
+
+    return Array.from(new Set(roles));
+  }
+
+  hasAnyRole(requiredRoles: string[]): boolean {
+    if (requiredRoles.length === 0) {
+      return true;
+    }
+
+    const currentRoles = this.getCurrentUserRoles();
+    if (currentRoles.length === 0) {
+      return false;
+    }
+
+    const normalizedCurrent = new Set(currentRoles.map((role) => this.normalizeRole(role)));
+    return requiredRoles.some((requiredRole) =>
+      normalizedCurrent.has(this.normalizeRole(requiredRole)),
+    );
+  }
+
+  private normalizeRole(role: string): string {
+    const compact = role.trim().toLowerCase().replace(/[^a-z]/g, '');
+
+    if (compact === 'systemadministrator' || compact === 'superadmin') {
+      return 'admin';
+    }
+
+    return compact;
+  }
+
   private isTokenExpired(token: string): boolean {
+    const payload = this.decodeTokenPayload(token);
+
+    if (!payload) {
+      return true;
+    }
+
+    const exp = payload['exp'];
+    if (typeof exp !== 'number') {
+      return true;
+    }
+
+    return Date.now() >= exp * 1000;
+  }
+
+  private decodeTokenPayload(token: string): Record<string, unknown> | null {
     try {
       const payloadPart = token.split('.')[1];
 
       if (!payloadPart) {
-        return true;
+        return null;
       }
 
       const base64 = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
       const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
-      const payload = JSON.parse(atob(padded)) as { exp?: unknown };
-
-      if (typeof payload.exp !== 'number') {
-        return true;
-      }
-
-      return Date.now() >= payload.exp * 1000;
+      return JSON.parse(atob(padded)) as Record<string, unknown>;
     } catch {
-      return true;
+      return null;
     }
   }
 

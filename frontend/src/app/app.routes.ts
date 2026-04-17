@@ -11,6 +11,7 @@ import { ManageOrdersComponent } from './features/admin/manage-orders/manage-ord
 import { ManageCouponsComponent } from './features/admin/manage-coupons/manage-coupons.component';
 import { ManageBannersComponent } from './features/admin/manage-banners/manage-banners.component';
 import { AuthGuard } from './core/guards/auth.guard';
+import { RoleGuard } from './core/guards/role.guard';
 
 import { ProductListComponent } from './product-list/product-list';
 import { ProductAddComponent } from './product-add/product-add';
@@ -39,9 +40,24 @@ export const routes: Routes = [
   { path: 'auth/forgot-password', component: ForgotPasswordComponent },
 
   // Products
-  { path: 'products', component: ProductListComponent },
-  { path: 'products/add', component: ProductAddComponent },
-  { path: 'products/edit/:id', component: ProductEditComponent },
+  {
+    path: 'products',
+    component: ProductListComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['Seller'] },
+  },
+  {
+    path: 'products/add',
+    component: ProductAddComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['Seller'] },
+  },
+  {
+    path: 'products/edit/:id',
+    component: ProductEditComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['Seller'] },
+  },
 
 
   // Seller Dashboard
@@ -53,12 +69,50 @@ export const routes: Routes = [
 
 
   // Admin Dashboard
-  { path: 'admin/dashboard', component: AdminDashboardComponent },
-	{ path: 'admin/users', component: ManageUsersComponent },
-	{ path: 'admin/products', component: ManageProductsComponent },
-	{ path: 'admin/orders', component: ManageOrdersComponent },
-	{ path: 'admin/coupons', component: ManageCouponsComponent },
-	{ path: 'admin/banners', component: ManageBannersComponent },
+  {
+    path: 'admin/dashboard',
+    component: AdminDashboardComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['Admin'] },
+  },
+	{
+    path: 'admin/users',
+    component: ManageUsersComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['Admin'] },
+  },
+	{
+    path: 'admin/products',
+    component: ManageProductsComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['Admin'] },
+  },
+	{
+    path: 'admin/orders',
+    component: ManageOrdersComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['Admin'] },
+  },
+	{
+    path: 'admin/coupons',
+    component: ManageCouponsComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['Admin'] },
+  },
+	{
+    path: 'admin/banners',
+    component: ManageBannersComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['Admin'] },
+  },
+
+  // Uppercase aliases
+  { path: 'Admin/dashboard', redirectTo: 'admin/dashboard', pathMatch: 'full' },
+  { path: 'Admin/users', redirectTo: 'admin/users', pathMatch: 'full' },
+  { path: 'Admin/products', redirectTo: 'admin/products', pathMatch: 'full' },
+  { path: 'Admin/orders', redirectTo: 'admin/orders', pathMatch: 'full' },
+  { path: 'Admin/coupons', redirectTo: 'admin/coupons', pathMatch: 'full' },
+  { path: 'Admin/banners', redirectTo: 'admin/banners', pathMatch: 'full' },
   
   // Cart & Checkout
   {
