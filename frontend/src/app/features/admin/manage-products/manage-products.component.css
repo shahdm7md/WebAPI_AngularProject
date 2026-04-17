@@ -2,7 +2,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-:host { font-family: 'Inter', sans-serif; }
+:host {
+  display: block;
+  padding-top: 72px; 
+  font-family: 'Inter', sans-serif;
+}
 
 /* ===== SHELL ===== */
 .admin-shell { display: flex; min-height: 100vh; background: #f9f9fc; color: #1a1c1e; }
@@ -271,18 +275,34 @@
 .mob-item.active { color: #1d4ed8; }
 .mob-item .material-symbols-outlined { font-size: 22px; }
 
-/* ===== MODAL ===== */
+/* الخلفية المظلمة */
 .modal-overlay {
-  position: fixed; inset: 0; z-index: 100;
-  background: rgba(0,0,0,.4); backdrop-filter: blur(4px);
-  display: flex; align-items: center; justify-content: center;
-  padding: 16px; animation: fadeIn .2s ease;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.7) !important; /* تعتيم أغمق */
+  backdrop-filter: blur(8px);
+  display: flex !important;
+  justify-content: center !important; /* توسيط أفقي */
+  align-items: center !important;    /* توسيط رأسي */
+  z-index: 99999 !important;         /* أعلى من أي Navbar */
 }
+
+/* جسم الفورم */
 .modal {
-  background: #fff; border-radius: 20px; width: 100%; max-width: 520px;
-  box-shadow: 0 24px 60px rgba(0,0,0,.15);
-  animation: slideUp .2s ease;
-  max-height: 90vh; overflow-y: auto;
+  position: relative !important;
+  background: #fff !important;
+  width: 500px !important;         
+  max-width: 90% !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3) !important;
+  display: block !important;
+  margin: auto !important;
+  max-height: 85vh;
+  overflow-y: auto;
+  z-index: 100000 !important;
 }
 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 

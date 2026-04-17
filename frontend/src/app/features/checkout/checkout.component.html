@@ -142,7 +142,7 @@
             <p class="text-on-surface-variant leading-relaxed">Choose your preferred payment option.</p>
           </header>
 
-          <div class="grid grid-cols-3 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             @for (pm of paymentMethods; track pm.value) {
               <button type="button" (click)="selectPayment(pm.value)"
                 class="flex flex-col items-center gap-2 p-5 border-2 rounded-xl text-sm font-medium transition-all"
@@ -150,9 +150,8 @@
                 [class.bg-surface-container-low]="paymentForm.value.paymentMethod === pm.value"
                 [class.border-surface-container-highest]="paymentForm.value.paymentMethod !== pm.value">
                 <span class="text-2xl">
-                  @if (pm.value === PaymentMethod.Card)   { 💳 }
-                  @if (pm.value === PaymentMethod.PayPal) { 🅿️ }
-                  @if (pm.value === PaymentMethod.Cash)   { 💵 }
+                  @if (pm.value === PaymentMethod.Card) { 💳 }
+                  @if (pm.value === PaymentMethod.Cash) { 💵 }
                 </span>
                 <span class="text-xs font-bold text-on-surface-variant">{{ pm.label }}</span>
               </button>
@@ -227,9 +226,8 @@
               <div>
                 <p class="text-[10px] font-bold uppercase tracking-[0.1em] text-on-surface-variant mb-2">Payment Method</p>
                 <p class="font-bold text-primary">
-                  @if (paymentForm.value.paymentMethod === PaymentMethod.Card)   { 💳 Credit / Debit Card }
-                  @if (paymentForm.value.paymentMethod === PaymentMethod.PayPal) { 🅿️ PayPal }
-                  @if (paymentForm.value.paymentMethod === PaymentMethod.Cash)   { 💵 Cash on Delivery }
+                  @if (paymentForm.value.paymentMethod === PaymentMethod.Card) { 💳 Pay with Stripe }
+                  @if (paymentForm.value.paymentMethod === PaymentMethod.Cash) { 💵 Cash on Delivery }
                 </p>
               </div>
               <button (click)="goToStep(2)"
@@ -284,7 +282,7 @@
                 </svg>
                 Processing...
               } @else {
-                Place Order
+                {{ paymentForm.value.paymentMethod === PaymentMethod.Card ? 'Pay with Stripe' : 'Place Cash Order' }}
               }
             </button>
           </div>

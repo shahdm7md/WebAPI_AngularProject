@@ -29,26 +29,15 @@
   <!-- ===== MAIN ===== -->
   <main class="main-area">
 
-    <!-- TOPBAR -->
-    <header class="topbar">
-      <div class="search-wrap">
-        <span class="material-symbols-outlined si">search</span>
-        <input class="search-input" type="text"
-               placeholder="Search coupon codes..."
-               [(ngModel)]="searchTerm" />
-      </div>
-      <div class="topbar-right">
-        <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
-        <button class="icon-btn"><span class="material-symbols-outlined">help_outline</span></button>
-        <div class="sep"></div>
-        <div class="user-wrap">
-          <div class="user-text">
-            <p class="uname">Admin User</p>
-            <p class="urole">System Admin</p>
-          </div>
-          <div class="uavatar">A</div>
-        </div>
-      </div>
+    <!-- ADMIN TOPBAR -->
+<header class="admin-topbar">
+  <div class="search-wrap">
+    <span class="material-symbols-outlined si">search</span>
+    <input class="search-input" type="text"
+           placeholder="Search coupon codes..."
+           [(ngModel)]="searchTerm" />
+  </div>
+
     </header>
 
     <!-- PAGE BODY -->
@@ -113,7 +102,7 @@
         <!-- EMPTY -->
         <div *ngIf="!isLoading && filtered.length === 0" class="empty-state">
           <span class="material-symbols-outlined">sell</span>
-          <p>No coupons found.</p>
+          <p>No coupons yet.</p>
           <button class="btn-primary sm" (click)="openCreate()">
             <span class="material-symbols-outlined">add</span>
             Create First Coupon
@@ -137,26 +126,12 @@
             </thead>
             <tbody>
               <tr *ngFor="let c of filtered" [class.row-expired]="isExpired(c)">
-
-                <!-- Code -->
                 <td>
-                  <span class="coupon-code" [class.expired-code]="isExpired(c)">
-                    {{ c.code }}
-                  </span>
+                  <span class="coupon-code" [class.expired-code]="isExpired(c)">{{ c.code }}</span>
                 </td>
-
-                <!-- Type — resolveType يتعامل مع 0/1 أو string -->
                 <td class="type-cell">{{ getTypeLabel(c) }}</td>
-
-                <!-- Value -->
                 <td class="value-cell">{{ formatValue(c) }}</td>
-
-                <!-- Min Order -->
-                <td class="muted">
-                  {{ c.minOrderAmount ? ('$' + c.minOrderAmount) : '—' }}
-                </td>
-
-                <!-- Usage bar -->
+                <td class="muted">{{ c.minOrderAmount ? ('$' + c.minOrderAmount) : '—' }}</td>
                 <td>
                   <div class="usage-wrap">
                     <div class="usage-text">
@@ -166,23 +141,14 @@
                     <div class="usage-bar">
                       <div class="usage-fill"
                            [style.width.%]="getUsagePercent(c)"
-                           [class.full]="getUsagePercent(c) >= 100">
-                      </div>
+                           [class.full]="getUsagePercent(c) >= 100"></div>
                     </div>
                   </div>
                 </td>
-
-                <!-- Expiry -->
                 <td class="muted">{{ c.expiryDate | date:'MMM dd, yyyy' }}</td>
-
-                <!-- Status -->
                 <td>
-                  <span class="status-badge" [ngClass]="getStatusClass(c)">
-                    {{ getStatusLabel(c) }}
-                  </span>
+                  <span class="status-badge" [ngClass]="getStatusClass(c)">{{ getStatusLabel(c) }}</span>
                 </td>
-
-                <!-- Actions -->
                 <td class="text-right">
                   <div class="actions-wrap">
                     <button class="icon-action edit" title="Edit" (click)="openEdit(c)">
@@ -193,7 +159,6 @@
                     </button>
                   </div>
                 </td>
-
               </tr>
             </tbody>
           </table>
@@ -239,7 +204,7 @@
                [(ngModel)]="form.code"
                [disabled]="editMode"
                style="text-transform:uppercase" />
-        <span class="form-hint" *ngIf="!editMode">Letters and numbers only, will be uppercased.</span>
+        <span class="form-hint" *ngIf="!editMode">Will be saved in uppercase.</span>
       </div>
 
       <!-- Type + Value -->
@@ -257,7 +222,7 @@
             <span class="req">*</span>
           </label>
           <input class="form-input" type="number" min="0"
-                 [max]="form.discountType === 'Percentage' ? 100 : 99999"
+                 [max]="form.discountType === 'Percentage' ? 100 : 999999"
                  [placeholder]="form.discountType === 'Percentage' ? '0 – 100' : '0.00'"
                  [(ngModel)]="form.Value" />
         </div>
@@ -280,19 +245,20 @@
       <!-- Expiry -->
       <div class="form-group">
         <label class="form-label">Expiry Date <span class="req">*</span></label>
-        <input class="form-input" type="date"
-               [(ngModel)]="form.expiryDate" />
+        <input class="form-input" type="date" [(ngModel)]="form.expiryDate" />
       </div>
 
-      <!-- Preview card -->
+      <!-- Live Preview -->
       <div class="preview-card" *ngIf="form.code || form.Value">
         <div class="preview-left">
           <p class="preview-label">Preview</p>
-          <span class="preview-code">{{ form.code.toUpperCase() || 'CODE' }}</span>
+          <span class="preview-code">{{ (form.code || 'CODE').toUpperCase() }}</span>
         </div>
         <div class="preview-right">
           <p class="preview-val">
-            {{ form.discountType === 'Percentage' ? form.Value + '%' : '$' + form.Value }}
+            {{ form.discountType === 'Percentage'
+               ? form.Value + '%'
+               : '$' + form.Value }}
           </p>
           <p class="preview-sub">{{ form.discountType === 'Percentage' ? 'off total' : 'off order' }}</p>
         </div>

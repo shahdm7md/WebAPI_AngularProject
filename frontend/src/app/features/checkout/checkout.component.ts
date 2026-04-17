@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { CheckoutService } from '../../core/services/checkout.service';
 import { CartService } from '../../core/services/cart.service';
+import { PaymentService } from '../../core/services/payment.service';
 import { OrderResponse, PaymentMethod, CheckoutRequest, Governorate, CouponValidationResponse } from '../../core/models/order.model';
 import { CartResponse } from '../../core/models/cart.model';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
@@ -30,16 +31,15 @@ export class CheckoutComponent implements OnInit {
   PaymentMethod = PaymentMethod;
 
   paymentMethods = [
-   
-    { value: PaymentMethod.PayPal,     label: 'PayPal' },
-    { value: PaymentMethod.Cash,       label: 'Cash on Delivery' },
-    { value: PaymentMethod.Card,     label: 'Credit Card' }
+    { value: PaymentMethod.Cash, label: 'Cash on Delivery' },
+    { value: PaymentMethod.Card, label: 'Pay with Stripe' }
   ];
 
   constructor(
     private fb: FormBuilder,
     private checkoutService: CheckoutService,
     private cartService: CartService,
+    private paymentService: PaymentService,
     private router: Router
   ) {}
 
@@ -304,10 +304,37 @@ export class CheckoutComponent implements OnInit {
 
     this.checkoutService.checkout(dto).subscribe({
       next: order => {
-        this.cartService.getCart().subscribe();
-        this.router.navigate(['/order-success', order.id],
-          { state: { order } }
-        );
+        const selectedMethod = this.paymentForm.value.paymentMethod as PaymentMethod;
+
+        if (selectedMethod === PaymentMethod.Cash) {
+          this.paymentService.cashPayment(order.id).subscribe({
+            next: () => {
+              this.cartService.getCart().subscribe();
+              this.router.navigate(['/success'], { queryParams: { orderId: order.id }, state: { order } });
+            },
+            error: err => {
+              this.error = err.error?.error ?? 'Cash payment could not be processed. Please try again.';
+              this.submitting = false;
+            }
+          });
+          return;
+        }
+
+        this.paymentService.createStripeSession(order.id).subscribe({
+          next: session => {
+            if (!session.checkoutUrl) {
+              this.error = 'Stripe session was created without a checkout URL.';
+              this.submitting = false;
+              return;
+            }
+
+            window.location.href = session.checkoutUrl;
+          },
+          error: err => {
+            this.error = err.error?.error ?? 'Unable to start Stripe checkout. Please try again.';
+            this.submitting = false;
+          }
+        });
       },
       error: err => {
         this.error = err.status === 403

@@ -90,9 +90,9 @@ public class CheckoutService : ICheckoutService
         {
             Order = order,
             PaymentMethod = dto.PaymentMethod,
-            Status = PaymentStatus.Completed,
-            TransactionId = Guid.NewGuid().ToString(),
-            PaidAt = DateTime.UtcNow
+            Status = PaymentStatus.Pending,
+            TransactionId = null,
+            PaidAt = null
         };
 
         _context.Payments.Add(payment);

@@ -133,9 +133,16 @@ export const routes: Routes = [
     data: { roles: ['Customer'] }
   },
   {
-    path: 'order-success/:id',
+    path: 'success',
     loadComponent: () =>
       import('./features/order-success/order-success.component').then(m => m.OrderSuccessComponent),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['Customer'] }
+  },
+  {
+    path: 'cancel',
+    loadComponent: () =>
+      import('./features/cancel/cancel.component').then(m => m.CancelComponent),
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['Customer'] }
   },
