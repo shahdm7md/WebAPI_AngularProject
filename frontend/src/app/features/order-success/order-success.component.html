@@ -1,30 +1,210 @@
-<div class="min-h-screen bg-surface pt-24 pb-20 px-6">
-  <div class="max-w-2xl mx-auto">
-    <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-10 text-center space-y-5">
-      @if (loading) {
-        <p class="text-on-surface-variant">Confirming your payment...</p>
-      }
-
-      @if (!loading && isSuccess) {
-        <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary">Payment Successful</p>
-        <h1 class="text-4xl font-black tracking-tighter text-primary">Payment Successful</h1>
-        <p class="text-on-surface-variant">Your order #{{ orderId }} has been confirmed successfully.</p>
-      }
-
-      @if (!loading && error) {
-        <p class="text-xs font-bold uppercase tracking-[0.2em] text-error">Payment Confirmation Failed</p>
-        <h1 class="text-4xl font-black tracking-tighter text-primary">We could not confirm payment</h1>
-        <p class="text-on-surface-variant">{{ error }}</p>
-      }
-
-      <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-        <a routerLink="/shop" class="primary-gradient text-on-primary px-8 py-3 rounded-xl font-bold uppercase tracking-widest">
-          Continue Shopping
-        </a>
-        <a routerLink="/checkout" class="bg-surface-container border border-outline-variant/30 px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-primary">
-          Back to Checkout
-        </a>
+<main class="success-page min-h-screen px-6 py-12 lg:py-20">
+  <div class="success-container max-w-6xl mx-auto space-y-12">
+    <section class="hero text-center space-y-6">
+      <div class="hero-icon" [class.hero-icon-error]="!loading && !!error">
+        @if (loading) {
+          <span class="loader" aria-hidden="true"></span>
+        } @else if (isSuccess) {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 7L10 17l-6-6" />
+          </svg>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 8v5" />
+            <path d="M12 16h.01" />
+            <path d="M10.3 3.9L1.8 18.3A2 2 0 0 0 3.5 21h17a2 2 0 0 0 1.7-2.7L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+          </svg>
+        }
       </div>
-    </div>
+
+      @if (loading) {
+        <h1 class="hero-title">Confirming your order...</h1>
+        <p class="hero-subtitle">Please wait while we verify your payment with the gateway.</p>
+      } @else if (isSuccess) {
+        <h1 class="hero-title">Order Confirmed.</h1>
+        <p class="hero-subtitle">Thank you for your purchase. Your curated selection is being prepared and will be en route shortly.</p>
+      } @else {
+        <h1 class="hero-title">Payment needs attention.</h1>
+        <p class="hero-subtitle">{{ error }}</p>
+      }
+
+      @if (detailsWarning) {
+        <p class="hero-subtitle">{{ detailsWarning }}</p>
+      }
+
+      <div class="ref-block">
+        <span class="ref-label">Order Reference</span>
+        <span class="ref-number">#{{ orderId || '----' }}</span>
+      </div>
+    </section>
+
+    <section class="bento-grid">
+      <article class="card journey-card md:col-span-2">
+        <h3 class="card-label">Shipping Journey</h3>
+        <div class="journey-content">
+          <div class="journey-line">
+            <span class="point active"></span>
+            <span class="line"></span>
+            <span class="point" [class.active]="!loading && isSuccess"></span>
+          </div>
+
+          <div class="journey-events">
+            <div>
+              <p class="event-title">Order Processed</p>
+              <p class="event-meta">
+                @if (loading) { Verifying payment }
+                @if (!loading && isSuccess) { Confirmed successfully }
+                @if (!loading && error) { Could not confirm }
+              </p>
+            </div>
+            <div>
+              <p class="event-title muted">Estimated Delivery</p>
+              <p class="event-meta muted">3 to 5 business days</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card address-card">
+        <h3 class="card-label">Delivery Address</h3>
+        @if (orderData) {
+          <div class="space-y-1 text-sm text-on-surface-variant">
+            <p class="font-bold text-primary">{{ orderData.shippingFirstName }} {{ orderData.shippingLastName }}</p>
+            <p class="leading-relaxed">
+              {{ orderData.shippingAddress }}<br/>
+              {{ orderData.shippingCity }}@if (orderData.shippingState) { , {{ orderData.shippingState }} }<br/>
+              {{ orderData.shippingZipCode }}<br/>
+              Phone: {{ orderData.shippingPhone }}
+            </p>
+          </div>
+        } @else {
+          <div class="text-on-surface-variant text-sm">
+            <p>{{ loading ? 'Loading shipping details...' : 'Shipping details not available yet.' }}</p>
+          </div>
+        }
+      </article>
+
+      <article class="card summary-card">
+        <h3 class="card-label">Order Items</h3>
+        @if (orderData) {
+          @if (orderData.items && orderData.items.length > 0) {
+            <ul class="space-y-3">
+              @for (item of orderData.items; track item.productId) {
+                <li class="summary-item-row">
+                  <div>
+                    <p class="font-medium text-primary">{{ item.productName }}</p>
+                    <p class="text-xs text-on-surface-variant">Qty: {{ item.quantity }}</p>
+                  </div>
+                  <p class="font-medium text-primary">{{ item.subTotal | currency }}</p>
+                </li>
+              }
+              <li class="summary-total border-t pt-2 mt-2">
+                <span>Total</span>
+                <strong class="text-lg">{{ orderData.totalAmount | currency }}</strong>
+              </li>
+            </ul>
+          } @else {
+            <p class="text-on-surface-variant text-sm">No items in order.</p>
+          }
+        } @else {
+          <p class="text-on-surface-variant text-sm">{{ loading ? 'Loading order items...' : 'Order items not available yet.' }}</p>
+        }
+      </article>
+
+      <article class="card status-card">
+        <h3 class="card-label">Payment & Status</h3>
+        <ul class="space-y-3">
+          <li class="summary-row">
+            <span>Status</span>
+            <strong>
+              @if (loading || !orderData) {
+                Pending
+              } @else {
+                @switch (orderData.status) {
+                  @case (OrderStatus.Pending) { Pending }
+                  @case (OrderStatus.Paid) { Paid }
+                  @case (OrderStatus.Shipped) { Shipped }
+                  @case (OrderStatus.Delivered) { Delivered }
+                  @case (OrderStatus.Cancelled) { Cancelled }
+                  @default { Pending }
+                }
+              }
+            </strong>
+          </li>
+          <li class="summary-row">
+            <span>Next Step</span>
+            <strong>
+              @if (loading || !orderData) {
+                Confirming payment
+              } @else {
+                @switch (orderData.status) {
+                  @case (OrderStatus.Pending) { Confirming payment }
+                  @case (OrderStatus.Paid) { Packing & dispatch }
+                  @case (OrderStatus.Shipped) { In transit }
+                  @case (OrderStatus.Delivered) { Completed }
+                  @default { Confirming payment }
+                }
+              }
+            </strong>
+          </li>
+          <li class="summary-row">
+            <span>Support Ref</span>
+            <strong>#{{ orderId || '----' }}</strong>
+          </li>
+        </ul>
+      </article>
+
+      <article class="card cta-card md:col-span-2">
+        <div>
+          <h3>What's next?</h3>
+          <p>Follow your shipment progress or continue exploring new architectural arrivals.</p>
+        </div>
+        <div class="cta-actions">
+          <a routerLink="/checkout" class="btn-teal">View Order History</a>
+          <a routerLink="/shop" class="btn-glass">Continue Shopping</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="suggestions">
+      <div class="suggestions-head">
+        <h2>You Might Also Appreciate</h2>
+        <span class="bar"></span>
+      </div>
+
+      <div class="suggestions-grid">
+        <article class="suggestion-item">
+          <div class="thumb">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-nAUI7IwA_q2Hc9hNEKww4GEPjGVD-SnCLXyvbpgMqJH0vQ_4aAxRhpMtimEFRIgzj7txM1Zh1ho7ARTRqCgsU1aXbfgDvZ_3o66uuY56Ox0OGMFDgB8lX9zsjSvSRRFLo33B9g9II6g4MZyBSiONtszHVGAIDBZKvnxvuodga5sGQbvjJ6znbp-eGjKeGm8VEhNdXI-CZ84Pym7fjGFjCKlUIvGLAGzxh4SBMU8-6B3_rXN_zRLsClVF3n65lD47jHxJEM-YemA" alt="Monolith Sculpture" loading="lazy" />
+          </div>
+          <h4>Monolith Sculpture</h4>
+          <p>Limited Edition</p>
+        </article>
+
+        <article class="suggestion-item">
+          <div class="thumb">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1ELT5sduNbMKvzJuOPoZZZQBDz6ZLqnFs3m4NV0gNwsVlfVC5bQQHrwIwpRLPPwC9mCj-xd2s1HyRcRxZ92hIPbKJTwAz0bZWmO4fg0I2ziPyl9V2cFJjRBQNNNYiFTCEmaw4OY6S2B3CFVIrSortXeq1lEvV5CozqeBGU9udXZhQM0EwE-AmO2Kpidk03NAYXn9gdQE-fBSCe3HwXFoJLJNUUXF3VEubFlpMAQ7vCtFcA9HBdqAsx3Z-Gj03XjOGUA-tROC7T3I" alt="Articulated Brass Lamp" loading="lazy" />
+          </div>
+          <h4>Articulated Brass Lamp</h4>
+          <p>Lighting</p>
+        </article>
+
+        <article class="suggestion-item">
+          <div class="thumb">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwf6ehToz3ZSRxT1SvWjLS7oHlFFlrbshPN2wK0YvFdKwvmgNjBcPx0s8TvxcVDeUlzk_8NyF9ezGwHcB2EKL8FlicPa2lcrgN3pGcgIPu_N1PSITvRPhKP5y4usBTYoJuyG44piyZTqsU9DglEioshSXNMsKLaTUyfu5Fcr0Q3XzYUH1xuZhXF55qjEgbOz2zQcAfDEXTSsC4KFZN5ZbJz_d0N8KuBOIC68zKF-VVj-32c2SfKMsPsZvAyTtzp8vhVJoGJf16a5Q" alt="Texture Study 04" loading="lazy" />
+          </div>
+          <h4>Texture Study 04</h4>
+          <p>Fine Art</p>
+        </article>
+
+        <article class="suggestion-item">
+          <div class="thumb">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQkaPmF2Ll_p_S87Gq0X7jTlUY19n_dV1-cVRW0qg9szda_9EaMWqH5ZcrgZftPhqqMfBOrgYGCBFjrt-GLwmJ5pCGBd8VN7kjnpBFHcoUNEsiaGQQDwfu35M4EvTBLlHR16ZOgolq0fuMmE8L-_DhwrTGgoWz3UpTQ7wqxvkOZIiw7iYNnXALPAlENAvyTyk_RBdLC4Q4DS2BYu5RZSpMqXZNOCKK_UAxATeCYmRWsi-3GAFcf3wwoWXTUmFt2cFMrDQsoyL0Es4" alt="Obsidian Lounge Chair" loading="lazy" />
+          </div>
+          <h4>Obsidian Lounge Chair</h4>
+          <p>Furniture</p>
+        </article>
+      </div>
+    </section>
   </div>
-</div>
+</main>
