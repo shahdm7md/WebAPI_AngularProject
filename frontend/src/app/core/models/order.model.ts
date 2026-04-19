@@ -77,8 +77,16 @@ export interface OrderResponse {
   shippingState: string;
   shippingZipCode: string;
   appliedCouponCode?: string;
-  status: OrderStatus;
+  status: OrderStatus | number;
   createdAt: string;
   items: OrderItemResponse[];
   payment: PaymentResponse | null;
 }
+export interface OrderHistory {
+  id: number;
+  createdAt: Date;
+  totalAmount: number;
+  status: string;
+  itemCount: number;
+}
+

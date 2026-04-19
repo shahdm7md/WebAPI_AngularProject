@@ -1,6 +1,8 @@
 ﻿using API.Contracts.Admin;
+using Core.Interfaces;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using SharedKernel.Enums;
 using System.Text;
 namespace API.Services
 {
@@ -8,7 +10,11 @@ namespace API.Services
     {
         private readonly AppDbContext _context;
 
-        public AdminProductService(AppDbContext context) => _context = context;
+        public AdminProductService(AppDbContext context)
+        {
+            _context = context;        
+        }
+        
 
         public async Task<PaginatedResponse<AdminProductResponse>> GetAllProductsAsync(
             string? sellerId, int page, int pageSize)
@@ -85,8 +91,14 @@ namespace API.Services
     public sealed class AdminOrderService : IAdminOrderService
     {
         private readonly AppDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public AdminOrderService(AppDbContext context) => _context = context;
+
+        public AdminOrderService(AppDbContext context , IEmailService emailService)
+        {
+            _context = context;
+            _emailService = emailService;
+        }
 
         public async Task<PaginatedResponse<AdminOrderResponse>> GetAllOrdersAsync(
             string? status, int page, int pageSize)
@@ -130,25 +142,66 @@ namespace API.Services
             });
         }
 
-        public async Task<UpdateOrderStatusResult> UpdateOrderStatusAsync(int orderId, string status)
+        public async Task<UpdateOrderStatusResult> UpdateOrderStatusAsync(int orderId, OrderStatus status)
         {
-            // uncomment لما Dev 3 يخلص:
-            // var order = await _context.Orders.FindAsync(orderId);
-            // if (order is null)
-            //     return new UpdateOrderStatusResult
-            //     {
-            //         Success = false, StatusCode = 404, Message = "Order not found."
-            //     };
-            // order.Status = status;
-            // await _context.SaveChangesAsync();
-            // return new UpdateOrderStatusResult { Success = true, StatusCode = 200, Message = "Status updated." };
+            // 1. هاتي الـ Order مع اليوزر (بإستخدام Include) عشان الإيميل
+            var order = await _context.Orders
+                .Include(o => o.User)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
 
-            return await Task.FromResult(new UpdateOrderStatusResult
+            if (order is null)
+            {
+                return new UpdateOrderStatusResult
+                {
+                    Success = false,
+                    StatusCode = 404,
+                    Message = "Order not found."
+                };
+            }
+
+            // 2. تحديث الحالة
+            order.Status = status;
+            var result = await _context.SaveChangesAsync();
+
+            if (result > 0)
+            {
+                // 3. منطق إرسال الإيميل (SendGrid)
+                if (order.User != null && !string.IsNullOrEmpty(order.User.Email))
+                {
+                    string subject = "Order Status Updated";
+                    string message = status switch
+                    {
+                        OrderStatus.Shipped => $"Good news! Your order #{orderId} is on its way. It has been shipped!",
+                        OrderStatus.Delivered => $"Your order #{orderId} has been delivered. We hope you enjoy your flowers!",
+                        OrderStatus.Cancelled => $"We are sorry to inform you that your order #{orderId} has been cancelled.",
+                        _ => $"The status of your order #{orderId} has been updated to {status}."
+                    };
+
+                    try
+                    {
+                        await _emailService.SendEmailAsync(order.User.Email, subject, message);
+                    }
+                    catch (Exception ex)
+                    {
+                        // بنعمل Log للخطأ بس مش بنوقف الـ API
+                        Console.WriteLine($"SendGrid Error: {ex.Message}");
+                    }
+                }
+
+                return new UpdateOrderStatusResult
+                {
+                    Success = true,
+                    StatusCode = 200,
+                    Message = "Status updated and email sent successfully."
+                };
+            }
+
+            return new UpdateOrderStatusResult
             {
                 Success = false,
-                StatusCode = StatusCodes.Status503ServiceUnavailable,
-                Message = "Orders module not ready yet."
-            });
+                StatusCode = 400,
+                Message = "Failed to update status in database."
+            };
         }
 
         public async Task<byte[]> ExportOrdersCsvAsync()

@@ -1,32 +1,32 @@
 // import { Component, OnInit, inject } from '@angular/core';
 // import { CommonModule } from '@angular/common';
-// import { ProductService } from '../services/product.service'; 
+// import { ProductService } from '../services/product.service';
 // import { RouterModule } from '@angular/router';
 
 // @Component({
 //   selector: 'app-product-list',
 //   standalone: true,
 //  imports: [CommonModule, RouterModule],
- 
+
 //   templateUrl: './product-list.html',
 //   styleUrls: ['./product-list.css']
 // })
 // export class ProductListComponent implements OnInit {
 //   private productService = inject(ProductService);
-  
+
 //   products: any[] = [];
-//   readonly imageBaseUrl = 'http://localhost:5199/'; 
+//   readonly imageBaseUrl = 'http://localhost:5199/';
 
 //   ngOnInit() {
 //     this.productService.getProducts().subscribe({
-     
+
 //       next: (res: any) => {
 //         console.log('API Response:', res);
-//         this.products = res.data; 
+//         this.products = res.data;
 //       },
-     
+
 //       error: (err: any) =>{ console.error('API Error:', err);}
-      
+
 //     });
 //   }
 // }
@@ -36,7 +36,7 @@
 
 // import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 // import { CommonModule } from '@angular/common';
-// import { ProductService } from '../services/product.service'; 
+// import { ProductService } from '../services/product.service';
 // import { RouterModule } from '@angular/router';
 
 // @Component({
@@ -49,26 +49,26 @@
 // export class ProductListComponent implements OnInit {
 //   private productService = inject(ProductService);
 //   // ضفنا السطر ده عشان نجبر الأنجلر يحدث الشاشة أول ما الداتا تيجي
-//   private cdr = inject(ChangeDetectorRef); 
-  
+//   private cdr = inject(ChangeDetectorRef);
+
 //   products: any[] = [];
-//   readonly imageBaseUrl = 'http://localhost:5199/'; 
+//   readonly imageBaseUrl = 'http://localhost:5199/';
 
 //   ngOnInit() {
 //     this.productService.getProducts().subscribe({
 //       next: (res: any) => {
 //         console.log('API Response:', res);
-        
+
 //         // هنا بناخد الداتا ونحطها في نسخة جديدة عشان الأنجلر يحس بيها فوراً
-//         this.products = res.data ? [...res.data] : []; 
-        
+//         this.products = res.data ? [...res.data] : [];
+
 //         // بنقول للأنجلر: "الداتا وصلت، حدث الشاشة فوراً!"
-//         this.cdr.detectChanges(); 
+//         this.cdr.detectChanges();
 //       },
 //       error: (err: any) => {
 //         console.error('API Error:', err);
 //       },
-      
+
 
 //     });
 //   }
@@ -79,7 +79,7 @@
 
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProductService } from '../services/product.service'; 
+import { ProductService } from '../services/product.service';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -91,18 +91,18 @@ import { RouterModule } from '@angular/router';
 })
 export class ProductListComponent implements OnInit {
   private productService = inject(ProductService);
-  private cdr = inject(ChangeDetectorRef); 
-  
+  private cdr = inject(ChangeDetectorRef);
+
   products: any[] = [];
   // شيلنا السلاش (/) اللي في الآخر عشان الباك إند بيبعتها في أول المسار
-  readonly imageBaseUrl = 'http://localhost:5199/'; 
+  readonly imageBaseUrl = 'http://localhost:44395/';
 
   ngOnInit() {
     this.productService.getProducts().subscribe({
       next: (res: any) => {
         console.log('API Response:', res);
-        this.products = res.data ? [...res.data] : []; 
-        this.cdr.detectChanges(); 
+        this.products = res.data ? [...res.data] : [];
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         console.error('API Error:', err);

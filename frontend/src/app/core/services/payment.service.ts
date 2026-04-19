@@ -10,8 +10,7 @@ export interface StripeSessionResponse {
 
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
-  private readonly baseUrl = `${DEFAULT_API_BASE_URL}/api/payment`;
-
+private readonly baseUrl = 'https://localhost:44395/api/payment';
   constructor(private http: HttpClient) {}
 
   createStripeSession(orderId: number): Observable<StripeSessionResponse> {

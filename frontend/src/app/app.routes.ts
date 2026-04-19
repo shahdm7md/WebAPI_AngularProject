@@ -21,6 +21,7 @@ import { SellerOrdersComponent } from './features/seller-panel/order-management/
 import { SellerProductsComponent } from './features/seller-panel/product-management/product-management';
 // import { SettingsComponent } from './features/seller-panel/store-settings/store-settings';
 import { SellerOverviewComponent } from './features/seller-panel/seller-overview/seller-overview';
+import { OrderHistoryComponent } from './features/order-history/order-history/order-history';
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   {
@@ -113,7 +114,7 @@ export const routes: Routes = [
   { path: 'Admin/orders', redirectTo: 'admin/orders', pathMatch: 'full' },
   { path: 'Admin/coupons', redirectTo: 'admin/coupons', pathMatch: 'full' },
   { path: 'Admin/banners', redirectTo: 'admin/banners', pathMatch: 'full' },
-  
+
   // Cart & Checkout
   {
     path: 'cart',
@@ -146,6 +147,10 @@ export const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['Customer'] }
   },
-
+{
+    path: 'my-orders',
+    loadComponent: () =>
+      import('./features/order-history/order-history/order-history').then(m => m.OrderHistoryComponent)
+  },
   { path: '**', redirectTo: '' },
 ];

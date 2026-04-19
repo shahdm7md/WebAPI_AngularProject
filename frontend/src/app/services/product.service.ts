@@ -40,7 +40,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 })
 export class ProductService {
   private http = inject(HttpClient);
-  private baseUrl = 'http://localhost:5199/api/';
+  private baseUrl = 'http://localhost:44395/api/';
 
   private getAuthHeaders() {
     const token = localStorage.getItem('auth_token');

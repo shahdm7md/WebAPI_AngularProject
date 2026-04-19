@@ -24,7 +24,7 @@ export class ProductDetailsComponent {
   private readonly cartService = inject(CartService);
   private readonly wishlistService = inject(WishlistService);
 
-  protected readonly imageBaseUrl = 'http://localhost:5199';
+  protected readonly imageBaseUrl = 'http://localhost:44395';
 
   protected loading = false;
   protected savingReview = false;

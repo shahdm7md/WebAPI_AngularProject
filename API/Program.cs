@@ -50,6 +50,8 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IBannerService, BannerService>();
 builder.Services.AddScoped<ISellerService, SellerService>();
 builder.Services.AddScoped<ISellerRepository, SellerRepository>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IOrderHistoryService, OrderHistoryService>();
 builder.Services.AddSingleton<IFileStorageService>(_ =>
     new LocalFileStorageService(
         rootPath: builder.Environment.WebRootPath,

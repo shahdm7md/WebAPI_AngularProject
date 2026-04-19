@@ -1,4 +1,6 @@
-﻿namespace API.Contracts.Admin
+﻿using SharedKernel.Enums;
+
+namespace API.Contracts.Admin
 {
     public sealed class AdminOrderResponse
     {
@@ -6,7 +8,7 @@
         public string CustomerName { get; init; } = string.Empty;
         public string CustomerEmail { get; init; } = string.Empty;
         public decimal TotalAmount { get; init; }
-        public string Status { get; init; } = string.Empty;
+        public OrderStatus Status { get; init; } 
         public string PaymentMethod { get; init; } = string.Empty;
         public DateTime CreatedAt { get; init; }
     }

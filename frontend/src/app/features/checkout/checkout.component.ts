@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { CheckoutService } from '../../core/services/checkout.service';
 import { CartService } from '../../core/services/cart.service';
 import { PaymentService } from '../../core/services/payment.service';
-import { OrderResponse, PaymentMethod, CheckoutRequest, Governorate, CouponValidationResponse } from '../../core/models/order.model';
+import { OrderResponse, PaymentMethod, CheckoutRequest, Governorate, CouponValidationResponse, OrderStatus } from '../../core/models/order.model';
 import { CartResponse } from '../../core/models/cart.model';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 
@@ -27,7 +27,7 @@ export class CheckoutComponent implements OnInit {
   loading = false;
   submitting = false;
   error: string | null = null;
-  private readonly imageBaseUrl = 'http://localhost:5199';
+  private readonly imageBaseUrl = 'http://localhost:44395';
   PaymentMethod = PaymentMethod;
 
   paymentMethods = [
@@ -133,7 +133,7 @@ export class CheckoutComponent implements OnInit {
       shippingCity: '',
       shippingState: '',
       shippingZipCode: '',
-      status: 1,
+      status: OrderStatus.Pending,
       createdAt: new Date().toISOString(),
       items: cart.items.map(item => ({
         productId: item.productId,
