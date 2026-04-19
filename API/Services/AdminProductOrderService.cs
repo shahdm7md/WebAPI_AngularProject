@@ -135,7 +135,7 @@ namespace API.Services
                 CustomerName = o.User?.FullName ?? "Guest",
                 CustomerEmail = o.User?.Email ?? "N/A",
                 TotalAmount = o.TotalAmount,
-                Status = ((int)o.Status).ToString(),
+                Status = o.Status,
                 CreatedAt = o.CreatedAt
             }).ToList();
 

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -27,7 +27,7 @@ export class HomeComponent {
   protected error = '';
   protected notice = '';
   protected readonly wishlistIds = new Set<number>();
-  protected readonly imageBaseUrl = 'http://localhost:44395';
+  protected readonly imageBaseUrl = 'http://localhost:5199';
 
   ngOnInit(): void {
     this.loadStorefront();
@@ -138,3 +138,4 @@ export class HomeComponent {
     this.router.navigateByUrl('/auth/login');
   }
 }
+

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -20,7 +20,7 @@ export class ShopComponent {
   private readonly cartService = inject(CartService);
   private readonly wishlistService = inject(WishlistService);
 
-  protected readonly imageBaseUrl = 'http://localhost:44395';
+  protected readonly imageBaseUrl = 'http://localhost:5199';
 
   protected loading = false;
   protected error = '';
@@ -256,3 +256,4 @@ export class ShopComponent {
     return Array.from({ length: 5 }, (_, index) => (index < normalized ? 'full' : 'empty'));
   }
 }
+

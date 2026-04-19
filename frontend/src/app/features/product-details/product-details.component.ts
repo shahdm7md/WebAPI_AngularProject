@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -24,7 +24,7 @@ export class ProductDetailsComponent {
   private readonly cartService = inject(CartService);
   private readonly wishlistService = inject(WishlistService);
 
-  protected readonly imageBaseUrl = 'http://localhost:44395';
+  protected readonly imageBaseUrl = 'http://localhost:5199';
 
   protected loading = false;
   protected savingReview = false;
@@ -233,3 +233,4 @@ export class ProductDetailsComponent {
     return `${this.product.stockQuantity} left`;
   }
 }
+

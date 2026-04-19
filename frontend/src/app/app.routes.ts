@@ -22,7 +22,6 @@ import { SellerOrdersComponent } from './features/seller-panel/order-management/
 import { SellerProductsComponent } from './features/seller-panel/product-management/product-management';
 // import { SettingsComponent } from './features/seller-panel/store-settings/store-settings';
 import { SellerOverviewComponent } from './features/seller-panel/seller-overview/seller-overview';
-import { OrderHistoryComponent } from './features/order-history/order-history/order-history';
 export const routes: Routes = [
   { path: '', component: HomeComponent, canActivate: [RoleLandingGuard] },
   {
@@ -179,10 +178,11 @@ export const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['Customer'] }
   },
-{
+  {
     path: 'my-orders',
     loadComponent: () =>
-      import('./features/order-history/order-history/order-history').then(m => m.OrderHistoryComponent)
+      import('./features/order-history/order-history/order-history').then(m => m.OrderHistoryComponent),
+    canActivate: [AuthGuard]
   },
   { path: '**', redirectTo: '' },
 ];

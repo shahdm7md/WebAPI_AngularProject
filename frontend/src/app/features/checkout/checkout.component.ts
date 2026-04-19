@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { CheckoutService } from '../../core/services/checkout.service';
 import { CartService } from '../../core/services/cart.service';
 import { PaymentService } from '../../core/services/payment.service';
-import { OrderResponse, PaymentMethod, CheckoutRequest, Governorate, CouponValidationResponse, OrderStatus } from '../../core/models/order.model';
 import {
   OrderResponse, PaymentMethod, CheckoutRequest,
   Governorate, CouponValidationResponse, OrderStatus, PaymentStatus

@@ -1,4 +1,4 @@
-// import { HttpClient } from '@angular/common/http';
+﻿// import { HttpClient } from '@angular/common/http';
 // import { Injectable, inject } from '@angular/core';
 
 // @Injectable({
@@ -6,14 +6,13 @@
 // })
 // export class ProductService {
 //   private http = inject(HttpClient);
-//   private baseUrl = 'http://localhost:5199/api/'; // تأكدي من البورت بتاع الباك إند
+//   private baseUrl = 'http://localhost:5199/api/'; 
 
-//   // دالة جلب المنتجات
 //   getProducts() {
 //     return this.http.get<any>(this.baseUrl + 'Products');
 //   }
 
-//   // دالة جلب الأقسام
+
 //   getCategories() {
 //     return this.http.get<any>(this.baseUrl + 'Categories');
 //   }
@@ -21,12 +20,12 @@
 //   addProduct(formData: FormData) {
 //     return this.http.post<any>(this.baseUrl + 'Products', formData);
 //   }
-//   // 1. دالة بتجيب بيانات منتج واحد بس بناءً على الـ ID بتاعه
+//  
 //   getProductById(id: number) {
 //     return this.http.get(`${this.baseUrl}Products/${id}`);
 //   }
 
-//   // 2. دالة بتبعت البيانات الجديدة للباك إند عشان يحفظ التعديل (هنحتاجها في زرار الحفظ)
+//   
 //   updateProduct(id: number, productData: any) {
 //     return this.http.put(`${this.baseUrl}Products/${id}`, productData);
 //   }
@@ -40,7 +39,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 })
 export class ProductService {
   private http = inject(HttpClient);
-  private baseUrl = 'http://localhost:44395/api/';
+  private baseUrl = 'http://localhost:5199/api/';
 
   private getAuthHeaders() {
     const token = localStorage.getItem('auth_token');
@@ -69,11 +68,11 @@ export class ProductService {
   }
 
   updateProduct(id: number, data: any) {
-    // استخدمنا PUT بناءً على كود الباك إند بتاعك
-    return this.http.put(`${this.baseUrl}Products/${id}`, data, this.getAuthHeaders());
+     return this.http.put(`${this.baseUrl}Products/${id}`, data, this.getAuthHeaders());
   }
 
   deleteProduct(id: number) {
     return this.http.delete(`${this.baseUrl}Products/${id}`, this.getAuthHeaders());
   }
 }
+

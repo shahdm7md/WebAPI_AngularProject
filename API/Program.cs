@@ -130,12 +130,10 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseCors("AngularClient");
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.UseStaticFiles();
 
 
 app.Run();

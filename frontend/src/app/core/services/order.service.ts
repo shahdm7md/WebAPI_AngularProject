@@ -1,13 +1,13 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { OrderHistory, OrderItemResponse, OrderResponse } from '../models/order.model'; // استيراد الموديل
+import { OrderHistory, OrderItemResponse, OrderResponse } from '../models/order.model'; // Ø§Ø³ØªÙŠØ±Ø§Ø¯ Ø§Ù„Ù…ÙˆØ¯ÙŠÙ„
 @Injectable({
   providedIn: 'root',
 })
 export class OrderService
 {
-  private apiUrl = 'https://localhost:44395/api/orders';
+  private apiUrl = 'http://localhost:5199/api/orders';
 
   constructor(private http: HttpClient) { }
 
@@ -16,3 +16,4 @@ export class OrderService
   }
   
 }
+

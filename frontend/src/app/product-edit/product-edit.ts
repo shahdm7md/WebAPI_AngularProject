@@ -1,4 +1,4 @@
-// // import { Component, OnInit, inject } from '@angular/core';
+﻿// // import { Component, OnInit, inject } from '@angular/core';
 // // import { CommonModule } from '@angular/common';
 // // import { FormsModule } from '@angular/forms';
 // // import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -55,28 +55,28 @@
 // })
 // export class ProductEditComponent implements OnInit {
 //   private productService = inject(ProductService);
-//   private route = inject(ActivatedRoute); // عشان نقرأ الرابط
-//   private router = inject(Router); // عشان نرجع لصفحة المنتجات بعد الحفظ
+//   private route = inject(ActivatedRoute); // Ø¹Ø´Ø§Ù† Ù†Ù‚Ø±Ø£ Ø§Ù„Ø±Ø§Ø¨Ø·
+//   private router = inject(Router); // Ø¹Ø´Ø§Ù† Ù†Ø±Ø¬Ø¹ Ù„ØµÙØ­Ø© Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª Ø¨Ø¹Ø¯ Ø§Ù„Ø­ÙØ¸
 
 //   product: any = {};
 //   categories: any[] = [];
 //   readonly imageBaseUrl = 'http://localhost:5199/';
 
 //   ngOnInit() {
-//     // 1. جلب الأقسام (بدون .data زي ما اتفقنا)
+//     // 1. Ø¬Ù„Ø¨ Ø§Ù„Ø£Ù‚Ø³Ø§Ù… (Ø¨Ø¯ÙˆÙ† .data Ø²ÙŠ Ù…Ø§ Ø§ØªÙÙ‚Ù†Ø§)
 //     this.productService.getCategories().subscribe((res: any) => {
 //       this.categories = res;
 //     });
 
-//     // 2. قراءة الـ ID من الرابط، وبعدين نطلب بياناته من الباك إند
+//     // 2. Ù‚Ø±Ø§Ø¡Ø© Ø§Ù„Ù€ ID Ù…Ù† Ø§Ù„Ø±Ø§Ø¨Ø·ØŒ ÙˆØ¨Ø¹Ø¯ÙŠÙ† Ù†Ø·Ù„Ø¨ Ø¨ÙŠØ§Ù†Ø§ØªÙ‡ Ù…Ù† Ø§Ù„Ø¨Ø§Ùƒ Ø¥Ù†Ø¯
 //     this.route.paramMap.subscribe(params => {
 //       const id = params.get('id');
 //       if (id) {
-//         // تأكدي إن عندك دالة getProductById في الـ ProductService
+//         // ØªØ£ÙƒØ¯ÙŠ Ø¥Ù† Ø¹Ù†Ø¯Ùƒ Ø¯Ø§Ù„Ø© getProductById ÙÙŠ Ø§Ù„Ù€ ProductService
 //         this.productService.getProductById(Number(id)).subscribe({
 //           next: (res: any) => {
 //             console.log('Product loaded:', res);
-//             // لو الباك إند بيبعت المنتج جوه data، خليها res.data .. لو بيبعته مباشر خليها res
+//             // Ù„Ùˆ Ø§Ù„Ø¨Ø§Ùƒ Ø¥Ù†Ø¯ Ø¨ÙŠØ¨Ø¹Øª Ø§Ù„Ù…Ù†ØªØ¬ Ø¬ÙˆÙ‡ dataØŒ Ø®Ù„ÙŠÙ‡Ø§ res.data .. Ù„Ùˆ Ø¨ÙŠØ¨Ø¹ØªÙ‡ Ù…Ø¨Ø§Ø´Ø± Ø®Ù„ÙŠÙ‡Ø§ res
 //             this.product = res.data ? res.data : res;
 //           },
 //           error: (err: any) => console.error('Error loading product', err)
@@ -86,17 +86,17 @@
 //   }
 
 //  saveChanges() {
-//     // هنتأكد إن الـ ID موجود
+//     // Ù‡Ù†ØªØ£ÙƒØ¯ Ø¥Ù† Ø§Ù„Ù€ ID Ù…ÙˆØ¬ÙˆØ¯
 //     if (this.product.id) {
 //       this.productService.updateProduct(this.product.id, this.product).subscribe({
 //         next: (res: any) => {
-//           alert('Done! 🚀');
-//           // بعد ما يحفظ، يرجعنا أوتوماتيك لصفحة عرض المنتجات
+//           alert('Done! ðŸš€');
+//           // Ø¨Ø¹Ø¯ Ù…Ø§ ÙŠØ­ÙØ¸ØŒ ÙŠØ±Ø¬Ø¹Ù†Ø§ Ø£ÙˆØªÙˆÙ…Ø§ØªÙŠÙƒ Ù„ØµÙØ­Ø© Ø¹Ø±Ø¶ Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª
 //           this.router.navigate(['/products']);
 //         },
 //         error: (err: any) => {
 //           console.error('Error updating product:', err);
-//           alert('حصلت مشكلة أثناء التعديل، راجعي الكونسول.');
+//           alert('Ø­ØµÙ„Øª Ù…Ø´ÙƒÙ„Ø© Ø£Ø«Ù†Ø§Ø¡ Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ØŒ Ø±Ø§Ø¬Ø¹ÙŠ Ø§Ù„ÙƒÙˆÙ†Ø³ÙˆÙ„.');
 //         }
 //       });
 //     }
@@ -126,7 +126,7 @@
 //   private productService = inject(ProductService);
 //   private route = inject(ActivatedRoute);
 //   private router = inject(Router);
-//   private cdr = inject(ChangeDetectorRef); // ضفنا ده عشان نجبر الشاشة تتحدث فوراً
+//   private cdr = inject(ChangeDetectorRef); // Ø¶ÙÙ†Ø§ Ø¯Ù‡ Ø¹Ø´Ø§Ù† Ù†Ø¬Ø¨Ø± Ø§Ù„Ø´Ø§Ø´Ø© ØªØªØ­Ø¯Ø« ÙÙˆØ±Ø§Ù‹
 
 //   product: any = {};
 //   categories: any[] = [];
@@ -142,9 +142,9 @@
 //       if (id) {
 //         this.productService.getProductById(Number(id)).subscribe({
 //           next: (res: any) => {
-//             // لو الباك إند بيبعت الداتا المباشرة
+//             // Ù„Ùˆ Ø§Ù„Ø¨Ø§Ùƒ Ø¥Ù†Ø¯ Ø¨ÙŠØ¨Ø¹Øª Ø§Ù„Ø¯Ø§ØªØ§ Ø§Ù„Ù…Ø¨Ø§Ø´Ø±Ø©
 //             this.product = res;
-//             // نجبر الأنجلر يعرض الداتا فوراً
+//             // Ù†Ø¬Ø¨Ø± Ø§Ù„Ø£Ù†Ø¬Ù„Ø± ÙŠØ¹Ø±Ø¶ Ø§Ù„Ø¯Ø§ØªØ§ ÙÙˆØ±Ø§Ù‹
 //             this.cdr.detectChanges();
 //           },
 //           error: (err: any) => console.error('Error loading product', err)
@@ -155,23 +155,23 @@
 
 //   saveChanges() {
 //     if (this.product.id) {
-//       // الباك إند كان متوقع بيانات معينة للتعديل (CreateProductRequest)، هنبعتله الداتا نظيفة
+//       // Ø§Ù„Ø¨Ø§Ùƒ Ø¥Ù†Ø¯ ÙƒØ§Ù† Ù…ØªÙˆÙ‚Ø¹ Ø¨ÙŠØ§Ù†Ø§Øª Ù…Ø¹ÙŠÙ†Ø© Ù„Ù„ØªØ¹Ø¯ÙŠÙ„ (CreateProductRequest)ØŒ Ù‡Ù†Ø¨Ø¹ØªÙ„Ù‡ Ø§Ù„Ø¯Ø§ØªØ§ Ù†Ø¸ÙŠÙØ©
 //       const dataToUpdate = {
 //         name: this.product.name,
 //         description: this.product.description,
 //         price: this.product.price,
 //         stockQuantity: this.product.stockQuantity,
-//         categoryId: Number(this.product.categoryId) // تأكيد إنها رقم
+//         categoryId: Number(this.product.categoryId) // ØªØ£ÙƒÙŠØ¯ Ø¥Ù†Ù‡Ø§ Ø±Ù‚Ù…
 //       };
 
 //       this.productService.updateProduct(this.product.id, dataToUpdate).subscribe({
 //         next: (res: any) => {
-//           alert('تم التعديل بنجاح!');
+//           alert('ØªÙ… Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ Ø¨Ù†Ø¬Ø§Ø­!');
 //           this.router.navigate(['/products']);
 //         },
 //         error: (err: any) => {
 //           console.error('Error updating product:', err);
-//           alert('حصلت مشكلة أثناء التعديل (راجع الكونسول)');
+//           alert('Ø­ØµÙ„Øª Ù…Ø´ÙƒÙ„Ø© Ø£Ø«Ù†Ø§Ø¡ Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ (Ø±Ø§Ø¬Ø¹ Ø§Ù„ÙƒÙˆÙ†Ø³ÙˆÙ„)');
 //         }
 //       });
 //     }
@@ -199,11 +199,11 @@ export class ProductEditComponent implements OnInit {
   private productService = inject(ProductService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef); // 👈 ضفنا ده عشان الداتا تظهر فوراً
+  private cdr = inject(ChangeDetectorRef); // ðŸ‘ˆ Ø¶ÙÙ†Ø§ Ø¯Ù‡ Ø¹Ø´Ø§Ù† Ø§Ù„Ø¯Ø§ØªØ§ ØªØ¸Ù‡Ø± ÙÙˆØ±Ø§Ù‹
 
   product: any = {};
   categories: any[] = [];
-  readonly imageBaseUrl = 'http://localhost:44395/';
+  readonly imageBaseUrl = 'http://localhost:5199/';
 
   ngOnInit() {
     this.productService.getCategories().subscribe((res: any) => {
@@ -217,7 +217,7 @@ export class ProductEditComponent implements OnInit {
           next: (res: any) => {
             this.product = res.data ? res.data : res;
 
-            this.cdr.detectChanges(); // 👈 السطر ده هيخلي الداتا تظهر في الخانات أول ما تفتح الصفحة
+            this.cdr.detectChanges(); // ðŸ‘ˆ Ø§Ù„Ø³Ø·Ø± Ø¯Ù‡ Ù‡ÙŠØ®Ù„ÙŠ Ø§Ù„Ø¯Ø§ØªØ§ ØªØ¸Ù‡Ø± ÙÙŠ Ø§Ù„Ø®Ø§Ù†Ø§Øª Ø£ÙˆÙ„ Ù…Ø§ ØªÙØªØ­ Ø§Ù„ØµÙØ­Ø©
           },
           error: (err: any) => console.error('Error loading product', err)
         });
@@ -242,7 +242,7 @@ saveChanges() {
 
       this.productService.updateProduct(this.product.id, cleanDataToUpdate).subscribe({
         next: (res: any) => {
-          alert('Product updated successfully! 🚀');
+          alert('Product updated successfully! ðŸš€');
           // Navigate back to the products list
           this.router.navigate(['/products']);
         },
@@ -261,3 +261,4 @@ saveChanges() {
     }
   }
 }
+

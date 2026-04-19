@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -21,7 +21,7 @@ export class WishlistComponent implements OnInit {
   actionLoading = false;
   error = '';
   notice = '';
-  readonly imageBaseUrl = 'http://localhost:44395';
+  readonly imageBaseUrl = 'http://localhost:5199';
 
   constructor(
     private wishlistService: WishlistService,
@@ -148,3 +148,4 @@ export class WishlistComponent implements OnInit {
     return `${this.imageBaseUrl}${item.mainImageUrl}`;
   }
 }
+

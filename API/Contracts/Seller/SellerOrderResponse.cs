@@ -8,6 +8,7 @@
         public decimal TotalAmount { get; set; }
         public string Status { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public string? NotificationWarning { get; set; }
         public List<SellerOrderItemResponse> Items { get; set; } = new();
         public PaymentSummaryResponse? Payment { get; set; }
     }

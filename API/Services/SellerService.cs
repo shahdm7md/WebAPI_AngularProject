@@ -4,6 +4,7 @@ using Core.Entities;
 using Core.Interfaces;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
+using Microsoft.Extensions.Logging;
 using SharedKernel.Enums;
 
 namespace Application.Services;
@@ -13,12 +14,21 @@ public class SellerService : ISellerService
     private readonly ISellerRepository _sellerRepo;
     private readonly IFileStorageService _fileStorage;
     private readonly IEmailService _emailService;
+    private readonly IEmailSender _emailSender;
+    private readonly ILogger<SellerService> _logger;
 
-    public SellerService(ISellerRepository sellerRepo, IFileStorageService fileStorage , IEmailService emailService)
+    public SellerService(
+        ISellerRepository sellerRepo,
+        IFileStorageService fileStorage,
+        IEmailService emailService,
+        IEmailSender emailSender,
+        ILogger<SellerService> logger)
     {
         _sellerRepo = sellerRepo;
         _fileStorage = fileStorage;
         _emailService = emailService;
+        _emailSender = emailSender;
+        _logger = logger;
     }
 
     // ── Profile ───────────────────────────────────────────────────────────────
@@ -204,25 +214,68 @@ public class SellerService : ISellerService
         order.Status = newStatus;
         await _sellerRepo.UpdateOrderAsync(order);
 
-        // 3. إضافة جزء إرسال الإيميل
-        try
+        string? notificationWarning = null;
+        var userEmail = order.User?.Email;
+
+        if (string.IsNullOrWhiteSpace(userEmail))
         {
-            var userEmail = order.User?.Email;
+            notificationWarning = "Order status updated, but customer email is missing.";
+            _logger.LogWarning("Order {OrderId} status changed to {Status}, but customer email is missing.", orderId, newStatus);
+        }
+        else
+        {
+            string subject = $"Update for Order #{orderId}";
+            string body = GetEmailBodyForStatus(newStatus, orderId);
+            const int maxAttempts = 2;
+            var smtpSent = false;
 
-            if (!string.IsNullOrEmpty(userEmail))
+            for (var attempt = 1; attempt <= maxAttempts; attempt++)
             {
-                string subject = $"Update for Order #{orderId}";
-                string body = GetEmailBodyForStatus(newStatus, orderId);
+                try
+                {
+                    await _emailSender.SendAsync(userEmail, subject, body);
+                    _logger.LogInformation("Order status email sent via SMTP for order {OrderId} to {Email}", orderId, userEmail);
+                    smtpSent = true;
+                    notificationWarning = null;
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex,
+                        "Failed to send order status email via SMTP for order {OrderId} to {Email}. Attempt {Attempt}/{MaxAttempts}.",
+                        orderId, userEmail, attempt, maxAttempts);
+                }
+            }
 
-                await _emailService.SendEmailAsync(userEmail, subject, body);
+            if (!smtpSent)
+            {
+                for (var attempt = 1; attempt <= maxAttempts; attempt++)
+                {
+                    try
+                    {
+                        await _emailService.SendEmailAsync(userEmail, subject, body);
+                        _logger.LogInformation("Order status email accepted by SendGrid for order {OrderId} to {Email}", orderId, userEmail);
+                        notificationWarning = "Order status updated. Notification was accepted by SendGrid but may be delayed in delivery.";
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex,
+                            "Failed to send order status email via SendGrid for order {OrderId} to {Email}. Attempt {Attempt}/{MaxAttempts}.",
+                            orderId, userEmail, attempt, maxAttempts);
+
+                        if (attempt == maxAttempts)
+                        {
+                            notificationWarning = "Order status updated, but notification email could not be sent (SMTP and SendGrid failed).";
+                        }
+                    }
+                }
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Email failed to send: {ex.Message}");
-        }
 
-        return MapToOrderResponse(order, sellerId);
+        var response = MapToOrderResponse(order, sellerId);
+        response.NotificationWarning = notificationWarning;
+        return response;
     }
 
     private string GetEmailBodyForStatus(OrderStatus status, int orderId)

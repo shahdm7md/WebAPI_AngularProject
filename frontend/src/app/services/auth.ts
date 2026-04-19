@@ -1,11 +1,11 @@
-import { HttpClient } from '@angular/common/http';
+﻿import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'http://localhost:44395/api/Account/';
+  private baseUrl = 'http://localhost:5199/api/Account/';
 
   constructor(private http: HttpClient) { }
 
@@ -17,3 +17,4 @@ export class AuthService {
     return this.http.post(this.baseUrl + 'register', model);
   }
 }
+
