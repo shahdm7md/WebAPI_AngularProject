@@ -12,6 +12,15 @@ import { AdminService } from '../../../core/services/admin-api.service';
 
 type OrderStatus = 'All' | 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
 
+// ✅ C# OrderStatus enum — غيّر الأرقام لو الباك بتاعك مختلف
+const STATUS_MAP: Record<number, string> = {
+  0: 'Pending',
+  1: 'Processing',
+  2: 'Shipped',
+  3: 'Delivered',
+  4: 'Cancelled',
+};
+
 @Component({
   selector: 'app-manage-orders',
   standalone: true,
@@ -23,20 +32,16 @@ export class ManageOrdersComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly cdr          = inject(ChangeDetectorRef);
 
-  // ===== State =====
   isLoading      = false;
   actionLoading: Record<number, boolean> = {};
   successMessage = '';
   errorMessage   = '';
 
-  // ===== Data =====
   orders: AdminOrderResponse[] = [];
 
-  // ===== Filters =====
   searchTerm     = '';
   selectedStatus: OrderStatus = 'All';
 
-  // ===== Pagination =====
   currentPage = 1;
   pageSize    = 10;
   totalCount  = 0;
@@ -46,10 +51,7 @@ export class ManageOrdersComponent implements OnInit {
     'All', 'Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled',
   ];
 
-  // ===== Computed =====
-  get totalPages(): number {
-    return Math.ceil(this.totalCount / this.pageSize);
-  }
+  get totalPages(): number { return Math.ceil(this.totalCount / this.pageSize); }
 
   get pageNumbers(): number[] {
     const pages: number[] = [];
@@ -69,14 +71,13 @@ export class ManageOrdersComponent implements OnInit {
     );
   }
 
-  get pendingCount(): number  { return this.orders.filter(o => o.status === 'Pending').length; }
-  get deliveredCount(): number { return this.orders.filter(o => o.status === 'Delivered').length; }
-  get cancelledCount(): number { return this.orders.filter(o => o.status === 'Cancelled').length; }
+  get pendingCount(): number   { return this.orders.filter(o => this.resolveStatus(o.status) === 'Pending').length; }
+  get deliveredCount(): number { return this.orders.filter(o => this.resolveStatus(o.status) === 'Delivered').length; }
+  get cancelledCount(): number { return this.orders.filter(o => this.resolveStatus(o.status) === 'Cancelled').length; }
 
   navItems = [
     { icon: 'dashboard',     label: 'Dashboard', route: '/admin/dashboard', active: false },
     { icon: 'group',         label: 'Users',     route: '/admin/users',     active: false },
-    { icon: 'storefront',    label: 'Vendors',   route: '/admin/users',     active: false },
     { icon: 'inventory_2',   label: 'Products',  route: '/admin/products',  active: false },
     { icon: 'shopping_cart', label: 'Orders',    route: '/admin/orders',    active: true  },
     { icon: 'sell',          label: 'Coupons',   route: '/admin/coupons',   active: false },
@@ -84,43 +85,46 @@ export class ManageOrdersComponent implements OnInit {
     { icon: 'settings',      label: 'Settings',  route: '/admin/settings',  active: false },
   ];
 
-  ngOnInit(): void {
-    this.loadOrders();
-  }
+  ngOnInit(): void { 
+    console.log('Component Initialized');
+    this.loadOrders(); }
+// تأكدي إن الخريطة (Map) مطابقة للأرقام اللي في الداتا بيز عندك
+statusMap: Record<string, string> = {
+  'Pending': '0',
+  'Processing': '1',
+  'Shipped': '2',
+  'Delivered': '3',
+  'Cancelled': '4'
+};
 
-  // ===== Load =====
-  loadOrders(): void {
-    this.isLoading    = true;
-    this.errorMessage = '';
+loadOrders(): void {
+  this.isLoading = true;
+  
+  // بنجيب القيمة النصية للرقم من الخريطة
+  const statusToSend = this.selectedStatus === 'All' ? undefined : this.statusMap[this.selectedStatus];
 
-    const status = this.selectedStatus === 'All' ? undefined : this.selectedStatus;
+  this.adminService.getAllOrders(statusToSend, this.currentPage, this.pageSize).subscribe({
+    next: (res) => {
+      this.orders = res.data; // الداتا هتنزل هنا مظبوطة
+      this.totalCount = res.totalCount;
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    },
+    error: () => {
+      this.isLoading = false;
+    }
+  });
+}
 
-    this.adminService.getAllOrders(status, this.currentPage, this.pageSize).subscribe({
-      next: (res: PaginatedResponse<AdminOrderResponse>) => {
-        this.orders     = res.data;
-        this.totalCount = res.totalCount;
-        this.isLoading  = false;
-        this.cdr.detectChanges();
-      },
-      error: (err: unknown) => {
-        this.errorMessage = this.extractError(err, 'Failed to load orders.');
-        this.isLoading    = false;
-        this.cdr.detectChanges();
-      },
-    });
-  }
 
-  // ===== Filter by status tab =====
   setStatus(status: OrderStatus): void {
     this.selectedStatus = status;
     this.currentPage    = 1;
     this.loadOrders();
   }
 
-  // ===== Update Status =====
   updateStatus(orderId: number, newStatus: string): void {
     this.actionLoading[orderId] = true;
-
     this.adminService.updateOrderStatus(orderId, newStatus).subscribe({
       next: (res: UpdateOrderStatusResult) => {
         this.showSuccess(res.message || 'Order status updated.');
@@ -134,15 +138,22 @@ export class ManageOrdersComponent implements OnInit {
     });
   }
 
-  // ===== Pagination =====
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
     this.loadOrders();
   }
 
-  // ===== Helpers =====
-  getStatusClass(status: string): string {
+  // ✅ يتعامل مع رقم (0-4) أو string ('Pending'...)
+  resolveStatus(val: string | number): string {
+    if (typeof val === 'number') return STATUS_MAP[val] ?? 'Pending';
+    const n = Number(val);
+    if (!isNaN(n) && STATUS_MAP[n]) return STATUS_MAP[n];
+    return String(val);
+  }
+
+  getStatusClass(status: string | number): string {
+    const s = this.resolveStatus(status);
     const map: Record<string, string> = {
       Pending:    'status-pending',
       Processing: 'status-processing',
@@ -150,10 +161,11 @@ export class ManageOrdersComponent implements OnInit {
       Delivered:  'status-delivered',
       Cancelled:  'status-cancelled',
     };
-    return map[status] ?? 'status-pending';
+    return map[s] ?? 'status-pending';
   }
 
-  getNextStatuses(current: string): string[] {
+  getNextStatuses(current: string | number): string[] {
+    const s = this.resolveStatus(current);
     const flow: Record<string, string[]> = {
       Pending:    ['Processing', 'Cancelled'],
       Processing: ['Shipped',    'Cancelled'],
@@ -161,12 +173,10 @@ export class ManageOrdersComponent implements OnInit {
       Delivered:  [],
       Cancelled:  [],
     };
-    return flow[current] ?? [];
+    return flow[s] ?? [];
   }
 
-  isActionLoading(id: number): boolean {
-    return !!this.actionLoading[id];
-  }
+  isActionLoading(id: number): boolean { return !!this.actionLoading[id]; }
 
   private showSuccess(msg: string): void {
     this.successMessage = msg;
@@ -181,7 +191,7 @@ export class ManageOrdersComponent implements OnInit {
   private extractError(error: unknown, fallback: string): string {
     const e = error as { error?: unknown } | null;
     const p = e?.error;
-    if (typeof p === 'string' && p.trim().length > 0) return p;
+    if (typeof p === 'string' && p.trim()) return p;
     return fallback;
   }
 }

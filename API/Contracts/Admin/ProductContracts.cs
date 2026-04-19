@@ -8,6 +8,7 @@
         public int Stock { get; init; }
         public bool IsAvailable { get; init; }
         public bool IsActive { get; init; }
+        public string? MainImageUrl { get; init; }
         public string CategoryName { get; init; } = string.Empty;
         public string SellerName { get; init; } = string.Empty;
         public string SellerId { get; init; } = string.Empty;

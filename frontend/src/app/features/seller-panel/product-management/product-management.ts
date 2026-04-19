@@ -14,6 +14,7 @@ import {
   SellerService,
 } from '../../../core/services/seller.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { DEFAULT_API_BASE_URL } from '../../../core/config/api.config';
 
 @Component({
   selector: 'app-seller-products',
@@ -26,6 +27,7 @@ export class SellerProductsComponent implements OnInit {
   private readonly sellerService = inject(SellerService);
   private readonly authService   = inject(AuthService);
   private readonly cdr           = inject(ChangeDetectorRef);
+  private readonly imageBaseUrl  = DEFAULT_API_BASE_URL;
 
   loading       = true;
   sidebarOpen   = false;
@@ -114,6 +116,14 @@ export class SellerProductsComponent implements OnInit {
     if (qty === 0) return 'Out of Stock';
     if (qty <= 5)  return `Low Stock (${qty})`;
     return `In Stock (${qty})`;
+  }
+
+  getProductImageUrl(imagePath: string | null | undefined): string | null {
+    if (!imagePath) return null;
+
+    const p = imagePath.replace(/\\/g, '/');
+    if (p.startsWith('http://') || p.startsWith('https://')) return p;
+    return `${this.imageBaseUrl}${p.startsWith('/') ? p : `/${p}`}`;
   }
 
   getInitials(name: string): string {

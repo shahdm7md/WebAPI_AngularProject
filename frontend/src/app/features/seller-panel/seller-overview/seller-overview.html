@@ -17,7 +17,7 @@
       <p class="text-xs text-slate-500 truncate">{{ profile?.storeName || 'Loading...' }}</p>
     </div>
     <nav class="flex-1 space-y-1">
-      <a routerLink="/seller/overview" routerLinkActive="text-blue-700 font-bold bg-white shadow-sm"
+      <a routerLink="/seller/dashboard" routerLinkActive="text-blue-700 font-bold bg-white shadow-sm"
          class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-all">
         <span class="material-symbols-outlined">dashboard</span><span class="text-sm">Overview</span>
       </a>
@@ -36,6 +36,9 @@
       <a routerLink="/seller/settings" routerLinkActive="text-blue-700 font-bold bg-white shadow-sm"
          class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-all">
         <span class="material-symbols-outlined">settings</span><span class="text-sm">Settings</span>
+      </a>
+      <a routerLink="/" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-all">
+        <span class="material-symbols-outlined">home</span><span class="text-sm">Back to Homepage</span>
       </a>
     </nav>
     <div class="mt-auto pb-4">
@@ -190,10 +193,14 @@
 
   <!-- Bottom Nav Mobile -->
   <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 flex justify-around items-center py-2">
-    <a routerLink="/seller/overview" routerLinkActive="text-[#0045a3]"
+    <a routerLink="/seller/dashboard" routerLinkActive="text-[#0045a3]"
        class="flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1">
       <span class="material-symbols-outlined text-[22px]">dashboard</span>
       <span class="text-[10px] font-bold">Overview</span>
+    </a>
+    <a routerLink="/" class="flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1">
+      <span class="material-symbols-outlined text-[22px]">home</span>
+      <span class="text-[10px] font-bold">Home</span>
     </a>
     <a routerLink="/seller/products" routerLinkActive="text-[#0045a3]"
        class="flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1">

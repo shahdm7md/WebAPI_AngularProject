@@ -11,6 +11,7 @@ import {
   CreateProductRequest,
 } from '../../../core/models/admin.models';
 import { AdminService } from '../../../core/services/admin-api.service';
+import { DEFAULT_API_BASE_URL } from '../../../core/config/api.config';
 
 @Component({
   selector: 'app-manage-products',
@@ -21,6 +22,7 @@ import { AdminService } from '../../../core/services/admin-api.service';
 })
 export class ManageProductsComponent implements OnInit {
   private readonly adminService = inject(AdminService);
+  private readonly imageBaseUrl = DEFAULT_API_BASE_URL;
 
   // ===== State =====
   isLoading      = false;
@@ -211,15 +213,23 @@ private readonly cdr = inject(ChangeDetectorRef);
 
   // ===== Helpers =====
   getStockClass(product: AdminProductResponse): string {
-    if (!product.isAvailable || product.stock === 0) return 'stock-out';
+    if (product.stock <= 0) return 'stock-out';
     if (product.stock < 5) return 'stock-low';
     return 'stock-in';
   }
 
   getStockLabel(product: AdminProductResponse): string {
-    if (!product.isAvailable || product.stock === 0) return 'Out of Stock';
+    if (product.stock <= 0) return 'Out of Stock';
     if (product.stock < 5) return 'Low Stock';
     return 'In Stock';
+  }
+
+  getProductImageUrl(imagePath: string | null | undefined): string | null {
+    if (!imagePath) return null;
+
+    const p = imagePath.replace(/\\/g, '/');
+    if (p.startsWith('http://') || p.startsWith('https://')) return p;
+    return `${this.imageBaseUrl}${p.startsWith('/') ? p : `/${p}`}`;
   }
 
   isActionLoading(id: number): boolean {

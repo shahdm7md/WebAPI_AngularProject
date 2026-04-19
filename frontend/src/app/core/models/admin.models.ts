@@ -66,6 +66,7 @@ export interface AdminProductResponse {
   stock: number;
   isAvailable: boolean;
   isActive: boolean;
+  mainImageUrl?: string;
   categoryName: string;
   sellerName: string;
   sellerId: string;

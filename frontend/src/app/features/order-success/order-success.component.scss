@@ -263,65 +263,6 @@
   transform: translateY(-1px);
 }
 
-.suggestions-head h2 {
-  font-size: clamp(1.5rem, 2.5vw, 2rem);
-  line-height: 1.1;
-  text-transform: uppercase;
-  letter-spacing: -0.02em;
-  color: var(--color-primary);
-  font-weight: 900;
-}
-
-.suggestions-head .bar {
-  display: inline-block;
-  margin-top: 0.6rem;
-  width: 5.5rem;
-  height: 0.2rem;
-  border-radius: 9999px;
-  background: var(--color-secondary);
-}
-
-.suggestions-grid {
-  margin-top: 1.2rem;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.suggestion-item .thumb {
-  aspect-ratio: 4 / 5;
-  border-radius: 0.8rem;
-  overflow: hidden;
-  background: color-mix(in srgb, var(--color-surface-container-low) 82%, transparent);
-}
-
-.suggestion-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.45s ease;
-}
-
-.suggestion-item:hover img {
-  transform: scale(1.05);
-}
-
-.suggestion-item h4 {
-  margin-top: 0.6rem;
-  font-size: 0.97rem;
-  font-weight: 800;
-  color: var(--color-primary);
-}
-
-.suggestion-item p {
-  margin-top: 0.18rem;
-  font-size: 0.69rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--color-outline);
-  font-weight: 600;
-}
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -339,12 +280,6 @@
   }
 }
 
-@media (max-width: 1024px) {
-  .suggestions-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 900px) {
   .bento-grid {
     grid-template-columns: 1fr;
@@ -359,9 +294,5 @@
 @media (max-width: 640px) {
   .hero-title {
     font-size: 2rem;
-  }
-
-  .suggestions-grid {
-    grid-template-columns: 1fr;
   }
 }

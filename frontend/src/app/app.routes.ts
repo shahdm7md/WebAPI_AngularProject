@@ -12,6 +12,7 @@ import { ManageCouponsComponent } from './features/admin/manage-coupons/manage-c
 import { ManageBannersComponent } from './features/admin/manage-banners/manage-banners.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
+import { RoleLandingGuard } from './core/guards/role-landing.guard';
 
 import { ProductListComponent } from './product-list/product-list';
 import { ProductAddComponent } from './product-add/product-add';
@@ -22,7 +23,7 @@ import { SellerProductsComponent } from './features/seller-panel/product-managem
 // import { SettingsComponent } from './features/seller-panel/store-settings/store-settings';
 import { SellerOverviewComponent } from './features/seller-panel/seller-overview/seller-overview';
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
+  { path: '', component: HomeComponent, canActivate: [RoleLandingGuard] },
   {
     path: 'shop',
     loadComponent: () =>
@@ -61,9 +62,34 @@ export const routes: Routes = [
 
 
   // Seller Dashboard
-  { path: 'seller/dashboard', component: SellerOverviewComponent },
-  { path: 'seller/orders', component: SellerOrdersComponent },
-  { path: 'seller/products', component: SellerProductsComponent },
+  {
+    path: 'seller/dashboard',
+    component: SellerOverviewComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['Seller'] },
+  },
+  {
+    path: 'seller/overview',
+    redirectTo: 'seller/dashboard',
+    pathMatch: 'full',
+  },
+  {
+    path: 'seller/dashoard',
+    redirectTo: 'seller/dashboard',
+    pathMatch: 'full',
+  },
+  {
+    path: 'seller/orders',
+    component: SellerOrdersComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['Seller'] },
+  },
+  {
+    path: 'seller/products',
+    component: SellerProductsComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['Seller'] },
+  },
   // { path: 'seller/settings', component: SettingsComponent },
 
 

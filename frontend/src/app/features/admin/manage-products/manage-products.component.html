@@ -141,7 +141,11 @@
                 <td>
                   <div class="product-cell">
                     <div class="product-thumb">
-                      <span class="material-symbols-outlined">inventory_2</span>
+                      <img *ngIf="getProductImageUrl(product.mainImageUrl) as imageUrl"
+                           [src]="imageUrl"
+                           [alt]="product.name"
+                           class="w-full h-full object-cover" />
+                      <span *ngIf="!getProductImageUrl(product.mainImageUrl)" class="material-symbols-outlined">inventory_2</span>
                     </div>
                     <div>
                       <p class="product-name">{{ product.name }}</p>

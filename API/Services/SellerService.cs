@@ -73,6 +73,7 @@ public class SellerService : ISellerService
             Description   = request.Description,
             Price         = request.Price,
             StockQuantity = request.StockQuantity,
+            IsAvailable   = request.StockQuantity > 0,
             CategoryId    = request.CategoryId,
             SellerId      = sellerId
         };
@@ -104,6 +105,7 @@ public class SellerService : ISellerService
         product.Description   = request.Description;
         product.Price         = request.Price;
         product.StockQuantity = request.StockQuantity;
+        product.IsAvailable   = request.StockQuantity > 0;
         product.CategoryId    = request.CategoryId;
 
         await _sellerRepo.UpdateProductAsync(product);
@@ -125,6 +127,7 @@ public class SellerService : ISellerService
             ?? throw new KeyNotFoundException("Product not found or does not belong to you.");
 
         product.StockQuantity = request.StockQuantity;
+        product.IsAvailable   = request.StockQuantity > 0;
         await _sellerRepo.UpdateProductAsync(product);
         return MapToProductResponse(product);
     }

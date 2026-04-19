@@ -41,6 +41,13 @@ export class OrderSuccessComponent implements OnInit {
     }
 
     this.orderId = parsedOrderId;
+
+    if (!sessionId) {
+      this.isSuccess = true;
+      this.fetchOrderDetails(parsedOrderId);
+      return;
+    }
+
     this.paymentService.confirmPayment(parsedOrderId, sessionId).subscribe({
       next: () => {
         this.isSuccess = true;
