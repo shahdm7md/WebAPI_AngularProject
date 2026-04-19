@@ -355,3 +355,240 @@
   border-top-color: #fff; border-radius: 50%;
   animation: spin .6s linear infinite;
 }
+
+
+/* ── Add these styles to manage-products.component.css ─────────────────────
+   (Append to the end of your existing CSS file)
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ── Modal Sub-title ───────────────────────────────────────────────────────── */
+.modal-sub {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* ── Wide modal (add/edit) ─────────────────────────────────────────────────── */
+.modal-wide {
+  max-width: 680px;
+  width: 100%;
+}
+
+/* ── Small modal (delete) ──────────────────────────────────────────────────── */
+.modal-sm {
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  padding: 32px 24px 24px;
+}
+
+/* ── Action buttons in table ───────────────────────────────────────────────── */
+.icon-action.edit {
+  color: #0045a3;
+  border-color: #dbeafe;
+}
+.icon-action.edit:hover {
+  background: #eff6ff;
+}
+
+.icon-action.delete {
+  color: #ef4444;
+  border-color: #fee2e2;
+}
+.icon-action.delete:hover {
+  background: #fef2f2;
+}
+
+/* ── Image upload grid ─────────────────────────────────────────────────────── */
+.images-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.img-slot {
+  position: relative;
+  width: 82px;
+  height: 82px;
+  border-radius: 12px;
+  overflow: visible;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.img-slot-inner {
+  width: 82px;
+  height: 82px;
+  border-radius: 12px;
+  border: 2px dashed #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.img-slot-inner:hover,
+.img-slot-inner.has-image {
+  border-color: #93c5fd;
+}
+
+.img-slot-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.img-slot-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.img-slot-placeholder .material-symbols-outlined {
+  font-size: 22px;
+  color: #cbd5e1;
+}
+
+.img-slot-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+}
+
+.img-slot-extra .img-slot-preview,
+.img-slot-extra img {
+  width: 82px;
+  height: 82px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  display: block;
+}
+
+.img-slot-add {
+  width: 82px;
+  height: 82px;
+  border-radius: 12px;
+  border: 2px dashed #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.img-slot-add:hover {
+  border-color: #93c5fd;
+}
+.img-slot-add .material-symbols-outlined {
+  font-size: 22px;
+  color: #cbd5e1;
+}
+
+.img-badge {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0045a3;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  white-space: nowrap;
+  letter-spacing: 0.05em;
+}
+
+.img-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1;
+}
+.img-remove .material-symbols-outlined {
+  font-size: 12px;
+}
+
+.img-divider {
+  width: 1px;
+  height: 82px;
+  background: #e2e8f0;
+  margin: 0 4px;
+}
+
+.img-count {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.hidden-input {
+  display: none;
+}
+
+/* ── Delete modal ──────────────────────────────────────────────────────────── */
+.delete-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #fef2f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.delete-icon {
+  font-size: 28px;
+  color: #ef4444;
+}
+
+.delete-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.delete-sub {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+/* ── Danger button ─────────────────────────────────────────────────────────── */
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-danger:hover   { opacity: 0.88; }
+.btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }

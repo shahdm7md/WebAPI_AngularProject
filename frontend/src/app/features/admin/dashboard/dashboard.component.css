@@ -192,6 +192,15 @@
   transition:opacity .15s;
 }
 .alert-btn:hover { opacity:.9; }
+
+/* ===== ERROR BANNER ===== */
+.error-banner {
+  display:flex; align-items:center; gap:12px;
+  background:#fef2f2; border:1px solid #fecaca;
+  padding:12px 16px; border-radius:8px; color:#dc2626;
+  font-size:12px; margin-bottom:16px;
+}
+.error-banner .material-symbols-outlined { font-size:20px; }
  
 /* ===== CARD BASE ===== */
 .card {

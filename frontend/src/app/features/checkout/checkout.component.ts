@@ -40,7 +40,7 @@ export class CheckoutComponent implements OnInit {
   // Tracks whether PayPal buttons are already rendered in the DOM
   private paypalButtonsRendered = false;
 
-  private readonly imageBaseUrl = 'http://localhost:5199';
+  private readonly imageBaseUrl = 'https://localhost:44395';
   PaymentMethod = PaymentMethod;
 
   paymentMethods = [

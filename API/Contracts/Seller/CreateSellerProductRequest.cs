@@ -20,6 +20,10 @@ namespace API.Contracts.Seller
         [Range(1, int.MaxValue, ErrorMessage = "A valid CategoryId is required")]
         public int CategoryId { get; set; }
 
+        // الصورة الرئيسية
         public IFormFile? MainImage { get; set; }
+
+        // الصور الإضافية — Angular هيبعتهم كـ extraImages[]
+        public List<IFormFile>? ExtraImages { get; set; }
     }
 }
