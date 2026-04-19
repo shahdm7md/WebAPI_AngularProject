@@ -1,0 +1,272 @@
+<!-- LOADING -->
+<div class="loading-screen" *ngIf="isLoading">
+  <div class="spinner"></div>
+  <p>Loading your profile...</p>
+</div>
+
+<!-- MAIN PAGE -->
+<div class="profile-page" *ngIf="!isLoading">
+
+  <!-- ===== HERO BANNER ===== -->
+  <div class="hero-banner">
+    <div class="hero-content">
+      <!-- Avatar -->
+      <div class="avatar-wrap">
+        <div class="avatar">{{ getInitials() }}</div>
+        <div class="avatar-badge" *ngIf="profile?.isActive">
+          <span class="material-symbols-outlined">check</span>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="hero-info">
+        <div class="hero-name-row">
+          <h1 class="hero-name">{{ profile?.fullName || '—' }}</h1>
+          <span class="role-badge" [ngClass]="getRoleBadgeClass()">
+            {{ profile?.role }}
+          </span>
+        </div>
+        <p class="hero-email">{{ profile?.email }}</p>
+<p class="hero-since">
+  Member since {{ getMemberSince() }}
+</p>
+      </div>
+
+      <!-- CTA Buttons -->
+      <div class="hero-actions">
+        <button class="btn-outline" (click)="cancelEdit()">Cancel</button>
+        <button class="btn-primary" [disabled]="isSaving" (click)="saveProfile()">
+          <div class="btn-spinner" *ngIf="isSaving"></div>
+          <span class="material-symbols-outlined" *ngIf="!isSaving">save</span>
+          {{ isSaving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE BODY ===== -->
+  <div class="page-body">
+
+    <!-- GLOBAL TOAST -->
+    <div class="toast toast-success" *ngIf="successMessage">
+      <span class="material-symbols-outlined">check_circle</span>
+      {{ successMessage }}
+    </div>
+    <div class="toast toast-error" *ngIf="errorMessage">
+      <span class="material-symbols-outlined">error</span>
+      {{ errorMessage }}
+    </div>
+
+    <!-- STATS STRIP -->
+    <div class="stats-strip">
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <span class="material-symbols-outlined">shopping_bag</span>
+        </div>
+        <div>
+          <p class="stat-label">Total Orders</p>
+          <p class="stat-val">{{ profile?.totalOrders ?? 0 }}</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber">
+          <span class="material-symbols-outlined">payments</span>
+        </div>
+        <div>
+          <p class="stat-label">Total Spent</p>
+          <p class="stat-val">${{ (profile?.totalSpent ?? 0) | number:'1.2-2' }}</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <span class="material-symbols-outlined">verified_user</span>
+        </div>
+        <div>
+          <p class="stat-label">Account Status</p>
+          <p class="stat-val">{{ profile?.isActive ? 'Active' : 'Inactive' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TWO COLUMNS -->
+    <div class="columns">
+
+      <!-- LEFT: Profile Form -->
+      <div class="col-main">
+
+        <!-- Profile Information -->
+        <section class="card">
+          <h2 class="card-title">Profile Information</h2>
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label class="form-label">Full Name <span class="req">*</span></label>
+              <input class="form-input" type="text" placeholder="Your full name"
+                     [(ngModel)]="form.fullName" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input class="form-input disabled" type="email"
+                     [value]="profile?.email || ''" disabled />
+              <span class="form-hint">Email cannot be changed here.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              <input class="form-input" type="tel" placeholder="+1 (555) 000-0000"
+                     [(ngModel)]="form.phoneNumber" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Address</label>
+              <input class="form-input" type="text" placeholder="Your address"
+                     [(ngModel)]="form.address" />
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Security -->
+        <section class="card security-card">
+          <div class="security-header">
+            <div>
+              <h2 class="card-title">Security</h2>
+              <p class="card-sub">Manage your password and account security.</p>
+            </div>
+            <button class="btn-ghost" (click)="showPwdSection = !showPwdSection">
+              <span class="material-symbols-outlined">
+                {{ showPwdSection ? 'expand_less' : 'expand_more' }}
+              </span>
+              {{ showPwdSection ? 'Hide' : 'Change Password' }}
+            </button>
+          </div>
+
+          <!-- Password Form -->
+          <div class="pwd-form" *ngIf="showPwdSection">
+            <div class="toast toast-success sm" *ngIf="pwdSuccess">
+              <span class="material-symbols-outlined">check_circle</span>{{ pwdSuccess }}
+            </div>
+            <div class="toast toast-error sm" *ngIf="pwdError">
+              <span class="material-symbols-outlined">error</span>{{ pwdError }}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Current Password</label>
+              <div class="input-eye-wrap">
+                <input class="form-input" [type]="showCurrentPwd ? 'text' : 'password'"
+                       placeholder="Enter current password"
+                       [(ngModel)]="pwdForm.currentPassword" />
+                <button class="eye-btn" type="button"
+                        (click)="showCurrentPwd = !showCurrentPwd">
+                  <span class="material-symbols-outlined">
+                    {{ showCurrentPwd ? 'visibility_off' : 'visibility' }}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <div class="input-eye-wrap">
+                <input class="form-input" [type]="showNewPwd ? 'text' : 'password'"
+                       placeholder="Min 8 characters"
+                       [(ngModel)]="pwdForm.newPassword" />
+                <button class="eye-btn" type="button"
+                        (click)="showNewPwd = !showNewPwd">
+                  <span class="material-symbols-outlined">
+                    {{ showNewPwd ? 'visibility_off' : 'visibility' }}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Confirm New Password</label>
+              <input class="form-input" type="password"
+                     placeholder="Repeat new password"
+                     [(ngModel)]="pwdForm.confirmPassword" />
+            </div>
+
+            <button class="btn-primary full-w" [disabled]="isChangingPwd"
+                    (click)="changePassword()">
+              <div class="btn-spinner" *ngIf="isChangingPwd"></div>
+              <span class="material-symbols-outlined" *ngIf="!isChangingPwd">lock_reset</span>
+              {{ isChangingPwd ? 'Updating...' : 'Update Password' }}
+            </button>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT: Account Info -->
+      <div class="col-side">
+
+        <!-- Account Details -->
+        <section class="card">
+          <h2 class="card-title">Account Details</h2>
+          <div class="details-list">
+            <div class="detail-row">
+              <span class="detail-label">Role</span>
+              <span class="role-badge sm" [ngClass]="getRoleBadgeClass()">{{ profile?.role }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Status</span>
+              <span class="status-dot" [class.active]="profile?.isActive">
+                {{ profile?.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Member Since</span>
+              <span class="detail-val">{{ getMemberSince() }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Email</span>
+              <span class="detail-val truncate">{{ profile?.email }}</span>
+            </div>
+            <div class="detail-row" *ngIf="profile?.phoneNumber">
+              <span class="detail-label">Phone</span>
+              <span class="detail-val">{{ profile?.phoneNumber }}</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Security Notice -->
+        <section class="security-notice">
+          <div class="notice-icon">
+            <span class="material-symbols-outlined">shield</span>
+          </div>
+          <div>
+            <h3 class="notice-title">Keep Your Account Safe</h3>
+            <p class="notice-body">
+              Use a strong, unique password and never share your login credentials with anyone.
+            </p>
+          </div>
+        </section>
+
+        <!-- Quick Navigation -->
+        <section class="card">
+          <h2 class="card-title">Quick Links</h2>
+          <div class="quick-links">
+            <a routerLink="/orders" class="quick-link">
+              <span class="material-symbols-outlined">receipt_long</span>
+              <span>My Orders</span>
+              <span class="material-symbols-outlined arrow">chevron_right</span>
+            </a>
+            <a routerLink="/wishlist" class="quick-link">
+              <span class="material-symbols-outlined">favorite</span>
+              <span>Wishlist</span>
+              <span class="material-symbols-outlined arrow">chevron_right</span>
+            </a>
+            <a routerLink="/cart" class="quick-link">
+              <span class="material-symbols-outlined">shopping_cart</span>
+              <span>Cart</span>
+              <span class="material-symbols-outlined arrow">chevron_right</span>
+            </a>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>

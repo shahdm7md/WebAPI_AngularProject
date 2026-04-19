@@ -1,6 +1,7 @@
 ﻿using API.Contracts.Admin;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using SharedKernel.Enums;
 using System.Text;
 namespace API.Services
 {
@@ -15,7 +16,7 @@ namespace API.Services
         {
             var query = _context.Products
                 .Include(p => p.Category)
-                //.Where(p => p.IsActive)
+                .Where(p => p.IsActive)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(sellerId))
@@ -82,87 +83,109 @@ namespace API.Services
     }
 
     // =================== Order Service ===================
+
     public sealed class AdminOrderService : IAdminOrderService
     {
         private readonly AppDbContext _context;
 
         public AdminOrderService(AppDbContext context) => _context = context;
 
-        public async Task<PaginatedResponse<AdminOrderResponse>> GetAllOrdersAsync(
-            string? status, int page, int pageSize)
+        public async Task<PaginatedResponse<AdminOrderResponse>> GetAllOrdersAsync(string? status, int page, int pageSize)
         {
-            // uncomment لما Dev 3 يخلص Order entity:
-            //
-            // var query = _context.Orders.Include(o => o.User).AsQueryable();
-            //
-            // if (!string.IsNullOrEmpty(status))
-            //     query = query.Where(o => o.Status == status);
-            //
-            // var total  = await query.CountAsync();
-            // var orders = await query
-            //     .OrderByDescending(o => o.CreatedAt)
-            //     .Skip((page - 1) * pageSize)
-            //     .Take(pageSize)
-            //     .ToListAsync();
-            //
-            // var data = orders.Select(o => new AdminOrderResponse
-            // {
-            //     Id            = o.Id,
-            //     CustomerName  = o.User?.FullName ?? "Guest",
-            //     CustomerEmail = o.User?.Email ?? string.Empty,
-            //     TotalAmount   = o.TotalAmount,
-            //     Status        = o.Status,
-            //     PaymentMethod = o.PaymentMethod,
-            //     CreatedAt     = o.CreatedAt
-            // }).ToList();
-            //
-            // return new PaginatedResponse<AdminOrderResponse>
-            // {
-            //     Data = data, TotalCount = total, Page = page, PageSize = pageSize
-            // };
+            // 1. إنشاء الـ Query الأساسية مع Include للمستخدم لضمان ظهور الأسماء
+            var query = _context.Orders.Include(o => o.User).AsQueryable();
 
-            return await Task.FromResult(new PaginatedResponse<AdminOrderResponse>
+            // 2. منطق الفلترة الاحترافي:
+            // هنا بنحول الـ string اللي جاي من Angular (زي "0" أو "1") لرقم عشان نقارنه بالـ Enum في الداتا بيز
+            if (!string.IsNullOrEmpty(status) && status != "All")
             {
-                Data = Array.Empty<AdminOrderResponse>(),
-                TotalCount = 0,
+                if (int.TryParse(status, out int statusInt))
+                {
+                    // المقارنة الرقمية هي اللي بتخلي الفلتر يشتغل صح في SQL
+                    query = query.Where(o => (int)o.Status == statusInt);
+                }
+                else
+                {
+                    // احتياطاً لو الحالة مبعوثة كنص
+                    query = query.Where(o => o.Status.ToString() == status);
+                }
+            }
+
+            // 3. حساب العدد الإجمالي للمفلتر (عشان الـ Pagination يظهر صح)
+            var total = await query.CountAsync();
+
+            // 4. جلب البيانات بترتيب الأحدث مع تطبيق الـ Paging
+            var orders = await query
+                .OrderByDescending(o => o.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // 5. الـ Mapping للـ Response:
+            // بنحول الـ Status لرقم نصي عشان الـ resolveStatus في Angular تفهمه وتظهر الألوان
+            var data = orders.Select(o => new AdminOrderResponse
+            {
+                Id = o.Id,
+                CustomerName = o.User?.FullName ?? "Guest",
+                CustomerEmail = o.User?.Email ?? "N/A",
+                TotalAmount = o.TotalAmount,
+                // نرسل الرقم (0, 1, 2) كـ string لأن الـ Angular بيفك شفرته هناك
+                Status = ((int)o.Status).ToString(),
+                CreatedAt = o.CreatedAt
+            }).ToList();
+
+            return new PaginatedResponse<AdminOrderResponse>
+            {
+                Data = data,
+                TotalCount = total,
                 Page = page,
                 PageSize = pageSize
-            });
+            };
         }
 
         public async Task<UpdateOrderStatusResult> UpdateOrderStatusAsync(int orderId, string status)
         {
-            // uncomment لما Dev 3 يخلص:
-            // var order = await _context.Orders.FindAsync(orderId);
-            // if (order is null)
-            //     return new UpdateOrderStatusResult
-            //     {
-            //         Success = false, StatusCode = 404, Message = "Order not found."
-            //     };
-            // order.Status = status;
-            // await _context.SaveChangesAsync();
-            // return new UpdateOrderStatusResult { Success = true, StatusCode = 200, Message = "Status updated." };
-
-            return await Task.FromResult(new UpdateOrderStatusResult
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order is null)
             {
-                Success = false,
-                StatusCode = StatusCodes.Status503ServiceUnavailable,
-                Message = "Orders module not ready yet."
-            });
+                return new UpdateOrderStatusResult
+                {
+                    Success = false,
+                    StatusCode = 404,
+                    Message = "Order not found."
+                };
+            }
+
+            // لو الـ Status في الـ Entity نوعه Enum، لازم نعمل Parse للقيمة المبعوثة
+            if (int.TryParse(status, out int statusInt))
+            {
+                order.Status = (OrderStatus)statusInt;
+            }
+            else
+            {
+                // لو مبعوثة نص، بنحولها لـ Enum
+                if (Enum.TryParse<OrderStatus>(status, true, out var statusEnum))
+                {
+                    order.Status = statusEnum;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return new UpdateOrderStatusResult { Success = true, StatusCode = 200, Message = "Status updated successfully." };
         }
 
         public async Task<byte[]> ExportOrdersCsvAsync()
         {
-            // uncomment لما Dev 3 يخلص:
-            // var orders = await _context.Orders.Include(o => o.User).ToListAsync();
-            // var sb     = new StringBuilder();
-            // sb.AppendLine("Id,Customer,Email,Amount,Status,Date");
-            // foreach (var o in orders)
-            //     sb.AppendLine($"{o.Id},{o.User?.FullName},{o.User?.Email},{o.TotalAmount},{o.Status},{o.CreatedAt:yyyy-MM-dd}");
-            // return Encoding.UTF8.GetBytes(sb.ToString());
+            var orders = await _context.Orders.Include(o => o.User).ToListAsync();
+            var sb = new StringBuilder();
+            sb.AppendLine("Id,Customer,Email,Amount,Status,Date");
 
-            return await Task.FromResult(
-                Encoding.UTF8.GetBytes("Id,Customer,Email,Amount,Status,Date\n"));
+            foreach (var o in orders)
+            {
+                sb.AppendLine($"{o.Id},{o.User?.FullName ?? "Guest"},{o.User?.Email},{o.TotalAmount},{o.Status},{o.CreatedAt:yyyy-MM-dd}");
+            }
+
+            return Encoding.UTF8.GetBytes(sb.ToString());
         }
     }
 }

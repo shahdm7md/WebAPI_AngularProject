@@ -83,7 +83,7 @@ export interface AdminOrderResponse {
   customerName: string;
   customerEmail: string;
   totalAmount: number;
-  status: string;
+  status: string | number;
   paymentMethod: string;
   createdAt: string;
 }

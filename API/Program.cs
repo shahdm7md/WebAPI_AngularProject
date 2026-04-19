@@ -31,7 +31,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularClient", policy =>
     {
-        policy.WithOrigins("http://localhost:63330")
+        policy.WithOrigins("http://localhost:53525")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -55,7 +55,7 @@ builder.Services.AddSingleton<IFileStorageService>(_ =>
         rootPath: builder.Environment.WebRootPath,
         baseUrl: "https://yourdomain.com/uploads"
     ));
-
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
     ?? throw new InvalidOperationException("JWT settings are not configured.");

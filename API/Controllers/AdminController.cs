@@ -102,6 +102,8 @@ public sealed class AdminController : ControllerBase
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
     {
+        // تحويل النص "0" إلى رقم إذا كان ممكناً، لضمان توافق الـ Filter
+        // أو إرسال الحالة كما هي للـ Service
         var result = await _orderService.GetAllOrdersAsync(status, page, pageSize);
         return Ok(result);
     }

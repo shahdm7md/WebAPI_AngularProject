@@ -21,6 +21,7 @@ import { SellerOrdersComponent } from './features/seller-panel/order-management/
 import { SellerProductsComponent } from './features/seller-panel/product-management/product-management';
 // import { SettingsComponent } from './features/seller-panel/store-settings/store-settings';
 import { SellerOverviewComponent } from './features/seller-panel/seller-overview/seller-overview';
+import { ProfileComponent } from './features/profile/profile.component';
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   {
@@ -113,6 +114,7 @@ export const routes: Routes = [
   { path: 'Admin/orders', redirectTo: 'admin/orders', pathMatch: 'full' },
   { path: 'Admin/coupons', redirectTo: 'admin/coupons', pathMatch: 'full' },
   { path: 'Admin/banners', redirectTo: 'admin/banners', pathMatch: 'full' },
+   { path: 'profile', component: ProfileComponent },
   
   // Cart & Checkout
   {
@@ -148,4 +150,5 @@ export const routes: Routes = [
   },
 
   { path: '**', redirectTo: '' },
+
 ];
