@@ -27,7 +27,7 @@ export class HomeComponent {
   protected error = '';
   protected notice = '';
   protected readonly wishlistIds = new Set<number>();
-  protected readonly imageBaseUrl = 'http://localhost:5199';
+  protected readonly imageBaseUrl = 'https://localhost:44395';
 
   ngOnInit(): void {
     this.loadStorefront();

@@ -82,8 +82,7 @@ export class ManageOrdersComponent implements OnInit {
     { icon: 'shopping_cart', label: 'Orders',    route: '/admin/orders',    active: true  },
     { icon: 'sell',          label: 'Coupons',   route: '/admin/coupons',   active: false },
     { icon: 'ad_units',      label: 'Banners',   route: '/admin/banners',   active: false },
-    { icon: 'settings',      label: 'Settings',  route: '/admin/settings',  active: false },
-  ];
+     ];
 
   ngOnInit(): void { 
     console.log('Component Initialized');

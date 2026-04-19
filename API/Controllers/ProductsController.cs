@@ -223,7 +223,7 @@ namespace API.Controllers
         }
         [HttpPost]
         [Consumes("multipart/form-data")]
-    [Authorize(Roles = "Seller,Admin")]
+        [Authorize(Roles = "Seller,Admin")]
         public async Task<IActionResult> CreateProduct([FromForm] CreateProductRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);

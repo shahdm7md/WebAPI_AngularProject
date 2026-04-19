@@ -4,299 +4,381 @@
   <div *ngIf="sidebarOpen" class="fixed inset-0 bg-black/40 z-30 md:hidden" (click)="toggleSidebar()"></div>
 
   <!-- Sidebar -->
-  <aside class="h-screen w-64 fixed left-0 top-0 bg-slate-50 pt-16 flex flex-col p-4 space-y-2 z-40 transition-transform duration-300">
-    <div class="mb-6 px-2">
-      <h2 class="text-lg font-black text-blue-900">Seller Portal</h2>
-      <p class="text-xs text-slate-500 truncate">{{ profile?.storeName || 'Loading...' }}</p>
+  <aside
+    class="mt-20 h-screen w-64 fixed left-0 top-0 bg-white border-r border-slate-100 pt-16 flex flex-col p-4 z-40 transition-transform duration-300"
+    [ngClass]="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen, 'md:translate-x-0': true }">
+    <div class="mb-6 px-2 pt-2">
+      <h2 class="text-base font-black text-blue-900 tracking-tight">Seller Portal</h2>
+      <p class="text-[11px] text-slate-400 mt-0.5">{{ userName }}</p>
     </div>
-    <nav class="flex-1 space-y-1">
-      <a routerLink="/seller/dashboard" routerLinkActive="text-blue-700 font-bold bg-white shadow-sm"
-         class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-all">
-        <span class="material-symbols-outlined">dashboard</span><span class="text-sm">Overview</span>
+    <nav class="flex-1 space-y-0.5">
+      <a routerLink="/seller/dashboard" routerLinkActive="bg-blue-50 text-[#0045a3] font-bold"
+        class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:text-[#0045a3] hover:bg-blue-50 rounded-xl transition-all text-sm">
+        <span class="material-symbols-outlined text-[20px]">dashboard</span>Dashboard
       </a>
-      <a routerLink="/seller/products" routerLinkActive="text-blue-700 font-bold bg-white shadow-sm"
-         class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-all">
-        <span class="material-symbols-outlined">inventory_2</span><span class="text-sm">Products</span>
+      <a routerLink="/seller/products" routerLinkActive="bg-blue-50 text-[#0045a3] font-bold"
+        class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:text-[#0045a3] hover:bg-blue-50 rounded-xl transition-all text-sm">
+        <span class="material-symbols-outlined text-[20px]">inventory_2</span>Products
       </a>
-      <a routerLink="/seller/orders" routerLinkActive="text-blue-700 font-bold bg-white shadow-sm"
-         class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-all">
-        <span class="material-symbols-outlined">shopping_cart</span><span class="text-sm">Orders</span>
+      <a routerLink="/seller/orders" routerLinkActive="bg-blue-50 text-[#0045a3] font-bold"
+        class="flex items-center gap-3 px-3 py-2.5 text-slate-500 hover:text-[#0045a3] hover:bg-blue-50 rounded-xl transition-all text-sm">
+        <span class="material-symbols-outlined text-[20px]">shopping_cart</span>Orders
       </a>
-      <a routerLink="/seller/earnings" routerLinkActive="text-blue-700 font-bold bg-white shadow-sm"
-         class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-all">
-        <span class="material-symbols-outlined">payments</span><span class="text-sm">Earnings</span>
-      </a>
-      <a routerLink="/seller/settings" routerLinkActive="text-blue-700 font-bold bg-white shadow-sm"
-         class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-all">
-        <span class="material-symbols-outlined">settings</span><span class="text-sm">Settings</span>
-      </a>
-      <a routerLink="/" class="flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-all">
-        <span class="material-symbols-outlined">home</span><span class="text-sm">Back to Homepage</span>
-      </a>
+     
     </nav>
-    <div class="mt-auto pb-4">
-      <button class="w-full bg-[#0045a3] text-white py-3 px-4 rounded-full font-semibold flex items-center justify-center gap-2 shadow-lg shadow-blue-200/50 hover:opacity-90">
-        <span class="material-symbols-outlined text-sm">rocket_launch</span>Launch Storefront
-      </button>
-    </div>
   </aside>
 
   <!-- Main -->
-  <main class="md:ml-64 pt-20 px-4 md:px-8 pb-20 md:pb-12">
-    <div class="max-w-7xl mx-auto">
+  <main class="md:ml-64 pt-16">
+    <div class="flex">
 
-      <!-- Header -->
-      <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
-        <div>
-          <h1 class="text-2xl md:text-4xl font-extrabold tracking-tighter leading-tight">Product Inventory</h1>
-          <p class="text-slate-500 mt-1 text-sm md:text-base">Manage your collection of products.</p>
+      <!-- Left Content -->
+      <div class="flex-1 px-4 md:px-8 py-8">
+
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
+          <div>
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tighter">Product Inventory</h1>
+            <p class="text-slate-400 text-sm mt-1">Manage your collection of products.</p>
+          </div>
+          <button (click)="openAddModal()"
+            class="bg-[#0045a3] text-white font-bold py-2.5 px-5 rounded-2xl flex items-center gap-2 hover:opacity-90 active:scale-95 shadow-lg shadow-blue-200/50 text-sm">
+            <span class="material-symbols-outlined text-base">add</span>
+            Add New Product
+          </button>
         </div>
-        <a routerLink="/seller/products/new"
-           class="bg-[#0045a3] text-white font-bold py-3 px-6 rounded-full flex items-center gap-2 hover:opacity-90 active:scale-95 shadow-xl shadow-blue-100 self-start md:self-auto">
-          <span class="material-symbols-outlined">add</span>Add New Product
-        </a>
-      </div>
 
-      <!-- Stats -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-[#f3f3f6] p-4 md:p-6 rounded-2xl">
-          <p class="text-xs font-bold text-slate-500 tracking-widest uppercase mb-1">Total Items</p>
-          <p class="text-2xl md:text-3xl font-black text-[#0045a3]">{{ totalItems | number }}</p>
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div class="bg-white rounded-2xl p-4 border border-slate-100">
+            <p class="text-[10px] font-bold text-slate-400 uppercase">Total</p>
+            <p class="text-2xl font-black text-[#0045a3]">{{ totalCount | number }}</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-100">
+            <p class="text-[10px] font-bold text-slate-400 uppercase">Low Stock</p>
+            <p class="text-2xl font-black text-amber-500">{{ lowStock }}</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-100">
+            <p class="text-[10px] font-bold text-slate-400 uppercase">Out of Stock</p>
+            <p class="text-2xl font-black text-red-500">{{ outOfStock }}</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-100">
+            <p class="text-[10px] font-bold text-slate-400 uppercase">In Stock</p>
+            <p class="text-2xl font-black text-emerald-500">{{ inStock }}</p>
+          </div>
         </div>
-        <div class="bg-[#f3f3f6] p-4 md:p-6 rounded-2xl">
-          <p class="text-xs font-bold text-slate-500 tracking-widest uppercase mb-1">Low Stock</p>
-          <p class="text-2xl md:text-3xl font-black text-amber-600">{{ lowStockCount }}</p>
+
+        <!-- Category Filter -->
+        <div class="flex flex-wrap gap-2 mb-5">
+          <button (click)="selectedCategoryFilter = 0; fetchProducts()"
+            class="px-4 py-1.5 rounded-full text-xs font-bold border"
+            [ngClass]="selectedCategoryFilter === 0 ? 'bg-[#0045a3] text-white' : 'bg-white text-slate-500 border-slate-200'">
+            All
+          </button>
+          <button *ngFor="let cat of categories" (click)="selectedCategoryFilter = cat.id; fetchProducts()"
+            class="px-4 py-1.5 rounded-full text-xs font-bold border"
+            [ngClass]="selectedCategoryFilter === cat.id ? 'bg-[#0045a3] text-white' : 'bg-white text-slate-500 border-slate-200'">
+            {{ cat.name }}
+          </button>
         </div>
-        <div class="bg-[#f3f3f6] p-4 md:p-6 rounded-2xl">
-          <p class="text-xs font-bold text-slate-500 tracking-widest uppercase mb-1">Out of Stock</p>
-          <p class="text-2xl md:text-3xl font-black text-red-600">{{ outOfStockCount }}</p>
-        </div>
-        <div class="bg-[#f3f3f6] p-4 md:p-6 rounded-2xl">
-          <p class="text-xs font-bold text-slate-500 tracking-widest uppercase mb-1">In Stock</p>
-          <p class="text-2xl md:text-3xl font-black text-emerald-600">{{ totalItems - outOfStockCount }}</p>
-        </div>
-      </div>
 
-      <!-- Search Bar (mobile) -->
-      <div class="md:hidden mb-4 bg-[#f3f3f6] rounded-2xl p-4 flex items-center gap-3">
-        <span class="material-symbols-outlined text-slate-400">search</span>
-        <input class="bg-transparent border-none focus:ring-0 text-sm w-full"
-               placeholder="Search products..."
-               [(ngModel)]="searchQuery"
-               (keyup.enter)="onSearch()"
-               type="text"/>
-        <button (click)="onSearch()" class="text-[#0045a3] font-bold text-sm">Go</button>
-      </div>
-
-      <!-- Loading -->
-      <div *ngIf="loading" class="flex items-center justify-center h-48">
-        <div class="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
-      </div>
-
-      <!-- Error -->
-      <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl text-sm mb-4">
-        {{ error }}
-      </div>
-
-      <!-- Products Table -->
-      <div *ngIf="!loading" class="bg-white rounded-3xl overflow-hidden shadow-sm">
-
-        <!-- Mobile Cards -->
-        <div class="md:hidden divide-y divide-slate-100">
-          <div *ngFor="let product of products" class="p-4 flex items-center gap-4">
-            <div class="w-14 h-14 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0">
-              <img *ngIf="getProductImageUrl(product.mainImageUrl) as imageUrl" [src]="imageUrl" [alt]="product.name"
-                   class="w-full h-full object-cover"/>
-              <div *ngIf="!getProductImageUrl(product.mainImageUrl)"
-                   class="w-full h-full flex items-center justify-center text-slate-300">
-                <span class="material-symbols-outlined">image</span>
+        <!-- Products Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div *ngFor="let p of products" (click)="openDetail(p)"
+            class="bg-white rounded-2xl border border-slate-100 overflow-hidden cursor-pointer hover:shadow-lg transition-all">
+            <div class="h-44 bg-slate-50">
+              <img *ngIf="p.mainImageUrl" [src]="'https://localhost:44395/' + p.mainImageUrl"
+                class="w-full h-full object-cover" />
+              <div *ngIf="!p.mainImageUrl"
+                class="w-full h-full flex items-center justify-center text-slate-200 text-5xl">📦</div>
+            </div>
+            <div class="p-4">
+              <p class="font-bold text-sm">{{ p.name }}</p>
+              <p class="text-xs text-slate-400">{{ p.categoryName }}</p>
+              <div class="flex justify-between items-center mt-3">
+                <span class="font-black text-[#0045a3]">{{ p.price | currency }}</span>
+                <div class="flex gap-1">
+                  <button (click)="openEditModal(p, $event)"
+                    class="w-8 h-8 rounded-xl border border-slate-200 flex items-center justify-center hover:bg-slate-50 text-sm">✏️</button>
+                  <button (click)="openDeleteModal(p, $event)"
+                    class="w-8 h-8 rounded-xl border border-red-100 flex items-center justify-center hover:bg-red-50 text-sm">🗑️</button>
+                </div>
               </div>
             </div>
-            <div class="flex-1 min-w-0">
-              <p class="font-bold text-sm truncate">{{ product.name }}</p>
-              <p class="text-xs text-slate-400">{{ product.categoryName }}</p>
-              <div class="flex items-center justify-between mt-1">
-                <span class="font-bold text-sm">{{ product.price | currency }}</span>
-                <span class="inline-flex items-center gap-1 text-xs font-semibold"
-                      [ngClass]="getStockClass(product.stockQuantity)">
-                  <span class="w-1.5 h-1.5 rounded-full" [ngClass]="getStockDot(product.stockQuantity)"></span>
-                  {{ getStockLabel(product.stockQuantity) }}
-                </span>
-              </div>
-            </div>
-            <div class="flex flex-col gap-1 flex-shrink-0">
-              <button (click)="openStockModal(product)"
-                      class="p-2 hover:bg-slate-100 rounded-lg text-slate-500">
-                <span class="material-symbols-outlined text-lg">inventory</span>
-              </button>
-              <button (click)="openDeleteModal(product)"
-                      class="p-2 hover:bg-red-50 rounded-lg text-red-500">
-                <span class="material-symbols-outlined text-lg">delete</span>
-              </button>
-            </div>
-          </div>
-          <!-- Empty -->
-          <div *ngIf="products.length === 0" class="py-16 text-center text-slate-400">
-            <span class="material-symbols-outlined text-5xl mb-3 block text-slate-200">inventory_2</span>
-            <p class="text-sm font-medium">No products found</p>
           </div>
         </div>
 
-        <!-- Desktop Table -->
-        <div class="hidden md:block overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-slate-50/50">
-                <th class="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-400">Product</th>
-                <th class="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-400">Category</th>
-                <th class="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-400">Price</th>
-                <th class="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-400">Stock</th>
-                <th class="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-400">Rating</th>
-                <th class="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-400 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr *ngFor="let product of products" class="hover:bg-slate-50/80 transition-colors group">
-                <td class="px-8 py-5">
-                  <div class="flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0">
-                      <img *ngIf="getProductImageUrl(product.mainImageUrl) as imageUrl" [src]="imageUrl" [alt]="product.name"
-                           class="w-full h-full object-cover"/>
-                      <div *ngIf="!getProductImageUrl(product.mainImageUrl)"
-                           class="w-full h-full flex items-center justify-center text-slate-300">
-                        <span class="material-symbols-outlined text-2xl">image</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p class="font-bold group-hover:text-[#0045a3] transition-colors">{{ product.name }}</p>
-                      <p class="text-xs text-slate-400 mt-0.5 max-w-xs truncate">{{ product.description }}</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-8 py-5">
-                  <span class="text-sm text-slate-600 font-medium px-3 py-1 bg-slate-100 rounded-full">
-                    {{ product.categoryName }}
-                  </span>
-                </td>
-                <td class="px-8 py-5 font-bold">{{ product.price | currency }}</td>
-                <td class="px-8 py-5">
-                  <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full" [ngClass]="getStockDot(product.stockQuantity)"></span>
-                    <span class="text-sm font-semibold" [ngClass]="getStockClass(product.stockQuantity)">
-                      {{ getStockLabel(product.stockQuantity) }}
-                    </span>
-                  </div>
-                </td>
-                <td class="px-8 py-5">
-                  <div class="flex items-center gap-1">
-                    <span class="material-symbols-outlined text-amber-400 text-base" style="font-variation-settings:'FILL' 1">star</span>
-                    <span class="text-sm font-semibold">{{ product.averageRating | number:'1.1-1' }}</span>
-                    <span class="text-xs text-slate-400">({{ product.reviewCount }})</span>
-                  </div>
-                </td>
-                <td class="px-8 py-5 text-right">
-                  <div class="flex items-center justify-end gap-2">
-                    <button (click)="openStockModal(product)"
-                            title="Update Stock"
-                            class="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors">
-                      <span class="material-symbols-outlined text-xl">inventory</span>
-                    </button>
-                    <button (click)="openDeleteModal(product)"
-                            class="p-2 hover:bg-red-50 rounded-lg text-red-500 transition-colors">
-                      <span class="material-symbols-outlined text-xl">delete</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <!-- Empty Desktop -->
-          <div *ngIf="products.length === 0" class="py-16 text-center text-slate-400">
-            <span class="material-symbols-outlined text-5xl mb-3 block text-slate-200">inventory_2</span>
-            <p class="text-sm font-medium">No products found</p>
-          </div>
-        </div>
       </div>
+
+      <!-- Right Detail Panel -->
+      <div *ngIf="selectedProduct"
+        class="hidden md:flex flex-col w-[380px] flex-shrink-0 bg-white border-l border-slate-100 sticky top-16 h-[calc(100vh-64px)] overflow-y-auto">
+
+        <!-- Panel Header -->
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+          <div>
+            <p class="font-bold text-sm">{{ selectedProduct.name }}</p>
+            <p class="text-xs text-slate-400 mt-0.5">{{ selectedProduct.categoryName }}</p>
+          </div>
+          <button (click)="closeDetail()"
+            class="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-50 text-xs">✕</button>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div *ngIf="detailLoading" class="flex-1 flex items-center justify-center">
+          <div class="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+
+        <ng-container *ngIf="!detailLoading">
+
+          <!-- Main Image -->
+          <div class="h-52 bg-slate-50 flex-shrink-0">
+            <img *ngIf="selectedProduct.mainImageUrl"
+              [src]="'https://localhost:44395/' + selectedProduct.mainImageUrl"
+              class="w-full h-full object-cover" />
+            <div *ngIf="!selectedProduct.mainImageUrl"
+              class="w-full h-full flex items-center justify-center text-slate-200 text-6xl">📦</div>
+          </div>
+
+          <!-- Extra Images Thumbnails -->
+          <div *ngIf="selectedProduct.images?.length"
+            class="px-5 py-3 flex gap-2 overflow-x-auto border-b border-slate-100">
+            <div *ngFor="let img of selectedProduct.images"
+              class="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100">
+              <img [src]="'https://localhost:44395/' + img.imageUrl" class="w-full h-full object-cover" />
+            </div>
+          </div>
+
+          <!-- Info -->
+          <div class="p-5 space-y-4">
+
+            <!-- Price + Stock Badge -->
+            <div class="flex items-center justify-between">
+              <span class="text-2xl font-black text-[#0045a3]">{{ selectedProduct.price | currency }}</span>
+              <span class="text-xs font-bold px-3 py-1 rounded-full"
+                [ngClass]="{
+                  'bg-red-50 text-red-600':          selectedProduct.stockQuantity === 0,
+                  'bg-amber-50 text-amber-600':       selectedProduct.stockQuantity > 0 && selectedProduct.stockQuantity <= 5,
+                  'bg-emerald-50 text-emerald-700':   selectedProduct.stockQuantity > 5
+                }">
+                {{ getStockLabel(selectedProduct.stockQuantity) }}
+              </span>
+            </div>
+
+            <!-- Description -->
+            <p *ngIf="selectedProduct.description" class="text-sm text-slate-500 leading-relaxed">
+              {{ selectedProduct.description }}
+            </p>
+
+            <!-- Meta Table -->
+            <div class="bg-slate-50 rounded-xl p-3 space-y-2">
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-400">Category</span>
+                <span class="font-medium">{{ selectedProduct.categoryName }}</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-400">Stock</span>
+                <span class="font-medium">{{ selectedProduct.stockQuantity }} units</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-400">Product ID</span>
+                <span class="font-medium text-slate-400">#{{ selectedProduct.id }}</span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-2 pt-1">
+              <button (click)="openEditModal(selectedProduct, $event)"
+                class="flex-1 py-2 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition">
+                Edit
+              </button>
+              <button (click)="openDeleteModal(selectedProduct, $event)"
+                class="py-2 px-4 rounded-xl border border-red-100 text-sm font-bold text-red-500 hover:bg-red-50 transition">
+                Delete
+              </button>
+            </div>
+
+          </div>
+        </ng-container>
+      </div>
+
     </div>
   </main>
 
-  <!-- Bottom Nav Mobile -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 flex justify-around items-center py-2">
-    <a routerLink="/seller/dashboard" routerLinkActive="text-[#0045a3]"
-       class="flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1">
-      <span class="material-symbols-outlined text-[22px]">dashboard</span>
-      <span class="text-[10px] font-bold">Overview</span>
-    </a>
-    <a routerLink="/" class="flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1">
-      <span class="material-symbols-outlined text-[22px]">home</span>
-      <span class="text-[10px] font-bold">Home</span>
-    </a>
-    <a routerLink="/seller/products" routerLinkActive="text-[#0045a3]"
-       class="flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1">
-      <span class="material-symbols-outlined text-[22px]">inventory_2</span>
-      <span class="text-[10px] font-bold">Products</span>
-    </a>
-    <a routerLink="/seller/orders" routerLinkActive="text-[#0045a3]"
-       class="flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1">
-      <span class="material-symbols-outlined text-[22px]">shopping_cart</span>
-      <span class="text-[10px] font-bold">Orders</span>
-    </a>
-    <a routerLink="/seller/settings" routerLinkActive="text-[#0045a3]"
-       class="flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1">
-      <span class="material-symbols-outlined text-[22px]">settings</span>
-      <span class="text-[10px] font-bold">Settings</span>
-    </a>
-  </nav>
+  <!-- ══════════════════════════════════════════════════════════════════════════
+       ADD / EDIT MODAL  —  واحدة بس هنا تحت، امسحي أي نسخة تانية
+       ══════════════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="showModal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(0,0,0,0.45);"
+    (click)="closeModal()">
 
-  <!-- Delete Confirmation Modal -->
-  <div *ngIf="showDeleteModal"
-       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
-      <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
-        <span class="material-symbols-outlined text-red-500 text-2xl">delete</span>
+    <div class="bg-white w-full max-w-3xl rounded-2xl overflow-y-auto"
+      style="max-height: 100vh;"
+      (click)="$event.stopPropagation()">
+
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between px-8 py-6 border-b border-slate-100">
+        <div>
+          <p class="font-bold text-sm text-slate-800">
+            {{ isEditMode ? 'Edit product' : 'Add new product' }}
+          </p>
+          <p class="text-xs text-slate-400 mt-0.5">Fill in the details below</p>
+        </div>
+        <button (click)="closeModal()"
+          class="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-50 text-sm">
+          ✕
+        </button>
       </div>
-      <h3 class="text-lg font-bold text-center mb-2">Delete Product</h3>
-      <p class="text-sm text-slate-500 text-center mb-6">
-        Are you sure you want to delete <strong>{{ deletingProduct?.name }}</strong>? This action cannot be undone.
-      </p>
-      <div class="flex gap-3">
-        <button (click)="closeDeleteModal()"
-                class="flex-1 py-2.5 px-4 border border-slate-200 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors">
+
+      <!-- Modal Body -->
+      <div class="px-5 py-4 space-y-3">
+
+        <!-- Error Banner -->
+        <div *ngIf="modalError"
+          class="bg-red-50 border border-red-100 text-red-600 text-xs rounded-xl px-3 py-2">
+          {{ modalError }}
+        </div>
+
+        <!-- Name + Category -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Name *</label>
+            <input [(ngModel)]="form.name" type="text" placeholder="e.g. Blue T-Shirt"
+              class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Category *</label>
+            <select [(ngModel)]="form.categoryId"
+              class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition">
+              <option value="">Select…</option>
+              <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Description</label>
+          <textarea [(ngModel)]="form.description" rows="2" placeholder="Optional…"
+            class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition resize-none"></textarea>
+        </div>
+
+        <!-- Price + Stock -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Price *</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+              <input [(ngModel)]="form.price" type="number" min="0" step="0.01" placeholder="0.00"
+                class="w-full border border-slate-200 rounded-xl pl-7 pr-3 py-2 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Stock qty</label>
+            <input [(ngModel)]="form.stockQuantity" type="number" min="0" placeholder="0"
+              class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition" />
+          </div>
+        </div>
+
+        <!-- Images -->
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2">Images</label>
+          <div class="flex flex-wrap gap-2 items-start">
+
+            <!-- Main Image slot -->
+            <label class="cursor-pointer relative">
+              <div class="w-[80px] h-[80px] rounded-xl overflow-hidden flex items-center justify-center transition border-2 border-dashed"
+                [ngClass]="form.mainImagePreview
+                  ? 'border-blue-300'
+                  : 'border-slate-200 hover:border-blue-300 bg-slate-50'">
+                <img *ngIf="form.mainImagePreview"
+                  [src]="form.mainImagePreview"
+                  class="w-full h-full object-cover" />
+                <div *ngIf="!form.mainImagePreview" class="flex flex-col items-center gap-0.5">
+                  <span class="text-xl text-slate-300">+</span>
+                  <span class="text-[9px] text-slate-400 font-bold">MAIN</span>
+                </div>
+              </div>
+              <span *ngIf="form.mainImagePreview"
+                class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#0045a3] text-white text-[8px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+                Main
+              </span>
+              <input type="file" accept="image/*" class="hidden" (change)="onMainImageSelected($event)" />
+            </label>
+
+            <!-- Divider -->
+            <div class="w-px h-[80px] bg-slate-100 mx-1"></div>
+
+            <!-- Existing + new extra images -->
+            <ng-container *ngIf="form.extraFiles.length > 0">
+              <div *ngFor="let img of form.extraFiles; let i = index"
+                class="relative w-[80px] h-[80px] rounded-xl border border-slate-200 overflow-hidden flex-shrink-0">
+                <img [src]="img.preview" class="w-full h-full object-cover" />
+                <button type="button" (click)="removeExtraImage(i)"
+                  class="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center leading-none shadow">
+                  ✕
+                </button>
+              </div>
+            </ng-container>
+
+            <!-- Add extra slot -->
+            <label class="cursor-pointer w-[80px] h-[80px] rounded-xl border border-dashed border-slate-200 hover:border-blue-300 bg-slate-50 flex flex-col items-center justify-center gap-0.5 transition flex-shrink-0">
+              <span class="text-xl text-slate-300">+</span>
+              <span class="text-[9px] text-slate-400 font-bold">EXTRA</span>
+              <input type="file" accept="image/*" multiple class="hidden" (change)="onExtraImagesSelected($event)" />
+            </label>
+
+          </div>
+
+          <!-- Extra images count badge -->
+          <p *ngIf="form.extraFiles.length > 0"
+            class="mt-2 text-[11px] text-slate-400">
+            {{ form.extraFiles.length }} extra image{{ form.extraFiles.length > 1 ? 's' : '' }} added
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-5 py-3 border-t border-slate-100 flex justify-end gap-2">
+        <button (click)="closeModal()"
+          class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-500 hover:bg-slate-50 transition">
           Cancel
         </button>
-        <button (click)="confirmDelete()"
-                [disabled]="deleteLoading"
-                class="flex-1 py-2.5 px-4 bg-red-500 text-white rounded-xl font-semibold text-sm hover:bg-red-600 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
-          <span *ngIf="deleteLoading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-          {{ deleteLoading ? 'Deleting...' : 'Delete' }}
+        <button (click)="submitForm()" [disabled]="modalLoading"
+          class="px-5 py-2 rounded-xl bg-[#0045a3] text-white text-xs font-bold hover:opacity-90 disabled:opacity-50 transition flex items-center gap-2">
+          <span *ngIf="modalLoading"
+            class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          {{ isEditMode ? 'Save changes' : 'Add product' }}
         </button>
       </div>
+
     </div>
   </div>
 
-  <!-- Stock Update Modal -->
-  <div *ngIf="showStockModal"
-       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
-      <h3 class="text-lg font-bold mb-1">Update Stock</h3>
-      <p class="text-sm text-slate-500 mb-5">{{ editingProduct?.name }}</p>
-      <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-        New Stock Quantity
-      </label>
-      <input type="number"
-             [(ngModel)]="newStockValue"
-             min="0"
-             class="w-full border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"/>
-      <div class="flex gap-3 mt-5">
-        <button (click)="closeStockModal()"
-                class="flex-1 py-2.5 px-4 border border-slate-200 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors">
+  <!-- DELETE MODAL -->
+  <div *ngIf="showDeleteModal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(0,0,0,0.45);"
+    (click)="closeDeleteModal()">
+    <div class="bg-white rounded-2xl w-full max-w-sm p-6 text-center"
+      (click)="$event.stopPropagation()">
+      <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3 text-2xl">🗑️</div>
+      <p class="font-bold text-slate-800 mb-1">Delete product?</p>
+      <p class="text-xs text-slate-400 mb-5">
+        "<span class="font-medium text-slate-600">{{ deletingProduct?.name }}</span>" will be permanently removed.
+      </p>
+      <div class="flex gap-2">
+        <button (click)="closeDeleteModal()"
+          class="flex-1 py-2 rounded-xl border border-slate-200 text-sm font-bold text-slate-500 hover:bg-slate-50 transition">
           Cancel
         </button>
-        <button (click)="saveStock()"
-                [disabled]="stockLoading"
-                class="flex-1 py-2.5 px-4 bg-[#0045a3] text-white rounded-xl font-semibold text-sm hover:opacity-90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
-          <span *ngIf="stockLoading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-          {{ stockLoading ? 'Saving...' : 'Save' }}
+        <button (click)="confirmDelete()" [disabled]="deleteLoading"
+          class="flex-1 py-2 rounded-xl bg-red-500 text-white text-sm font-bold hover:opacity-90 disabled:opacity-50 transition flex items-center justify-center gap-2">
+          <span *ngIf="deleteLoading"
+            class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          Delete
         </button>
       </div>
     </div>

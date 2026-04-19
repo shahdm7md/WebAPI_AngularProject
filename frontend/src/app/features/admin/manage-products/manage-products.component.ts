@@ -8,10 +8,23 @@ import {
   PaginatedResponse,
   DeactivateProductResult,
   CategoryResponse,
-  CreateProductRequest,
 } from '../../../core/models/admin.models';
 import { AdminService } from '../../../core/services/admin-api.service';
 import { DEFAULT_API_BASE_URL } from '../../../core/config/api.config';
+import { ProductService } from '../../../core/services/product.service';
+
+// ── Product Form Interface ─────────────────────────────────────────────────
+interface ProductForm {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  stockQuantity: number;
+  categoryId: number | string;
+  mainImageFile: File | null;
+  mainImagePreview: string | null;
+  extraFiles: { file: File | null; preview: string; existingUrl?: string }[];
+}
 
 @Component({
   selector: 'app-manage-products',
@@ -21,26 +34,16 @@ import { DEFAULT_API_BASE_URL } from '../../../core/config/api.config';
   styleUrls: ['./manage-products.component.css'],
 })
 export class ManageProductsComponent implements OnInit {
-  private readonly adminService = inject(AdminService);
-  private readonly imageBaseUrl = DEFAULT_API_BASE_URL;
+  private readonly adminService   = inject(AdminService);
+  private readonly productService = inject(ProductService);
+  private readonly imageBaseUrl   = DEFAULT_API_BASE_URL;
+  private readonly cdr            = inject(ChangeDetectorRef);
 
   // ===== State =====
   isLoading      = false;
-  isSubmitting   = false;
   actionLoading: Record<number, boolean> = {};
   successMessage = '';
   errorMessage   = '';
-
-  // ===== Modal =====
-  showAddModal = false;
-  modalError   = '';
-  newProduct: CreateProductRequest = {
-    name: '',
-    description: '',
-    price: 0,
-    stock: 0,
-    categoryId: 0,
-  };
 
   // ===== Data =====
   products:   AdminProductResponse[] = [];
@@ -55,6 +58,29 @@ export class ManageProductsComponent implements OnInit {
   pageSize    = 10;
   totalCount  = 0;
 
+  // ===== Add / Edit Modal =====
+  showModal    = false;
+  isEditMode   = false;
+  modalLoading = false;
+  modalError: string | null = null;
+  form: ProductForm = this.emptyForm();
+
+  // ===== Delete Modal =====
+  showDeleteModal  = false;
+  deleteLoading    = false;
+  deletingProduct: AdminProductResponse | null = null;
+
+  // ===== Nav =====
+  navItems = [
+    { icon: 'dashboard',     label: 'Dashboard', route: '/admin/dashboard', active: false },
+    { icon: 'group',         label: 'Users',     route: '/admin/users',     active: false },
+    { icon: 'inventory_2',   label: 'Products',  route: '/admin/products',  active: true  },
+    { icon: 'shopping_cart', label: 'Orders',    route: '/admin/orders',    active: false },
+    { icon: 'sell',          label: 'Coupons',   route: '/admin/coupons',   active: false },
+    { icon: 'ad_units',      label: 'Banners',   route: '/admin/banners',   active: false },
+  ];
+
+  // ===== Computed =====
   get totalPages(): number {
     return Math.ceil(this.totalCount / this.pageSize);
   }
@@ -89,17 +115,7 @@ export class ManageProductsComponent implements OnInit {
     return this.products.filter(p => p.isActive).length;
   }
 
-  navItems = [
-    { icon: 'dashboard',     label: 'Dashboard', route: '/admin/dashboard', active: false },
-    { icon: 'group',         label: 'Users',     route: '/admin/users',     active: false },
-    { icon: 'storefront',    label: 'Vendors',   route: '/admin/users',     active: false },
-    { icon: 'inventory_2',   label: 'Products',  route: '/admin/products',  active: true  },
-    { icon: 'shopping_cart', label: 'Orders',    route: '/admin/orders',    active: false },
-    { icon: 'sell',      label: 'Coupons',   route: '/admin/coupons',   active: false },
-        { icon: 'ad_units',      label: 'Banners',   route: '/admin/banners',   active: false },
-    { icon: 'settings',      label: 'Settings',  route: '/admin/settings',  active: false },
-  ];
-private readonly cdr = inject(ChangeDetectorRef);
+  // ===== Lifecycle =====
   ngOnInit(): void {
     this.loadProducts();
     this.loadCategories();
@@ -131,57 +147,196 @@ private readonly cdr = inject(ChangeDetectorRef);
 
   // ===== Load Categories =====
   loadCategories(): void {
-    this.adminService.getCategories().subscribe({
-      next: (res: CategoryResponse[]) => {
+    this.productService.getCategories().subscribe({
+      next: (res) => {
         this.categories = res;
         this.cdr.detectChanges();
       },
       error: (err: unknown) => {
         console.error('Failed to load categories', err);
-        this.cdr.detectChanges();
       },
     });
   }
 
-  // ===== Add Product =====
+  // ===== Add Modal =====
   openAddModal(): void {
-    this.newProduct = { name: '', description: '', price: 0, stock: 0, categoryId: 0 };
-    this.modalError  = '';
-    this.showAddModal = true;
+    this.isEditMode = false;
+    this.modalError = null;
+    this.form       = this.emptyForm();
+    this.showModal  = true;
+    this.cdr.detectChanges();
   }
 
-  closeAddModal(): void {
-    this.showAddModal = false;
-    this.modalError   = '';
+  // ===== Edit Modal =====
+  openEditModal(product: AdminProductResponse, event: Event): void {
+    event.stopPropagation();
+    this.isEditMode = true;
+    this.modalError = null;
+
+    this.productService.getProductById(product.id).subscribe({
+      next: fullProduct => {
+        this.form = {
+          id:               fullProduct.id,
+          name:             fullProduct.name,
+          description:      fullProduct.description ?? '',
+          price:            fullProduct.price,
+          stockQuantity:    fullProduct.stockQuantity,
+          categoryId:       this.categories.find(c => c.name === fullProduct.categoryName)?.id ?? '',
+          mainImageFile:    null,
+          mainImagePreview: fullProduct.mainImageUrl
+            ? this.getProductImageUrl(fullProduct.mainImageUrl)
+            : null,
+          extraFiles: (fullProduct.images ?? [])
+            .filter(img => !img.isMain)
+            .map(img => ({
+              file:        null as any,
+              preview:     this.getProductImageUrl(img.imageUrl) ?? '',
+              existingUrl: img.imageUrl,
+            })),
+        };
+        this.showModal = true;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.showError('Failed to load product details.');
+      },
+    });
   }
 
-  submitAddProduct(): void {
-    if (!this.newProduct.name.trim()) {
-      this.modalError = 'Product name is required.';
-      return;
-    }
-    if (this.newProduct.price <= 0) {
-      this.modalError = 'Price must be greater than 0.';
-      return;
-    }
-    if (this.newProduct.categoryId === 0) {
-      this.modalError = 'Please select a category.';
-      return;
-    }
+  closeModal(): void {
+    this.showModal  = false;
+    this.modalError = null;
+    this.cdr.detectChanges();
+  }
 
-    this.isSubmitting = true;
-    this.modalError   = '';
+  // ===== Image Handlers =====
+  onMainImageSelected(e: Event): void {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.form.mainImageFile = file;
+    const r = new FileReader();
+    r.onload = ev => {
+      this.form.mainImagePreview = ev.target?.result as string;
+      this.cdr.detectChanges();
+    };
+    r.readAsDataURL(file);
+  }
 
-    this.adminService.createProduct(this.newProduct).subscribe({
+  onExtraImagesSelected(e: Event): void {
+    const files = Array.from((e.target as HTMLInputElement).files ?? []);
+    files.forEach(file => {
+      const r = new FileReader();
+      r.onload = ev => {
+        this.form.extraFiles.push({ file, preview: ev.target?.result as string });
+        this.cdr.detectChanges();
+      };
+      r.readAsDataURL(file);
+    });
+  }
+
+  removeExtraImage(idx: number): void {
+    this.form.extraFiles.splice(idx, 1);
+    this.cdr.detectChanges();
+  }
+
+  // ===== Submit Form =====
+  submitForm(): void {
+    this.modalError = null;
+    if (!this.form.name.trim()) { this.modalError = 'Product name is required.';    return; }
+    if (this.form.price <= 0)   { this.modalError = 'Price must be greater than 0.'; return; }
+    if (!this.form.categoryId)  { this.modalError = 'Please select a category.';    return; }
+
+    this.modalLoading = true;
+    this.cdr.detectChanges();
+
+    if (this.isEditMode) {
+      // ── Edit: update text fields ────────────────────────────────────────
+      this.productService.updateProduct(this.form.id, {
+        name:          this.form.name,
+        description:   this.form.description,
+        price:         this.form.price,
+        stockQuantity: this.form.stockQuantity,
+        categoryId:    Number(this.form.categoryId),
+      }).subscribe({
+        next: () => {
+          if (this.form.mainImageFile) {
+            this.productService.addProductImage(this.form.id, this.form.mainImageFile, true)
+              .subscribe({
+                next:  () => this.afterSave('Product updated successfully!'),
+                error: () => this.afterSave('Product updated successfully!'),
+              });
+          } else {
+            this.afterSave('Product updated successfully!');
+          }
+        },
+        error: (err: unknown) => {
+          this.modalError   = this.extractError(err, 'Update failed. Please try again.');
+          this.modalLoading = false;
+          this.cdr.detectChanges();
+        },
+      });
+
+    } else {
+      // ── Add: create product + images ────────────────────────────────────
+      this.productService.addProductWithImages({
+        name:          this.form.name,
+        description:   this.form.description,
+        price:         this.form.price,
+        stockQuantity: this.form.stockQuantity,
+        categoryId:    Number(this.form.categoryId),
+        mainImage:     this.form.mainImageFile ?? undefined,
+        extraImages:   this.form.extraFiles
+          .map(f => f.file)
+          .filter((f): f is File => f !== null),
+      }).subscribe({
+        next: () => this.afterSave('Product added successfully!'),
+        error: (err: unknown) => {
+          this.modalError   = this.extractError(err, 'Failed to create product. Please try again.');
+          this.modalLoading = false;
+          this.cdr.detectChanges();
+        },
+      });
+    }
+  }
+
+  private afterSave(message: string): void {
+    this.modalLoading = false;
+    this.showModal    = false;
+    this.showSuccess(message);
+    this.loadProducts();
+    this.cdr.detectChanges();
+  }
+
+  // ===== Delete =====
+  openDeleteModal(product: AdminProductResponse, event: Event): void {
+    event.stopPropagation();
+    this.deletingProduct = product;
+    this.showDeleteModal = true;
+    this.cdr.detectChanges();
+  }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.deletingProduct = null;
+    this.cdr.detectChanges();
+  }
+
+  confirmDelete(): void {
+    if (!this.deletingProduct) return;
+    this.deleteLoading = true;
+    this.cdr.detectChanges();
+
+    this.productService.deleteProduct(this.deletingProduct.id).subscribe({
       next: () => {
-        this.showSuccess('Product added successfully!');
-        this.closeAddModal();
+        this.deleteLoading = false;
+        this.closeDeleteModal();
+        this.showSuccess('Product deleted successfully!');
         this.loadProducts();
-        this.isSubmitting = false;
       },
       error: (err: unknown) => {
-        this.modalError   = this.extractError(err, 'Failed to add product.');
-        this.isSubmitting = false;
+        this.showError(this.extractError(err, 'Failed to delete product.'));
+        this.deleteLoading = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -214,19 +369,18 @@ private readonly cdr = inject(ChangeDetectorRef);
   // ===== Helpers =====
   getStockClass(product: AdminProductResponse): string {
     if (product.stock <= 0) return 'stock-out';
-    if (product.stock < 5) return 'stock-low';
+    if (product.stock < 5)  return 'stock-low';
     return 'stock-in';
   }
 
   getStockLabel(product: AdminProductResponse): string {
     if (product.stock <= 0) return 'Out of Stock';
-    if (product.stock < 5) return 'Low Stock';
+    if (product.stock < 5)  return 'Low Stock';
     return 'In Stock';
   }
 
   getProductImageUrl(imagePath: string | null | undefined): string | null {
     if (!imagePath) return null;
-
     const p = imagePath.replace(/\\/g, '/');
     if (p.startsWith('http://') || p.startsWith('https://')) return p;
     return `${this.imageBaseUrl}${p.startsWith('/') ? p : `/${p}`}`;
@@ -253,5 +407,13 @@ private readonly cdr = inject(ChangeDetectorRef);
     const p = e?.error;
     if (typeof p === 'string' && p.trim().length > 0) return p;
     return fallback;
+  }
+
+  private emptyForm(): ProductForm {
+    return {
+      id: 0, name: '', description: '', price: 0,
+      stockQuantity: 0, categoryId: '',
+      mainImageFile: null, mainImagePreview: null, extraFiles: [],
+    };
   }
 }

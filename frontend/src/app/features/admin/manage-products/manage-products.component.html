@@ -18,29 +18,10 @@
         <span>{{ item.label }}</span>
       </a>
     </nav>
-    <div class="sidebar-footer">
-      <button class="invite-btn">
-        <span class="material-symbols-outlined">rocket_launch</span>
-        Launch Storefront
-      </button>
-    </div>
   </aside>
 
   <!-- ===== MAIN ===== -->
   <main class="main-area">
-
-    <!-- TOPBAR -->
-    <header class="topbar">
-      <div class="search-wrap">
-        <span class="material-symbols-outlined si">search</span>
-        <input class="search-input" type="text"
-               placeholder="Search products, categories or sellers..."
-               [(ngModel)]="searchTerm" />
-      </div>
-
-    </header>
-
-    <!-- PAGE BODY -->
     <div class="page-body">
 
       <!-- HEADING -->
@@ -145,7 +126,8 @@
                            [src]="imageUrl"
                            [alt]="product.name"
                            class="w-full h-full object-cover" />
-                      <span *ngIf="!getProductImageUrl(product.mainImageUrl)" class="material-symbols-outlined">inventory_2</span>
+                      <span *ngIf="!getProductImageUrl(product.mainImageUrl)"
+                            class="material-symbols-outlined">inventory_2</span>
                     </div>
                     <div>
                       <p class="product-name">{{ product.name }}</p>
@@ -170,6 +152,19 @@
                 </td>
                 <td class="text-right">
                   <div class="actions-wrap">
+                    <!-- Edit -->
+                    <button class="icon-action edit"
+                            title="Edit Product"
+                            (click)="openEditModal(product, $event)">
+                      <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <!-- Delete -->
+                    <button class="icon-action delete"
+                            title="Delete Product"
+                            (click)="openDeleteModal(product, $event)">
+                      <span class="material-symbols-outlined">delete</span>
+                    </button>
+                    <!-- Deactivate -->
                     <button class="icon-action deactivate"
                             *ngIf="product.isActive"
                             title="Deactivate Product"
@@ -224,40 +219,59 @@
   </a>
 </nav>
 
-<!-- ===== ADD PRODUCT MODAL ===== -->
-<div class="modal-overlay" *ngIf="showAddModal" (click)="closeAddModal()">
-  <div class="modal" (click)="$event.stopPropagation()">
+<!-- ═══════════════════════════════════════════════════════════
+     ADD / EDIT MODAL
+     ═══════════════════════════════════════════════════════════ -->
+<div *ngIf="showModal"
+     class="modal-overlay"
+     (click)="closeModal()">
 
+  <div class="modal modal-wide"
+       (click)="$event.stopPropagation()">
+
+    <!-- Header -->
     <div class="modal-header">
-      <h3 class="modal-title">Add New Product</h3>
-      <button class="modal-close" (click)="closeAddModal()">
+      <div>
+        <h3 class="modal-title">{{ isEditMode ? 'Edit Product' : 'Add New Product' }}</h3>
+        <p class="modal-sub">Fill in the details below</p>
+      </div>
+      <button class="modal-close" (click)="closeModal()">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
 
-    <!-- Modal Error -->
+    <!-- Error Banner -->
     <div *ngIf="modalError" class="toast toast-error modal-toast">
       <span class="material-symbols-outlined">error</span>
       {{ modalError }}
     </div>
 
-    <div class="modal-body">
+    <div class="modal-body ">
 
-      <!-- Name -->
-      <div class="form-group">
-        <label class="form-label">Product Name <span class="required">*</span></label>
-        <input class="form-input" type="text"
-               placeholder="e.g. Eames Heritage Lounge"
-               [(ngModel)]="newProduct.name" />
+      <!-- Name + Category -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Name <span class="required">*</span></label>
+          <input class="form-input" type="text"
+                 placeholder="e.g. Blue T-Shirt"
+                 [(ngModel)]="form.name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category <span class="required">*</span></label>
+          <select class="form-input form-select" [(ngModel)]="form.categoryId">
+            <option value="">Select…</option>
+            <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+          </select>
+        </div>
       </div>
 
       <!-- Description -->
       <div class="form-group">
         <label class="form-label">Description</label>
         <textarea class="form-input form-textarea"
-                  placeholder="Product description..."
-                  [(ngModel)]="newProduct.description"
-                  rows="3"></textarea>
+                  placeholder="Optional…"
+                  rows="2"
+                  [(ngModel)]="form.description"></textarea>
       </div>
 
       <!-- Price + Stock -->
@@ -266,35 +280,104 @@
           <label class="form-label">Price ($) <span class="required">*</span></label>
           <input class="form-input" type="number" min="0" step="0.01"
                  placeholder="0.00"
-                 [(ngModel)]="newProduct.price" />
+                 [(ngModel)]="form.price" />
         </div>
         <div class="form-group">
-          <label class="form-label">Stock Quantity <span class="required">*</span></label>
+          <label class="form-label">Stock Quantity</label>
           <input class="form-input" type="number" min="0"
                  placeholder="0"
-                 [(ngModel)]="newProduct.stock" />
+                 [(ngModel)]="form.stockQuantity" />
         </div>
       </div>
 
-      <!-- Category -->
+      <!-- Images -->
       <div class="form-group">
-        <label class="form-label">Category <span class="required">*</span></label>
-        <select class="form-input form-select" [(ngModel)]="newProduct.categoryId">
-          <option [value]="0" disabled>Select a category...</option>
-          <option *ngFor="let cat of categories" [value]="cat.id">
-            {{ cat.name }}
-          </option>
-        </select>
+        <label class="form-label">Images</label>
+        <div class="images-row">
+
+          <!-- Main image slot -->
+          <label class="img-slot img-slot-main">
+            <div class="img-slot-inner" [class.has-image]="form.mainImagePreview">
+              <img *ngIf="form.mainImagePreview"
+                   [src]="form.mainImagePreview"
+                   class="img-slot-preview" />
+              <div *ngIf="!form.mainImagePreview" class="img-slot-placeholder">
+                <span class="material-symbols-outlined">add_photo_alternate</span>
+                <span class="img-slot-label">MAIN</span>
+              </div>
+            </div>
+            <span *ngIf="form.mainImagePreview" class="img-badge">Main</span>
+            <input type="file" accept="image/*" class="hidden-input"
+                   (change)="onMainImageSelected($event)" />
+          </label>
+
+          <div class="img-divider"></div>
+
+          <!-- Extra images -->
+          <div *ngFor="let img of form.extraFiles; let i = index"
+               class="img-slot img-slot-extra">
+            <img [src]="img.preview" class="img-slot-preview" />
+            <button type="button" class="img-remove" (click)="removeExtraImage(i)">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          <!-- Add extra slot -->
+          <label class="img-slot img-slot-add">
+            <span class="material-symbols-outlined">add</span>
+            <span class="img-slot-label">EXTRA</span>
+            <input type="file" accept="image/*" multiple class="hidden-input"
+                   (change)="onExtraImagesSelected($event)" />
+          </label>
+
+        </div>
+        <p *ngIf="form.extraFiles.length > 0" class="img-count">
+          {{ form.extraFiles.length }} extra image{{ form.extraFiles.length > 1 ? 's' : '' }} added
+        </p>
       </div>
 
     </div>
 
+    <!-- Footer -->
     <div class="modal-footer">
-      <button class="btn-cancel" (click)="closeAddModal()">Cancel</button>
-      <button class="btn-primary" [disabled]="isSubmitting" (click)="submitAddProduct()">
-        <span class="material-symbols-outlined" *ngIf="!isSubmitting">add</span>
-        <div class="btn-spinner" *ngIf="isSubmitting"></div>
-        {{ isSubmitting ? 'Adding...' : 'Add Product' }}
+      <button class="btn-cancel" (click)="closeModal()">Cancel</button>
+      <button class="btn-primary" [disabled]="modalLoading" (click)="submitForm()">
+        <div class="btn-spinner" *ngIf="modalLoading"></div>
+        <span class="material-symbols-outlined" *ngIf="!modalLoading">
+          {{ isEditMode ? 'save' : 'add' }}
+        </span>
+        {{ isEditMode ? (modalLoading ? 'Saving…' : 'Save Changes') : (modalLoading ? 'Adding…' : 'Add Product') }}
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     DELETE MODAL
+     ═══════════════════════════════════════════════════════════ -->
+<div *ngIf="showDeleteModal"
+     class="modal-overlay"
+     (click)="closeDeleteModal()">
+  <div class="modal modal-sm"
+       (click)="$event.stopPropagation()">
+
+    <div class="delete-icon-wrap">
+      <span class="material-symbols-outlined delete-icon">delete_forever</span>
+    </div>
+
+    <h3 class="delete-title">Delete Product?</h3>
+    <p class="delete-sub">
+      "<strong>{{ deletingProduct?.name }}</strong>" will be permanently removed.
+      This action cannot be undone.
+    </p>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeDeleteModal()">Cancel</button>
+      <button class="btn-danger" [disabled]="deleteLoading" (click)="confirmDelete()">
+        <div class="btn-spinner" *ngIf="deleteLoading"></div>
+        <span class="material-symbols-outlined" *ngIf="!deleteLoading">delete</span>
+        {{ deleteLoading ? 'Deleting…' : 'Delete' }}
       </button>
     </div>
 

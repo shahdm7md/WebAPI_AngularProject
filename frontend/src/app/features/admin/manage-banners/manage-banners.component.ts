@@ -53,13 +53,11 @@ export class ManageBannersComponent implements OnInit {
   navItems = [
     { icon: 'dashboard',     label: 'Dashboard', route: '/admin/dashboard', active: false },
     { icon: 'group',         label: 'Users',     route: '/admin/users',     active: false },
-    { icon: 'storefront',    label: 'Vendors',   route: '/admin/users',     active: false },
     { icon: 'inventory_2',   label: 'Products',  route: '/admin/products',  active: false },
     { icon: 'shopping_cart', label: 'Orders',    route: '/admin/orders',    active: false },
     { icon: 'sell',          label: 'Coupons',   route: '/admin/coupons',   active: false },
     { icon: 'ad_units',      label: 'Banners',   route: '/admin/banners',   active: true  },
-    { icon: 'settings',      label: 'Settings',  route: '/admin/settings',  active: false },
-  ];
+    ];
 
   ngOnInit(): void { this.loadBanners(); }
 

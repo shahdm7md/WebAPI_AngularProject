@@ -177,3 +177,30 @@ export interface CreateProductRequest {
   stock: number;
   categoryId: number;
 }
+
+// =================== Dashboard - Recent Orders ===================
+export interface RecentOrderResponse {
+  id: string;
+  customerName: string;
+  initials: string;
+  avatarColor: string;
+  date: string;
+  amount: number;
+  status: 'Completed' | 'Processing' | 'Shipped' | 'Cancelled';
+}
+
+// =================== Dashboard - Top Sellers ===================
+export interface TopSellerResponse {
+  rank: number;
+  name: string;
+  category: string;
+  revenue: string;
+  growth: string;
+  rankColor: string;
+}
+
+// =================== Dashboard - Sales Trends ===================
+export interface SalesTrendResponse {
+  bars: number[];
+  days: string[];
+}
