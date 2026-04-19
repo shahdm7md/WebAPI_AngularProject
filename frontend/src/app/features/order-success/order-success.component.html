@@ -160,8 +160,13 @@
           <p>Follow your shipment progress or continue exploring new architectural arrivals.</p>
         </div>
         <div class="cta-actions">
-          <a routerLink="/checkout" class="btn-teal">View Order History</a>
+          @if (isSuccess) {
+            <a routerLink="/checkout" class="btn-teal">View Order Summary</a>
+          }
           <a routerLink="/shop" class="btn-glass">Continue Shopping</a>
+          @if (error) {
+            <a routerLink="/checkout" class="btn-glass">Back to Checkout</a>
+          }
         </div>
       </article>
     </section>

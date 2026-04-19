@@ -2,6 +2,7 @@
 using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SharedKernel.Enums;
 
 namespace API.Controllers;
 
@@ -108,9 +109,9 @@ public sealed class AdminController : ControllerBase
 
     // PUT /api/admin/orders/{id}/status
     [HttpPut("orders/{id}/status")]
-    public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] UpdateOrderStatusRequest request)
+    public async Task<IActionResult> UpdateOrderStatus(int id, OrderStatus status)
     {
-        var result = await _orderService.UpdateOrderStatusAsync(id, request.Status);
+        var result = await _orderService.UpdateOrderStatusAsync(id, status);
         return StatusCode(result.StatusCode, new { result.Message });
     }
 

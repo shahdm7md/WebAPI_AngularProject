@@ -21,7 +21,7 @@ export class WishlistComponent implements OnInit {
   actionLoading = false;
   error = '';
   notice = '';
-  readonly imageBaseUrl = 'http://localhost:5199';
+  readonly imageBaseUrl = 'http://localhost:44395';
 
   constructor(
     private wishlistService: WishlistService,

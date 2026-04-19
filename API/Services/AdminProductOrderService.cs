@@ -1,15 +1,20 @@
-﻿using API.Contracts.Admin;
+using API.Contracts.Admin;
+using Core.Interfaces;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Enums;
 using System.Text;
+
 namespace API.Services
 {
     public sealed class AdminProductService : IAdminProductService
     {
         private readonly AppDbContext _context;
 
-        public AdminProductService(AppDbContext context) => _context = context;
+        public AdminProductService(AppDbContext context)
+        {
+            _context = context;
+        }
 
         public async Task<PaginatedResponse<AdminProductResponse>> GetAllProductsAsync(
             string? sellerId, int page, int pageSize)
@@ -92,49 +97,44 @@ namespace API.Services
     public sealed class AdminOrderService : IAdminOrderService
     {
         private readonly AppDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public AdminOrderService(AppDbContext context) => _context = context;
+        public AdminOrderService(AppDbContext context, IEmailService emailService)
+        {
+            _context = context;
+            _emailService = emailService;
+        }
 
         public async Task<PaginatedResponse<AdminOrderResponse>> GetAllOrdersAsync(string? status, int page, int pageSize)
         {
-            // 1. إنشاء الـ Query الأساسية مع Include للمستخدم لضمان ظهور الأسماء
             var query = _context.Orders.Include(o => o.User).AsQueryable();
 
-            // 2. منطق الفلترة الاحترافي:
-            // هنا بنحول الـ string اللي جاي من Angular (زي "0" أو "1") لرقم عشان نقارنه بالـ Enum في الداتا بيز
             if (!string.IsNullOrEmpty(status) && status != "All")
             {
                 if (int.TryParse(status, out int statusInt))
                 {
-                    // المقارنة الرقمية هي اللي بتخلي الفلتر يشتغل صح في SQL
                     query = query.Where(o => (int)o.Status == statusInt);
                 }
                 else
                 {
-                    // احتياطاً لو الحالة مبعوثة كنص
                     query = query.Where(o => o.Status.ToString() == status);
                 }
             }
 
-            // 3. حساب العدد الإجمالي للمفلتر (عشان الـ Pagination يظهر صح)
             var total = await query.CountAsync();
 
-            // 4. جلب البيانات بترتيب الأحدث مع تطبيق الـ Paging
             var orders = await query
                 .OrderByDescending(o => o.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
-            // 5. الـ Mapping للـ Response:
-            // بنحول الـ Status لرقم نصي عشان الـ resolveStatus في Angular تفهمه وتظهر الألوان
             var data = orders.Select(o => new AdminOrderResponse
             {
                 Id = o.Id,
                 CustomerName = o.User?.FullName ?? "Guest",
                 CustomerEmail = o.User?.Email ?? "N/A",
                 TotalAmount = o.TotalAmount,
-                // نرسل الرقم (0, 1, 2) كـ string لأن الـ Angular بيفك شفرته هناك
                 Status = ((int)o.Status).ToString(),
                 CreatedAt = o.CreatedAt
             }).ToList();
@@ -148,9 +148,12 @@ namespace API.Services
             };
         }
 
-        public async Task<UpdateOrderStatusResult> UpdateOrderStatusAsync(int orderId, string status)
+        public async Task<UpdateOrderStatusResult> UpdateOrderStatusAsync(int orderId, OrderStatus status)
         {
-            var order = await _context.Orders.FindAsync(orderId);
+            var order = await _context.Orders
+                .Include(o => o.User)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
             if (order is null)
             {
                 return new UpdateOrderStatusResult
@@ -161,22 +164,46 @@ namespace API.Services
                 };
             }
 
-            // لو الـ Status في الـ Entity نوعه Enum، لازم نعمل Parse للقيمة المبعوثة
-            if (int.TryParse(status, out int statusInt))
+            order.Status = status;
+            var result = await _context.SaveChangesAsync();
+
+            if (result > 0)
             {
-                order.Status = (OrderStatus)statusInt;
-            }
-            else
-            {
-                // لو مبعوثة نص، بنحولها لـ Enum
-                if (Enum.TryParse<OrderStatus>(status, true, out var statusEnum))
+                if (order.User != null && !string.IsNullOrEmpty(order.User.Email))
                 {
-                    order.Status = statusEnum;
+                    string subject = "Order Status Updated";
+                    string message = status switch
+                    {
+                        OrderStatus.Shipped => $"Good news! Your order #{orderId} is on its way.",
+                        OrderStatus.Delivered => $"Your order #{orderId} has been delivered.",
+                        OrderStatus.Cancelled => $"Your order #{orderId} has been cancelled.",
+                        _ => $"Order #{orderId} status updated to {status}."
+                    };
+
+                    try
+                    {
+                        await _emailService.SendEmailAsync(order.User.Email, subject, message);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Email Error: {ex.Message}");
+                    }
                 }
+
+                return new UpdateOrderStatusResult
+                {
+                    Success = true,
+                    StatusCode = 200,
+                    Message = "Status updated successfully."
+                };
             }
 
-            await _context.SaveChangesAsync();
-            return new UpdateOrderStatusResult { Success = true, StatusCode = 200, Message = "Status updated successfully." };
+            return new UpdateOrderStatusResult
+            {
+                Success = false,
+                StatusCode = 400,
+                Message = "Failed to update status."
+            };
         }
 
         public async Task<byte[]> ExportOrdersCsvAsync()

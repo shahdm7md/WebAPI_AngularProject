@@ -1,6 +1,7 @@
 using API.Contracts.Seller;
 using API.Services;
 using Core.Entities;
+using Core.Interfaces;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using SharedKernel.Enums;
@@ -11,11 +12,13 @@ public class SellerService : ISellerService
 {
     private readonly ISellerRepository _sellerRepo;
     private readonly IFileStorageService _fileStorage;
+    private readonly IEmailService _emailService;
 
-    public SellerService(ISellerRepository sellerRepo, IFileStorageService fileStorage)
+    public SellerService(ISellerRepository sellerRepo, IFileStorageService fileStorage , IEmailService emailService)
     {
         _sellerRepo = sellerRepo;
         _fileStorage = fileStorage;
+        _emailService = emailService;
     }
 
     // ── Profile ───────────────────────────────────────────────────────────────
@@ -190,7 +193,7 @@ public class SellerService : ISellerService
     }
 
     public async Task<SellerOrderResponse> UpdateOrderStatusAsync(
-        int orderId, string sellerId, UpdateOrderStatusRequest request)
+    int orderId, string sellerId, UpdateOrderStatusRequest request)
     {
         var order = await _sellerRepo.GetSellerOrderByIdAsync(orderId, sellerId)
             ?? throw new KeyNotFoundException("Order not found.");
@@ -200,7 +203,37 @@ public class SellerService : ISellerService
 
         order.Status = newStatus;
         await _sellerRepo.UpdateOrderAsync(order);
+
+        // 3. إضافة جزء إرسال الإيميل
+        try
+        {
+            var userEmail = order.User?.Email;
+
+            if (!string.IsNullOrEmpty(userEmail))
+            {
+                string subject = $"Update for Order #{orderId}";
+                string body = GetEmailBodyForStatus(newStatus, orderId);
+
+                await _emailService.SendEmailAsync(userEmail, subject, body);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Email failed to send: {ex.Message}");
+        }
+
         return MapToOrderResponse(order, sellerId);
+    }
+
+    private string GetEmailBodyForStatus(OrderStatus status, int orderId)
+    {
+        return status switch
+        {
+            OrderStatus.Shipped => $"Great news! Your order #{orderId} has been shipped and is on its way. 🚚",
+            OrderStatus.Delivered => $"Order #{orderId} has been delivered. Enjoy your flowers! ✨",
+            OrderStatus.Cancelled => $"Your order #{orderId} has been cancelled. Please contact support for details.",
+            _ => $"The status of your order #{orderId} has been changed to {status}."
+        };
     }
 
     // ── Earnings ──────────────────────────────────────────────────────────────

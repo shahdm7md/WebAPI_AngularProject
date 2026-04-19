@@ -1,5 +1,6 @@
 using API.Contracts.Admin;
 using Core.DTOs.Order;
+using SharedKernel.Enums;
 
 namespace API.Services;
 
@@ -23,7 +24,7 @@ public interface IAdminProductService
 public interface IAdminOrderService
 {
     Task<PaginatedResponse<AdminOrderResponse>> GetAllOrdersAsync(string? status, int page, int pageSize);
-    Task<UpdateOrderStatusResult> UpdateOrderStatusAsync(int orderId, string status);
+    Task<UpdateOrderStatusResult> UpdateOrderStatusAsync(int orderId,OrderStatus status);
     Task<byte[]> ExportOrdersCsvAsync();
 }
 

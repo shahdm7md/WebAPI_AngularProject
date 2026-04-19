@@ -1,0 +1,49 @@
+<div class="container my-5">
+  <h2 class="mb-4 text-primary"><i class="fas fa-history me-2"></i>My Orders</h2>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+  </div>
+
+  <div *ngIf="!loading && orders.length === 0" class="alert alert-info text-center">
+    You haven't placed any orders yet.
+    <a routerLink="/shop" class="alert-link">Start shopping now!</a>
+  </div>
+
+  <div *ngIf="!loading && orders.length > 0" class="table-responsive shadow-sm rounded">
+    <table class="table table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Order #</th>
+          <th>Date</th>
+          <th>Total Amount</th>
+          <th>Status</th>
+          <th>Items</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of orders">
+          <td class="fw-bold text-secondary">#{{order.id}}</td>
+          <td>{{order.createdAt | date:'mediumDate'}}</td>
+          <td>{{order.totalAmount | currency:'EGP'}}</td>
+          <td>
+            <span class="badge rounded-pill" [ngClass]="{
+              'bg-warning text-dark': order.status === 'Pending',
+              'bg-info': order.status === 'Paid',
+              'bg-primary': order.status === 'Shipped',
+              'bg-success': order.status === 'Delivered',
+              'bg-danger': order.status === 'Cancelled'
+            }">{{order.status}}</span>
+          </td>
+          <td>{{order.itemCount}} item(s)</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/orders', order.id]">
+              Details
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
