@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { finalize, switchMap } from 'rxjs';
+import { Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -15,15 +15,19 @@ import { AuthService } from '../../../core/services/auth.service';
 export class ForgotPasswordComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
+  protected submittingEmail = false;
   protected resettingPassword = false;
   protected showPassword = false;
   protected message = '';
   protected errorMessage = '';
   protected submitted = false;
+  protected otpRequested = false;
 
   protected readonly resetForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
+    otpCode: ['', [Validators.required, Validators.pattern(/^[0-9]{6}$/)]],
     newPassword: ['', [Validators.required]],
   });
 
@@ -32,6 +36,36 @@ export class ForgotPasswordComponent {
   }
 
   protected submitReset(): void {
+    this.submitted = true;
+    this.clearFeedback();
+
+    if (this.resetForm.controls.email.invalid) {
+      this.resetForm.markAllAsTouched();
+      return;
+    }
+
+    this.submittingEmail = true;
+    const email = this.resetForm.controls.email.value;
+
+    this.authService
+      .forgotPassword({ email })
+      .pipe(finalize(() => (this.submittingEmail = false)))
+      .subscribe({
+        next: (response) => {
+          this.otpRequested = true;
+          this.message = response.message || 'If the email exists, an OTP was sent.';
+          this.errorMessage = '';
+        },
+        error: (error: unknown) => {
+          this.errorMessage = this.authService.extractErrorMessage(
+            error,
+            'Unable to send OTP.',
+          );
+        },
+      });
+  }
+
+  protected confirmReset(): void {
     this.submitted = true;
     this.clearFeedback();
 
@@ -44,21 +78,16 @@ export class ForgotPasswordComponent {
     const payload = this.resetForm.getRawValue();
 
     this.authService
-      .forgotPassword({ email: payload.email })
-      .pipe(
-        switchMap((response) =>
-          this.authService.resetPassword({
-            email: payload.email,
-            token: response.resetToken,
-            newPassword: payload.newPassword,
-          }),
-        ),
-        finalize(() => (this.resettingPassword = false)),
-      )
+      .resetPassword({
+        email: payload.email,
+        otpCode: payload.otpCode,
+        newPassword: payload.newPassword,
+      })
+      .pipe(finalize(() => (this.resettingPassword = false)))
       .subscribe({
         next: (responseMessage: string) => {
           this.message = responseMessage || 'Password reset successful.';
-          this.resetForm.controls.newPassword.reset('');
+          this.router.navigateByUrl('/auth/login');
         },
         error: (error: unknown) => {
           this.errorMessage = this.authService.extractErrorMessage(

@@ -1,8 +1,10 @@
 using API.Contracts.Seller;
 using API.Services;
 using Core.Entities;
+using Core.Interfaces;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
+using Microsoft.Extensions.Logging;
 using SharedKernel.Enums;
 using System.Security.Claims;
 
@@ -13,11 +15,22 @@ public class SellerService : ISellerService
     private readonly ISellerRepository _sellerRepo;
     private readonly IFileStorageService _fileStorage;
     private readonly IWebHostEnvironment _env;
+    private readonly IEmailService _emailService;
+    private readonly IEmailSender _emailSender;
+    private readonly ILogger<SellerService> _logger;
 
-    public SellerService(ISellerRepository sellerRepo, IWebHostEnvironment env, IFileStorageService fileStorage)
+    public SellerService(
+        ISellerRepository sellerRepo,
+        IFileStorageService fileStorage,
+        IEmailService emailService,
+        IEmailSender emailSender,
+        ILogger<SellerService> logger)
     {
         _sellerRepo = sellerRepo;
         _fileStorage = fileStorage;
+        _emailService = emailService;
+        _emailSender = emailSender;
+        _logger = logger;
         _env = env;
     }
 
@@ -226,7 +239,7 @@ public class SellerService : ISellerService
     }
 
     public async Task<SellerOrderResponse> UpdateOrderStatusAsync(
-        int orderId, string sellerId, UpdateOrderStatusRequest request)
+    int orderId, string sellerId, UpdateOrderStatusRequest request)
     {
         var order = await _sellerRepo.GetSellerOrderByIdAsync(orderId, sellerId)
             ?? throw new KeyNotFoundException("Order not found.");
@@ -236,7 +249,80 @@ public class SellerService : ISellerService
 
         order.Status = newStatus;
         await _sellerRepo.UpdateOrderAsync(order);
-        return MapToOrderResponse(order, sellerId);
+
+        string? notificationWarning = null;
+        var userEmail = order.User?.Email;
+
+        if (string.IsNullOrWhiteSpace(userEmail))
+        {
+            notificationWarning = "Order status updated, but customer email is missing.";
+            _logger.LogWarning("Order {OrderId} status changed to {Status}, but customer email is missing.", orderId, newStatus);
+        }
+        else
+        {
+            string subject = $"Update for Order #{orderId}";
+            string body = GetEmailBodyForStatus(newStatus, orderId);
+            const int maxAttempts = 2;
+            var smtpSent = false;
+
+            for (var attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                try
+                {
+                    await _emailSender.SendAsync(userEmail, subject, body);
+                    _logger.LogInformation("Order status email sent via SMTP for order {OrderId} to {Email}", orderId, userEmail);
+                    smtpSent = true;
+                    notificationWarning = null;
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex,
+                        "Failed to send order status email via SMTP for order {OrderId} to {Email}. Attempt {Attempt}/{MaxAttempts}.",
+                        orderId, userEmail, attempt, maxAttempts);
+                }
+            }
+
+            if (!smtpSent)
+            {
+                for (var attempt = 1; attempt <= maxAttempts; attempt++)
+                {
+                    try
+                    {
+                        await _emailService.SendEmailAsync(userEmail, subject, body);
+                        _logger.LogInformation("Order status email accepted by SendGrid for order {OrderId} to {Email}", orderId, userEmail);
+                        notificationWarning = "Order status updated. Notification was accepted by SendGrid but may be delayed in delivery.";
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex,
+                            "Failed to send order status email via SendGrid for order {OrderId} to {Email}. Attempt {Attempt}/{MaxAttempts}.",
+                            orderId, userEmail, attempt, maxAttempts);
+
+                        if (attempt == maxAttempts)
+                        {
+                            notificationWarning = "Order status updated, but notification email could not be sent (SMTP and SendGrid failed).";
+                        }
+                    }
+                }
+            }
+        }
+
+        var response = MapToOrderResponse(order, sellerId);
+        response.NotificationWarning = notificationWarning;
+        return response;
+    }
+
+    private string GetEmailBodyForStatus(OrderStatus status, int orderId)
+    {
+        return status switch
+        {
+            OrderStatus.Shipped => $"Great news! Your order #{orderId} has been shipped and is on its way. 🚚",
+            OrderStatus.Delivered => $"Order #{orderId} has been delivered. Enjoy your flowers! ✨",
+            OrderStatus.Cancelled => $"Your order #{orderId} has been cancelled. Please contact support for details.",
+            _ => $"The status of your order #{orderId} has been changed to {status}."
+        };
     }
 
     // ── Earnings ──────────────────────────────────────────────────────────────

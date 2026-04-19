@@ -33,7 +33,7 @@ export class CheckoutComponent implements OnInit {
   loading = false;
   submitting = false;
   error: string | null = null;
-  paypalError: string | null = null;
+   paypalError: string | null = null;
   paypalLoading = false;
   systemOrderId: number | null = null;
 
@@ -133,9 +133,14 @@ export class CheckoutComponent implements OnInit {
       totalAmount:    cart.totalPrice,
       shippingCost:   0,
       discountAmount: 0,
-      shippingFirstName: '', shippingLastName: '', shippingPhone: '',
-      shippingAddress: '', shippingCity: '', shippingState: '', shippingZipCode: '',
-      status: 1,
+      shippingFirstName: '',
+      shippingLastName: '',
+      shippingPhone: '',
+      shippingAddress: '',
+      shippingCity: '',
+      shippingState: '',
+      shippingZipCode: '',
+      status: OrderStatus.Pending,
       createdAt: new Date().toISOString(),
       items: cart.items.map(item => ({
         productId:    item.productId,

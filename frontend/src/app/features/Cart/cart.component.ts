@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CartService } from '../../core/services/cart.service';
@@ -76,3 +76,4 @@ export class CartComponent implements OnInit {
     return `${this.imageBaseUrl}${item.productImage}`;
   }
 }
+

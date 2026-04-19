@@ -139,7 +139,7 @@ export const routes: Routes = [
   { path: 'Admin/orders', redirectTo: 'admin/orders', pathMatch: 'full' },
   { path: 'Admin/coupons', redirectTo: 'admin/coupons', pathMatch: 'full' },
   { path: 'Admin/banners', redirectTo: 'admin/banners', pathMatch: 'full' },
-  
+
   // Cart & Checkout
   {
     path: 'cart',
@@ -150,6 +150,12 @@ export const routes: Routes = [
     path: 'wishlist',
     loadComponent: () =>
       import('./features/wishlist/wishlist.component').then(m => m.WishlistComponent)
+  },
+  {
+    path: 'profile',
+    loadComponent: () =>
+      import('./features/profile/profile.component').then(m => m.ProfileComponent),
+    canActivate: [AuthGuard]
   },
   {
     path: 'checkout',
@@ -172,6 +178,11 @@ export const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['Customer'] }
   },
-
+  {
+    path: 'my-orders',
+    loadComponent: () =>
+      import('./features/order-history/order-history/order-history').then(m => m.OrderHistoryComponent),
+    canActivate: [AuthGuard]
+  },
   { path: '**', redirectTo: '' },
 ];

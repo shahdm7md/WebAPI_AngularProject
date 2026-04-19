@@ -38,12 +38,12 @@ export interface ForgotPasswordRequest {
 }
 
 export interface ForgotPasswordResponse {
-  resetToken: string;
+  message: string;
 }
 
 export interface ResetPasswordRequest {
   email: string;
-  token: string;
+  otpCode: string;
   newPassword: string;
 }
 

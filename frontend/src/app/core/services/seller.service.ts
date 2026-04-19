@@ -68,6 +68,7 @@ export interface SellerOrderResponse {
   totalAmount: number;
   status: string;
   createdAt: string;
+  notificationWarning?: string;
   items: SellerOrderItemResponse[];
   payment?: PaymentSummaryResponse;
 }

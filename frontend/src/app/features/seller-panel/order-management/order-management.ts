@@ -98,6 +98,7 @@ export class SellerOrdersComponent implements OnInit {
         const idx = this.orders.findIndex(o => o.id === updated.id);
         if (idx !== -1) this.orders[idx] = updated;
         this.orders          = [...this.orders];
+        this.error = updated.notificationWarning ?? null;
         this.updatingOrderId = null;
         this.cdr.markForCheck();
       },
