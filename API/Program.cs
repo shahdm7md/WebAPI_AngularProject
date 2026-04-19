@@ -51,6 +51,7 @@ builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IBannerService, BannerService>();
 builder.Services.AddScoped<ISellerService, SellerService>();
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<ISellerRepository, SellerRepository>();
 builder.Services.AddSingleton<IFileStorageService>(_ =>
     new LocalFileStorageService(

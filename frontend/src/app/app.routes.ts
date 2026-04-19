@@ -152,6 +152,12 @@ export const routes: Routes = [
       import('./features/wishlist/wishlist.component').then(m => m.WishlistComponent)
   },
   {
+    path: 'profile',
+    loadComponent: () =>
+      import('./features/profile/profile.component').then(m => m.ProfileComponent),
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'checkout',
     loadComponent: () =>
       import('./features/checkout/checkout.component').then(m => m.CheckoutComponent),
