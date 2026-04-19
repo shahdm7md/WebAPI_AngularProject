@@ -37,18 +37,7 @@
                placeholder="Search products, categories or sellers..."
                [(ngModel)]="searchTerm" />
       </div>
-      <div class="topbar-right">
-        <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
-        <button class="icon-btn"><span class="material-symbols-outlined">help_outline</span></button>
-        <div class="sep"></div>
-        <div class="user-wrap">
-          <div class="user-text">
-            <p class="uname">Admin User</p>
-            <p class="urole">System Admin</p>
-          </div>
-          <div class="uavatar">A</div>
-        </div>
-      </div>
+
     </header>
 
     <!-- PAGE BODY -->
@@ -152,7 +141,11 @@
                 <td>
                   <div class="product-cell">
                     <div class="product-thumb">
-                      <span class="material-symbols-outlined">inventory_2</span>
+                      <img *ngIf="getProductImageUrl(product.mainImageUrl) as imageUrl"
+                           [src]="imageUrl"
+                           [alt]="product.name"
+                           class="w-full h-full object-cover" />
+                      <span *ngIf="!getProductImageUrl(product.mainImageUrl)" class="material-symbols-outlined">inventory_2</span>
                     </div>
                     <div>
                       <p class="product-name">{{ product.name }}</p>

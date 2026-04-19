@@ -135,6 +135,13 @@ export class LoginComponent {
   private handlePostLogin(response: AuthResponse): void {
     this.authService.storeSession(response);
 
+    const redirectUrl = this.getPostLoginRedirectUrl();
+
+    if (redirectUrl !== '/') {
+      this.router.navigateByUrl(redirectUrl);
+      return;
+    }
+
     forkJoin([
       this.cartService.mergeGuestCartIntoUserCart(),
       this.wishlistService.mergeGuestWishlistIntoUserWishlist(),
@@ -142,5 +149,17 @@ export class LoginComponent {
       next: () => this.router.navigateByUrl('/'),
       error: () => this.router.navigateByUrl('/'),
     });
+  }
+
+  private getPostLoginRedirectUrl(): string {
+    if (this.authService.hasAnyRole(['Admin'])) {
+      return '/admin/dashboard';
+    }
+
+    if (this.authService.hasAnyRole(['Seller'])) {
+      return '/seller/dashboard';
+    }
+
+    return '/';
   }
 }

@@ -1,108 +1,175 @@
-<!-- <div class="min-h-screen bg-surface pt-24 pb-20 px-6">
-  <div class="max-w-2xl mx-auto">
-    <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-10 text-center space-y-5">
-      @if (loading) {
-        <p class="text-on-surface-variant">Confirming your payment...</p>
-      }
-
-      @if (!loading && isSuccess) {
-        <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary">Payment Successful</p>
-        <h1 class="text-4xl font-black tracking-tighter text-primary">Payment Successful</h1>
-        <p class="text-on-surface-variant">Your order #{{ orderId }} has been confirmed successfully.</p>
-      }
-
-      @if (!loading && error) {
-        <p class="text-xs font-bold uppercase tracking-[0.2em] text-error">Payment Confirmation Failed</p>
-        <h1 class="text-4xl font-black tracking-tighter text-primary">We could not confirm payment</h1>
-        <p class="text-on-surface-variant">{{ error }}</p>
-      }
-
-      <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-        <a routerLink="/shop" class="primary-gradient text-on-primary px-8 py-3 rounded-xl font-bold uppercase tracking-widest">
-          Continue Shopping
-        </a>
-        <a routerLink="/checkout" class="bg-surface-container border border-outline-variant/30 px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-primary">
-          Back to Checkout
-        </a>
+<main class="success-page min-h-screen px-6 py-12 lg:py-20">
+  <div class="success-container max-w-6xl mx-auto space-y-12">
+    <section class="hero text-center space-y-6">
+      <div class="hero-icon" [class.hero-icon-error]="!loading && !!error">
+        @if (loading) {
+          <span class="loader" aria-hidden="true"></span>
+        } @else if (isSuccess) {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 7L10 17l-6-6" />
+          </svg>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 8v5" />
+            <path d="M12 16h.01" />
+            <path d="M10.3 3.9L1.8 18.3A2 2 0 0 0 3.5 21h17a2 2 0 0 0 1.7-2.7L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+          </svg>
+        }
       </div>
-    </div>
-  </div>
-</div> -->
-
-<div class="min-h-screen bg-surface pt-24 pb-20 px-6">
-  <div class="max-w-2xl mx-auto">
-    <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-10 text-center space-y-5 shadow-sm">
 
       @if (loading) {
-        <div class="flex flex-col items-center space-y-4">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <p class="text-on-surface-variant font-medium">Confirming your payment, please wait...</p>
-        </div>
+        <h1 class="hero-title">Confirming your order...</h1>
+        <p class="hero-subtitle">Please wait while we verify your payment with the gateway.</p>
+      } @else if (isSuccess) {
+        <h1 class="hero-title">Order Confirmed.</h1>
+        <p class="hero-subtitle">Thank you for your purchase. Your curated selection is being prepared and will be en route shortly.</p>
+      } @else {
+        <h1 class="hero-title">Payment needs attention.</h1>
+        <p class="hero-subtitle">{{ error }}</p>
       }
 
-      @if (!loading && isSuccess) {
-        <div class="space-y-4 animate-in fade-in zoom-in duration-500">
-          <div class="flex justify-center">
-            <div class="bg-secondary/10 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
+      @if (detailsWarning) {
+        <p class="hero-subtitle">{{ detailsWarning }}</p>
+      }
+
+      <div class="ref-block">
+        <span class="ref-label">Order Reference</span>
+        <span class="ref-number">#{{ orderId || '----' }}</span>
+      </div>
+    </section>
+
+    <section class="bento-grid">
+      <article class="card journey-card md:col-span-2">
+        <h3 class="card-label">Shipping Journey</h3>
+        <div class="journey-content">
+          <div class="journey-line">
+            <span class="point active"></span>
+            <span class="line"></span>
+            <span class="point" [class.active]="!loading && isSuccess"></span>
           </div>
 
-          <p class="text-xs font-bold uppercase tracking-[0.2em] text-secondary">Payment Successful</p>
-          <h1 class="text-4xl font-black tracking-tighter text-primary">Thank You!</h1>
+          <div class="journey-events">
+            <div>
+              <p class="event-title">Order Processed</p>
+              <p class="event-meta">
+                @if (loading) { Verifying payment }
+                @if (!loading && isSuccess) { Confirmed successfully }
+                @if (!loading && error) { Could not confirm }
+              </p>
+            </div>
+            <div>
+              <p class="event-title muted">Estimated Delivery</p>
+              <p class="event-meta muted">3 to 5 business days</p>
+            </div>
+          </div>
+        </div>
+      </article>
 
-          <div class="py-4 border-y border-outline-variant/20">
-            <p class="text-xl font-bold text-primary">Order #{{ orderId }} Confirmed</p>
-            <p class="text-on-surface-variant mt-2 leading-relaxed">
-              We have successfully received your payment. A detailed invoice and order confirmation have been sent to your email address.
+      <article class="card address-card">
+        <h3 class="card-label">Delivery Address</h3>
+        @if (orderData) {
+          <div class="space-y-1 text-sm text-on-surface-variant">
+            <p class="font-bold text-primary">{{ orderData.shippingFirstName }} {{ orderData.shippingLastName }}</p>
+            <p class="leading-relaxed">
+              {{ orderData.shippingAddress }}<br/>
+              {{ orderData.shippingCity }}@if (orderData.shippingState) { , {{ orderData.shippingState }} }<br/>
+              {{ orderData.shippingZipCode }}<br/>
+              Phone: {{ orderData.shippingPhone }}
             </p>
           </div>
-
-          <p class="text-sm text-on-surface-variant/80 italic">
-            Thank you for choosing our shop 🌸
-          </p>
-        </div>
-      }
-
-      @if (!loading && error) {
-        <div class="space-y-4">
-          <div class="flex justify-center">
-            <div class="bg-error/10 rounded-full p-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </div>
+        } @else {
+          <div class="text-on-surface-variant text-sm">
+            <p>{{ loading ? 'Loading shipping details...' : 'Shipping details not available yet.' }}</p>
           </div>
-          <p class="text-xs font-bold uppercase tracking-[0.2em] text-error">Confirmation Failed</p>
-          <h1 class="text-4xl font-black tracking-tighter text-primary">Could Not Confirm Payment</h1>
-          <p class="text-on-surface-variant bg-error/5 p-4 rounded-lg border border-error/20">{{ error }}</p>
+        }
+      </article>
+
+      <article class="card summary-card">
+        <h3 class="card-label">Order Items</h3>
+        @if (orderData) {
+          @if (orderData.items && orderData.items.length > 0) {
+            <ul class="space-y-3">
+              @for (item of orderData.items; track item.productId) {
+                <li class="summary-item-row">
+                  <div>
+                    <p class="font-medium text-primary">{{ item.productName }}</p>
+                    <p class="text-xs text-on-surface-variant">Qty: {{ item.quantity }}</p>
+                  </div>
+                  <p class="font-medium text-primary">{{ item.subTotal | currency }}</p>
+                </li>
+              }
+              <li class="summary-total border-t pt-2 mt-2">
+                <span>Total</span>
+                <strong class="text-lg">{{ orderData.totalAmount | currency }}</strong>
+              </li>
+            </ul>
+          } @else {
+            <p class="text-on-surface-variant text-sm">No items in order.</p>
+          }
+        } @else {
+          <p class="text-on-surface-variant text-sm">{{ loading ? 'Loading order items...' : 'Order items not available yet.' }}</p>
+        }
+      </article>
+
+      <article class="card status-card">
+        <h3 class="card-label">Payment & Status</h3>
+        <ul class="space-y-3">
+          <li class="summary-row">
+            <span>Status</span>
+            <strong>
+              @if (loading || !orderData) {
+                Pending
+              } @else {
+                @switch (orderData.status) {
+                  @case (OrderStatus.Pending) { Pending }
+                  @case (OrderStatus.Paid) { Paid }
+                  @case (OrderStatus.Shipped) { Shipped }
+                  @case (OrderStatus.Delivered) { Delivered }
+                  @case (OrderStatus.Cancelled) { Cancelled }
+                  @default { Pending }
+                }
+              }
+            </strong>
+          </li>
+          <li class="summary-row">
+            <span>Next Step</span>
+            <strong>
+              @if (loading || !orderData) {
+                Confirming payment
+              } @else {
+                @switch (orderData.status) {
+                  @case (OrderStatus.Pending) { Confirming payment }
+                  @case (OrderStatus.Paid) { Packing & dispatch }
+                  @case (OrderStatus.Shipped) { In transit }
+                  @case (OrderStatus.Delivered) { Completed }
+                  @default { Confirming payment }
+                }
+              }
+            </strong>
+          </li>
+          <li class="summary-row">
+            <span>Support Ref</span>
+            <strong>#{{ orderId || '----' }}</strong>
+          </li>
+        </ul>
+      </article>
+
+      <article class="card cta-card md:col-span-2">
+        <div>
+          <h3>What's next?</h3>
+          <p>Follow your shipment progress or continue exploring new architectural arrivals.</p>
         </div>
-      }
+        <div class="cta-actions">
+          @if (isSuccess) {
+            <a routerLink="/checkout" class="btn-teal">View Order Summary</a>
+          }
+          <a routerLink="/shop" class="btn-glass">Continue Shopping</a>
+          @if (error) {
+            <a routerLink="/checkout" class="btn-glass">Back to Checkout</a>
+          }
+        </div>
+      </article>
+    </section>
 
-      <div class="flex flex-col sm:flex-row gap-3 justify-center pt-6">
-
-        @if (isSuccess) {
-          <a routerLink="/features/order-history"
-             class="primary-gradient text-on-primary px-8 py-3 rounded-xl font-bold uppercase tracking-widest hover:opacity-90 transition-all shadow-md">
-            View My Orders
-          </a>
-        }
-
-        <a routerLink="/shop"
-           class="bg-surface-container border border-outline-variant/30 px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-primary hover:bg-surface-container-high transition-all">
-          Continue Shopping
-        </a>
-
-        @if (error) {
-          <a routerLink="/checkout"
-             class="bg-error text-on-error px-8 py-3 rounded-xl font-bold uppercase tracking-widest hover:bg-error/90 transition-all">
-            Back to Checkout
-          </a>
-        }
-      </div>
-
-    </div>
   </div>
-</div>
+</main>

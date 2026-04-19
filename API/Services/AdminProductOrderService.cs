@@ -1,9 +1,10 @@
-﻿using API.Contracts.Admin;
+using API.Contracts.Admin;
 using Core.Interfaces;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Enums;
 using System.Text;
+
 namespace API.Services
 {
     public sealed class AdminProductService : IAdminProductService
@@ -12,16 +13,16 @@ namespace API.Services
 
         public AdminProductService(AppDbContext context)
         {
-            _context = context;        
+            _context = context;
         }
-        
 
         public async Task<PaginatedResponse<AdminProductResponse>> GetAllProductsAsync(
             string? sellerId, int page, int pageSize)
         {
             var query = _context.Products
                 .Include(p => p.Category)
-                //.Where(p => p.IsActive)
+                .Include(p => p.Images)
+                .Where(p => p.IsActive)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(sellerId))
@@ -46,9 +47,13 @@ namespace API.Services
                 Id = p.Id,
                 Name = p.Name,
                 Price = p.Price,
-                Stock = p.Stock,
-                IsAvailable = p.IsAvailable,
+                Stock = p.StockQuantity,
+                IsAvailable = p.IsActive && p.StockQuantity > 0,
                 IsActive = p.IsActive,
+                MainImageUrl = p.Images
+                    .OrderByDescending(i => i.IsMain)
+                    .Select(i => i.ImageUrl)
+                    .FirstOrDefault(),
                 CategoryName = p.Category?.Name ?? string.Empty,
                 SellerId = p.SellerId,
                 SellerName = sellers.TryGetValue(p.SellerId, out var name) ? name : "Unknown"
@@ -88,63 +93,63 @@ namespace API.Services
     }
 
     // =================== Order Service ===================
+
     public sealed class AdminOrderService : IAdminOrderService
     {
         private readonly AppDbContext _context;
         private readonly IEmailService _emailService;
 
-
-        public AdminOrderService(AppDbContext context , IEmailService emailService)
+        public AdminOrderService(AppDbContext context, IEmailService emailService)
         {
             _context = context;
             _emailService = emailService;
         }
 
-        public async Task<PaginatedResponse<AdminOrderResponse>> GetAllOrdersAsync(
-            string? status, int page, int pageSize)
+        public async Task<PaginatedResponse<AdminOrderResponse>> GetAllOrdersAsync(string? status, int page, int pageSize)
         {
-            // uncomment لما Dev 3 يخلص Order entity:
-            //
-            // var query = _context.Orders.Include(o => o.User).AsQueryable();
-            //
-            // if (!string.IsNullOrEmpty(status))
-            //     query = query.Where(o => o.Status == status);
-            //
-            // var total  = await query.CountAsync();
-            // var orders = await query
-            //     .OrderByDescending(o => o.CreatedAt)
-            //     .Skip((page - 1) * pageSize)
-            //     .Take(pageSize)
-            //     .ToListAsync();
-            //
-            // var data = orders.Select(o => new AdminOrderResponse
-            // {
-            //     Id            = o.Id,
-            //     CustomerName  = o.User?.FullName ?? "Guest",
-            //     CustomerEmail = o.User?.Email ?? string.Empty,
-            //     TotalAmount   = o.TotalAmount,
-            //     Status        = o.Status,
-            //     PaymentMethod = o.PaymentMethod,
-            //     CreatedAt     = o.CreatedAt
-            // }).ToList();
-            //
-            // return new PaginatedResponse<AdminOrderResponse>
-            // {
-            //     Data = data, TotalCount = total, Page = page, PageSize = pageSize
-            // };
+            var query = _context.Orders.Include(o => o.User).AsQueryable();
 
-            return await Task.FromResult(new PaginatedResponse<AdminOrderResponse>
+            if (!string.IsNullOrEmpty(status) && status != "All")
             {
-                Data = Array.Empty<AdminOrderResponse>(),
-                TotalCount = 0,
+                if (int.TryParse(status, out int statusInt))
+                {
+                    query = query.Where(o => (int)o.Status == statusInt);
+                }
+                else
+                {
+                    query = query.Where(o => o.Status.ToString() == status);
+                }
+            }
+
+            var total = await query.CountAsync();
+
+            var orders = await query
+                .OrderByDescending(o => o.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var data = orders.Select(o => new AdminOrderResponse
+            {
+                Id = o.Id,
+                CustomerName = o.User?.FullName ?? "Guest",
+                CustomerEmail = o.User?.Email ?? "N/A",
+                TotalAmount = o.TotalAmount,
+                Status = ((int)o.Status).ToString(),
+                CreatedAt = o.CreatedAt
+            }).ToList();
+
+            return new PaginatedResponse<AdminOrderResponse>
+            {
+                Data = data,
+                TotalCount = total,
                 Page = page,
                 PageSize = pageSize
-            });
+            };
         }
 
         public async Task<UpdateOrderStatusResult> UpdateOrderStatusAsync(int orderId, OrderStatus status)
         {
-            // 1. هاتي الـ Order مع اليوزر (بإستخدام Include) عشان الإيميل
             var order = await _context.Orders
                 .Include(o => o.User)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
@@ -159,22 +164,20 @@ namespace API.Services
                 };
             }
 
-            // 2. تحديث الحالة
             order.Status = status;
             var result = await _context.SaveChangesAsync();
 
             if (result > 0)
             {
-                // 3. منطق إرسال الإيميل (SendGrid)
                 if (order.User != null && !string.IsNullOrEmpty(order.User.Email))
                 {
                     string subject = "Order Status Updated";
                     string message = status switch
                     {
-                        OrderStatus.Shipped => $"Good news! Your order #{orderId} is on its way. It has been shipped!",
-                        OrderStatus.Delivered => $"Your order #{orderId} has been delivered. We hope you enjoy your flowers!",
-                        OrderStatus.Cancelled => $"We are sorry to inform you that your order #{orderId} has been cancelled.",
-                        _ => $"The status of your order #{orderId} has been updated to {status}."
+                        OrderStatus.Shipped => $"Good news! Your order #{orderId} is on its way.",
+                        OrderStatus.Delivered => $"Your order #{orderId} has been delivered.",
+                        OrderStatus.Cancelled => $"Your order #{orderId} has been cancelled.",
+                        _ => $"Order #{orderId} status updated to {status}."
                     };
 
                     try
@@ -183,8 +186,7 @@ namespace API.Services
                     }
                     catch (Exception ex)
                     {
-                        // بنعمل Log للخطأ بس مش بنوقف الـ API
-                        Console.WriteLine($"SendGrid Error: {ex.Message}");
+                        Console.WriteLine($"Email Error: {ex.Message}");
                     }
                 }
 
@@ -192,7 +194,7 @@ namespace API.Services
                 {
                     Success = true,
                     StatusCode = 200,
-                    Message = "Status updated and email sent successfully."
+                    Message = "Status updated successfully."
                 };
             }
 
@@ -200,22 +202,22 @@ namespace API.Services
             {
                 Success = false,
                 StatusCode = 400,
-                Message = "Failed to update status in database."
+                Message = "Failed to update status."
             };
         }
 
         public async Task<byte[]> ExportOrdersCsvAsync()
         {
-            // uncomment لما Dev 3 يخلص:
-            // var orders = await _context.Orders.Include(o => o.User).ToListAsync();
-            // var sb     = new StringBuilder();
-            // sb.AppendLine("Id,Customer,Email,Amount,Status,Date");
-            // foreach (var o in orders)
-            //     sb.AppendLine($"{o.Id},{o.User?.FullName},{o.User?.Email},{o.TotalAmount},{o.Status},{o.CreatedAt:yyyy-MM-dd}");
-            // return Encoding.UTF8.GetBytes(sb.ToString());
+            var orders = await _context.Orders.Include(o => o.User).ToListAsync();
+            var sb = new StringBuilder();
+            sb.AppendLine("Id,Customer,Email,Amount,Status,Date");
 
-            return await Task.FromResult(
-                Encoding.UTF8.GetBytes("Id,Customer,Email,Amount,Status,Date\n"));
+            foreach (var o in orders)
+            {
+                sb.AppendLine($"{o.Id},{o.User?.FullName ?? "Guest"},{o.User?.Email},{o.TotalAmount},{o.Status},{o.CreatedAt:yyyy-MM-dd}");
+            }
+
+            return Encoding.UTF8.GetBytes(sb.ToString());
         }
     }
 }

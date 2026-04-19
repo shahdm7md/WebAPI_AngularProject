@@ -152,6 +152,7 @@
                 <span class="text-2xl">
                   @if (pm.value === PaymentMethod.Card) { 💳 }
                   @if (pm.value === PaymentMethod.Cash) { 💵 }
+                  @if (pm.value === PaymentMethod.PayPal) { 🅿️ }
                 </span>
                 <span class="text-xs font-bold text-on-surface-variant">{{ pm.label }}</span>
               </button>
@@ -228,6 +229,7 @@
                 <p class="font-bold text-primary">
                   @if (paymentForm.value.paymentMethod === PaymentMethod.Card) { 💳 Pay with Stripe }
                   @if (paymentForm.value.paymentMethod === PaymentMethod.Cash) { 💵 Cash on Delivery }
+                  @if (paymentForm.value.paymentMethod === PaymentMethod.PayPal) { 🅿️ Pay with PayPal }
                 </p>
               </div>
               <button (click)="goToStep(2)"
@@ -282,10 +284,26 @@
                 </svg>
                 Processing...
               } @else {
-                {{ paymentForm.value.paymentMethod === PaymentMethod.Card ? 'Pay with Stripe' : 'Place Cash Order' }}
+                @if (paymentForm.value.paymentMethod === PaymentMethod.Card) { Pay with Stripe }
+                @if (paymentForm.value.paymentMethod === PaymentMethod.Cash) { Place Cash Order }
+                @if (paymentForm.value.paymentMethod === PaymentMethod.PayPal) { Load PayPal Buttons }
               }
             </button>
           </div>
+
+          @if (paymentForm.value.paymentMethod === PaymentMethod.PayPal) {
+            <div class="mt-6 rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-5 space-y-3">
+              <p class="text-xs font-bold uppercase tracking-widest text-primary">PayPal Sandbox</p>
+              <p class="text-sm text-on-surface-variant">Click the PayPal button below to open the sandbox approval flow. The order is created when you click PayPal, not before.</p>
+              @if (paypalLoading) {
+                <p class="text-sm text-on-surface-variant">Loading PayPal buttons...</p>
+              }
+              @if (paypalError) {
+                <p class="text-sm text-error">{{ paypalError }}</p>
+              }
+              <div id="paypal-button-container"></div>
+            </div>
+          }
         </div>
       }
 
