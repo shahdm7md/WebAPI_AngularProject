@@ -183,7 +183,4 @@ Make sure coupon type mapping in frontend matches backend enum:
 - Percentage = `1`
 - Fixed = `2`
 
-## Notes
 
-1. `About` navbar link was removed because it had no route/page.
-2. Admin/Seller category pages are available through sidebar navigation.
