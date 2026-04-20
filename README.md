@@ -124,7 +124,7 @@ Angular → API Controllers → Services → Repositories → SQL Server
 ### 🔧 Backend
 
 ```bash
-git clone https://github.com/your-repo.git
+git clone https://github.com/shahdm7md/WebAPI_AngularProject.git
 cd backend
 dotnet ef database update
 dotnet run
