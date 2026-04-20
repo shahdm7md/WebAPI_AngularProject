@@ -6,6 +6,7 @@ using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Enums;
+using System.Security.Claims;
 
 namespace Application.Services;
 
@@ -13,6 +14,7 @@ public class SellerService : ISellerService
 {
     private readonly ISellerRepository _sellerRepo;
     private readonly IFileStorageService _fileStorage;
+    private readonly IWebHostEnvironment _env;
     private readonly IEmailService _emailService;
     private readonly IEmailSender _emailSender;
     private readonly ILogger<SellerService> _logger;
@@ -29,6 +31,7 @@ public class SellerService : ISellerService
         _emailService = emailService;
         _emailSender = emailSender;
         _logger = logger;
+        _env = env;
     }
 
     // ── Profile ───────────────────────────────────────────────────────────────
@@ -78,36 +81,69 @@ public class SellerService : ISellerService
     }
 
     public async Task<SellerProductResponse> CreateProductAsync(
-        string sellerId, CreateSellerProductRequest request)
+     string sellerId, CreateSellerProductRequest request)
     {
         var product = new Product
         {
-            Name          = request.Name,
-            Description   = request.Description,
-            Price         = request.Price,
+            Name = request.Name,
+            Description = request.Description,
+            Price = request.Price,
             StockQuantity = request.StockQuantity,
-            IsAvailable   = request.StockQuantity > 0,
-            CategoryId    = request.CategoryId,
-            SellerId      = sellerId
+            IsAvailable = request.StockQuantity > 0,
+            CategoryId = request.CategoryId,
+            SellerId = sellerId
         };
 
         var created = await _sellerRepo.CreateProductAsync(product);
 
-        if (request.MainImage != null)
+        // ── Main Image ────────────────────────────────────────────────────────
+        if (request.MainImage != null && request.MainImage.Length > 0)
         {
-            var imageUrl = await _fileStorage.UploadAsync(request.MainImage);
+            var mainUrl = await SaveImageFileAsync(request.MainImage);
             await _sellerRepo.AddProductImageAsync(new ProductImage
             {
                 ProductId = created.Id,
-                ImageUrl  = imageUrl,
-                IsMain    = true
+                ImageUrl = mainUrl,
+                IsMain = true
             });
+        }
+
+        // ── Extra Images ──────────────────────────────────────────────────────
+        if (request.ExtraImages != null && request.ExtraImages.Count > 0)
+        {
+            foreach (var file in request.ExtraImages)
+            {
+                if (file == null || file.Length == 0) continue;
+
+                var extraUrl = await SaveImageFileAsync(file);
+                await _sellerRepo.AddProductImageAsync(new ProductImage
+                {
+                    ProductId = created.Id,
+                    ImageUrl = extraUrl,
+                    IsMain = false          // ← مهم: مش رئيسية
+                });
+            }
         }
 
         var full = await _sellerRepo.GetSellerProductByIdAsync(created.Id, sellerId);
         return MapToProductResponse(full!);
     }
 
+    // ── Helper ────────────────────────────────────────────────────────────────
+    private async Task<string> SaveImageFileAsync(IFormFile file)
+    {
+        var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+        var uploadsFolder = Path.Combine(_env.WebRootPath, "images", "products");
+
+        if (!Directory.Exists(uploadsFolder))
+            Directory.CreateDirectory(uploadsFolder);
+
+        var filePath = Path.Combine(uploadsFolder, fileName);
+        using var fs = new FileStream(filePath, FileMode.Create);
+        await file.CopyToAsync(fs);
+
+        return $"/images/products/{fileName}";
+    }
     public async Task<SellerProductResponse> UpdateProductAsync(
         int productId, string sellerId, UpdateSellerProductRequest request)
     {

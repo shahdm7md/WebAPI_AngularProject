@@ -19,7 +19,7 @@ import { ProductAddComponent } from './product-add/product-add';
 import { ProductEditComponent } from './product-edit/product-edit';
 
 import { SellerOrdersComponent } from './features/seller-panel/order-management/order-management';
-import { SellerProductsComponent } from './features/seller-panel/product-management/product-management';
+import { ProductsComponent } from './features/seller-panel/product-management/product-management';
 // import { SettingsComponent } from './features/seller-panel/store-settings/store-settings';
 import { SellerOverviewComponent } from './features/seller-panel/seller-overview/seller-overview';
 export const routes: Routes = [
@@ -86,7 +86,7 @@ export const routes: Routes = [
   },
   {
     path: 'seller/products',
-    component: SellerProductsComponent,
+    component: ProductsComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['Seller'] },
   },

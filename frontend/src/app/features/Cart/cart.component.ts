@@ -16,7 +16,7 @@ export class CartComponent implements OnInit {
   loading = false;
   error: string | null = null;
   removingId: number | null = null;
-  private readonly imageBaseUrl = 'http://localhost:5199';
+  private readonly imageBaseUrl = 'https://localhost:44395';
 
   constructor(private cartService: CartService) {}
 
