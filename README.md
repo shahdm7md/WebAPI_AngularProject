@@ -2,8 +2,6 @@
 
 <div align="center">
 
-![Project Banner](https://via.placeholder.com/900x200/0045a3/ffffff?text=E-Commerce+Platform)
-
 [![Angular](https://img.shields.io/badge/Angular-17+-DD0031?style=for-the-badge\&logo=angular\&logoColor=white)](https://angular.io/)
 [![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-8.0-512BD4?style=for-the-badge\&logo=dotnet\&logoColor=white)](https://dotnet.microsoft.com/)
 [![SQL Server](https://img.shields.io/badge/SQL_Server-2022-CC2927?style=for-the-badge\&logo=microsoftsqlserver\&logoColor=white)](https://www.microsoft.com/sql-server)
@@ -195,16 +193,7 @@ frontend/
 * [x] Email templates system
 * [x] Admin dashboard
 
----
 
-## 👩‍💻 Author
-
-**Your Name**
-
-* GitHub: https://github.com/your-username
-* LinkedIn: https://linkedin.com/in/your-profile
-
----
 
 <div align="center">
 
