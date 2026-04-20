@@ -2,17 +2,14 @@
 
 <div align="center">
 
-[![Angular](https://img.shields.io/badge/Angular-17+-DD0031?style=for-the-badge\&logo=angular\&logoColor=white)](https://angular.io/)
-[![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-8.0-512BD4?style=for-the-badge\&logo=dotnet\&logoColor=white)](https://dotnet.microsoft.com/)
-[![SQL Server](https://img.shields.io/badge/SQL_Server-2022-CC2927?style=for-the-badge\&logo=microsoftsqlserver\&logoColor=white)](https://www.microsoft.com/sql-server)
-[![Entity Framework](https://img.shields.io/badge/Entity_Framework_Core-8.0-512BD4?style=for-the-badge\&logo=dotnet\&logoColor=white)](https://docs.microsoft.com/ef/)
-[![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?style=for-the-badge\&logo=stripe\&logoColor=white)](#)
-[![PayMob](https://img.shields.io/badge/PayMob-Egypt-00AEEF?style=for-the-badge)](#)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![Angular](https://img.shields.io/badge/Angular-21+-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.io/)
+[![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-.NET_10-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![SQL Server](https://img.shields.io/badge/SQL_Server-2022-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/sql-server)
+[![Entity Framework](https://img.shields.io/badge/Entity_Framework_Core-10-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://learn.microsoft.com/ef/core)
+[![PayPal](https://img.shields.io/badge/PayPal-Payments-003087?style=for-the-badge&logo=paypal&logoColor=white)](#)
+[![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](#)
 
-**A production-ready full-stack e-commerce platform built with Angular 17, ASP.NET Core 8, and SQL Server — featuring real payment integration (Stripe & PayMob), product reviews, wishlist, discount system, advanced product image management, and a complete admin dashboard.**
-
-[Live Demo](#) · [API Docs](#api-documentation) · [Report Bug](#) · [Request Feature](#)
+**A full-stack e-commerce platform built with Angular + ASP.NET Core + SQL Server, with role-based access for Customer/Seller/Admin, real checkout flow, and dashboard management features.**
 
 </div>
 
@@ -20,183 +17,222 @@
 
 ## 📌 Overview
 
-This project is a **full-stack e-commerce platform** that delivers a complete online shopping experience.
+This project provides a complete online shopping workflow:
 
-It supports multiple roles:
+Product listing → Cart → Checkout → Payment → Order history
 
-* 🛍️ **Customers** — browse, review, wishlist, and purchase products
-* 🏪 **Sellers** — manage products, orders, and earnings
-* 🛠️ **Admins** — control and monitor the entire platform
+Supported roles:
 
-The system handles the full lifecycle:
-
-> Product listing → Cart → Checkout → Payment → Order tracking
+- 🛍️ Customer
+- 🏪 Seller
+- 🛠️ Admin
 
 ---
 
 ## 🚀 Features
 
-### 🛍️ Customer Side
+### Customer
 
-* Browse products with search & filtering
-* Product details with image gallery
-* Shopping cart & checkout flow
-* Wishlist (save products for later)
-* Product reviews & rating system
-* Apply discount coupons
-* Order history & tracking
+- Product browsing with search/filter
+- Product details + image gallery
+- Cart + checkout
+- Wishlist
+- Coupon apply/validation
+- Order history + order details
 
----
+### Seller Dashboard
 
-### 💳 Payments & Orders
+- Product CRUD with images
+- Category management
+- Order management + status updates
+- Earnings overview
 
-* Secure payments using **Stripe & PayMob**
-* Real transaction processing
-* Order confirmation via email
-* Full order lifecycle tracking
+### Admin Panel
 
----
+- Manage users, products, categories
+- Manage orders, coupons, banners
+- Platform dashboard stats
 
-### 🏪 Seller Dashboard
+### Auth & Security
 
-* Product CRUD (with multi-image upload)
-* Edit product images (reorder / delete)
-* Category management
-* Inventory tracking
-* Order management workflow
-* Earnings dashboard
+- ASP.NET Identity + JWT
+- Role-based authorization
+- Google login support (configurable)
+- OTP / email-based flows
 
----
+### Payments
 
-### 🛠️ Admin Panel
-
-* Manage users, products, and categories
-* Monitor platform activity
-* Full dashboard control
-
----
-
-### 📧 Notifications
-
-* HTML email templates for:
-
-  * OTP verification
-  * Order confirmation
-  * Password reset
-
----
-
-### 🔐 Authentication & Security
-
-* JWT Authentication
-* Role-based authorization (Customer / Seller / Admin)
-* Email OTP verification
-* Secure password reset flow
+- ✅ PayPal
+- ✅ Stripe
+- ❌ Paymob (not used)
 
 ---
 
 ## 🧱 Tech Stack
 
-| Layer    | Technology               |
-| -------- | ------------------------ |
-| Frontend | Angular 17, Tailwind CSS |
-| Backend  | ASP.NET Core 8 Web API   |
-| Database | SQL Server               |
-| ORM      | Entity Framework Core    |
-| Auth     | Identity + JWT           |
-| Payments | Stripe & PayMob          |
-| Docs     | Swagger                  |
+| Layer | Technology |
+|------|------------|
+| Frontend | Angular 21, Tailwind, Bootstrap |
+| Backend | ASP.NET Core Web API (.NET 10) |
+| Database | SQL Server |
+| ORM | Entity Framework Core |
+| Auth | ASP.NET Identity + JWT |
+| Payments | PayPal, Stripe |
 
 ---
 
-## 🏗️ System Architecture
+## 📁 Repository Structure
 
-Frontend (Angular SPA) communicates with Backend (ASP.NET API) via secure JWT-based HTTP requests.
-
-```
-Angular → API Controllers → Services → Repositories → SQL Server
-```
-
----
-
-## ⚙️ Getting Started
-
-### 🔧 Backend
-
-```bash
-git clone https://github.com/shahdm7md/WebAPI_AngularProject.git
-cd backend
-dotnet ef database update
-dotnet run
-```
-
----
-
-### 💻 Frontend
-
-```bash
-cd frontend
-npm install
-ng serve
-```
-
----
-
-## 📡 API Documentation
-
-Base URL:
-
-```
-https://localhost:44395/api
-```
-
-Auth Header:
-
-```
-Authorization: Bearer <token>
-```
-
----
-
-## 📸 Screenshots
-
-> Add real screenshots here
-
----
-
-## 📁 Folder Structure
-
-```
-backend/
+```text
+EcommerceProject.sln
+API/
+Core/
+Infrastructure/
+SharedKernel/
 frontend/
 ```
 
 ---
 
-## 🔮 Future Enhancements
+## ⚙️ Local Setup (Step by Step)
 
-* [ ] Real-time notifications (SignalR)
-* [ ] Advanced analytics dashboard
-* [ ] PWA support
-* [ ] Docker deployment
-* [ ] Automated testing
+### 1. Prerequisites
+
+Install:
+
+1. .NET SDK 10.x
+2. Node.js 22+ and npm
+3. SQL Server
+4. Git
+
+### 2. Clone
+
+```bash
+git clone <your-repo-url>
+cd WebAPI_AngularProject
+```
+
+### 3. Restore backend packages
+
+```bash
+dotnet restore EcommerceProject.sln
+```
+
+### 4. Configure local secrets (important)
+
+Project uses placeholders in committed config files. Set real values locally with User Secrets:
+
+```bash
+dotnet user-secrets init --project API/API.csproj
+
+dotnet user-secrets set "Jwt:Key" "your-jwt-key" --project API/API.csproj
+dotnet user-secrets set "Authentication:Google:ClientId" "your-google-client-id" --project API/API.csproj
+dotnet user-secrets set "Authentication:Google:ClientSecret" "your-google-client-secret" --project API/API.csproj
+
+dotnet user-secrets set "EmailSettings:SmtpUser" "your-smtp-user" --project API/API.csproj
+dotnet user-secrets set "EmailSettings:SmtpPassword" "your-smtp-password" --project API/API.csproj
+dotnet user-secrets set "EmailSettings:SenderEmail" "your-sender-email" --project API/API.csproj
+
+dotnet user-secrets set "Stripe:SecretKey" "your-stripe-secret" --project API/API.csproj
+dotnet user-secrets set "Stripe:PublishableKey" "your-stripe-publishable" --project API/API.csproj
+
+dotnet user-secrets set "PayPal:ClientId" "your-paypal-client-id" --project API/API.csproj
+dotnet user-secrets set "PayPal:Secret" "your-paypal-secret" --project API/API.csproj
+
+dotnet user-secrets set "SendGrid:ApiKey" "your-sendgrid-key" --project API/API.csproj
+dotnet user-secrets set "SendGrid:FromEmail" "your-from-email" --project API/API.csproj
+```
+
+### 5. Update database
+
+```bash
+dotnet ef database update --project Infrastructure --startup-project API
+```
+
+If needed:
+
+```bash
+dotnet tool install --global dotnet-ef
+```
+
+### 6. Run backend API
+
+```bash
+dotnet run --project API/API.csproj
+```
+
+Backend URL:
+
+- http://localhost:5199
+
+API docs (Development):
+
+- http://localhost:5199/swagger
+
+### 7. Run frontend
+
+Open a second terminal:
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+Frontend URL:
+
+- http://localhost:4200
 
 ---
 
-## ✅ Implemented Features
+## 🔑 Seeded Admin User
 
-* [x] Stripe & PayMob payments
-* [x] Product reviews & ratings
-* [x] Wishlist system
-* [x] Discount & coupon system
-* [x] Multi-image product editing
-* [x] Email templates system
-* [x] Admin dashboard
+Default admin is seeded automatically:
 
+- Email: admin@webapiangularproject.com
+- Password: Admin123!
 
+File: Infrastructure/Identity/IdentitySeeder.cs
 
-<div align="center">
+Change this password immediately in non-local environments.
 
-⭐ If you like this project, give it a star!
+---
 
-</div>
+## 🧪 Build Commands
+
+From repository root:
+
+```bash
+dotnet build EcommerceProject.sln
+```
+
+From frontend folder:
+
+```bash
+npm run build
+npm test
+```
+
+---
+
+## 🛡️ Security Checklist Before Public GitHub
+
+1. Never commit real secrets in `appsettings*.json`, `.env`, or source files.
+2. Rotate all previously exposed keys immediately:
+	- PayPal
+	- Stripe
+	- Google OAuth
+	- SMTP app password
+	- SendGrid API key
+	- JWT signing key
+3. Use User Secrets for local dev and environment variables in production.
+4. If secrets were previously committed, rewrite git history before publishing.
+
+---
+
+## 🧭 Notes
+
+- API local port is `5199`.
+- Frontend local port is `4200`.
+- About navbar link was removed because it had no working route.
+

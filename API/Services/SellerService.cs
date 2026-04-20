@@ -22,6 +22,7 @@ public class SellerService : ISellerService
     public SellerService(
         ISellerRepository sellerRepo,
         IFileStorageService fileStorage,
+        IWebHostEnvironment env,
         IEmailService emailService,
         IEmailSender emailSender,
         ILogger<SellerService> logger)

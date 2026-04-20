@@ -12,3 +12,9 @@ frontend/dist/
 
 # Environment files
 *.env
+
+# Local secrets and overrides
+API/appsettings.Local.json
+API/appsettings.Development.Local.json
+frontend/.env
+frontend/.env.local
