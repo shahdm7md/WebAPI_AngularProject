@@ -1,59 +1,189 @@
-# Frontend
+# EcommerceProject Setup Guide
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.4.
+This repository contains a full-stack ecommerce app:
 
-## Development server
+- Backend: ASP.NET Core Web API (`API`, `Core`, `Infrastructure`)
+- Frontend: Angular (`frontend`)
+- Database: SQL Server (Entity Framework Core)
 
-To start a local development server, run:
+## Payments
+
+The project currently uses:
+
+- PayPal (enabled)
+- Stripe (also configured in backend)
+
+It does not use Paymob.
+
+## Prerequisites
+
+Install the following before running the project:
+
+1. .NET SDK 10.x
+2. Node.js 22+ and npm
+3. SQL Server (local or remote)
+4. Git
+
+Optional but useful:
+
+1. Visual Studio 2022 / VS Code
+2. SQL Server Management Studio
+
+## Project Structure
+
+- `API`: Web API project (runs on `http://localhost:5199` in Development)
+- `Core`: Domain entities, DTOs, interfaces
+- `Infrastructure`: EF Core, repositories, Identity, migrations
+- `frontend`: Angular app (runs on `http://localhost:4200`)
+
+## Configuration
+
+### Backend settings
+
+Update backend settings in:
+
+- `API/appsettings.json`
+- `API/appsettings.Development.json`
+
+Important sections:
+
+1. `ConnectionStrings:DefaultConnection`
+2. `Jwt`
+3. `PayPal`
+4. `Stripe`
+5. `EmailSettings`
+6. `Authentication:Google`
+
+Security note:
+
+Do not commit real secrets (PayPal/Stripe/SMTP/JWT keys) to public repositories. Prefer environment variables or user secrets.
+
+### Frontend API base URL
+
+Frontend points to backend on `http://localhost:5199` via:
+
+- `frontend/src/app/core/config/api.config.ts`
+
+If backend URL changes, update this file.
+
+## Run The Project (First Time)
+
+### 1. Clone and open repo
 
 ```bash
-ng serve
+git clone <your-repo-url>
+cd WebAPI_AngularProject
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### 2. Restore backend dependencies
 
 ```bash
-ng generate component component-name
+dotnet restore EcommerceProject.sln
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### 3. Apply database migrations
+
+Run from repository root:
 
 ```bash
-ng generate --help
+dotnet ef database update --project Infrastructure --startup-project API
 ```
 
-## Building
-
-To build the project run:
+If `dotnet ef` is missing:
 
 ```bash
-ng build
+dotnet tool install --global dotnet-ef
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+### 4. Start backend API
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+From repository root:
 
 ```bash
-ng test
+dotnet run --project API/API.csproj
 ```
 
-## Running end-to-end tests
+Expected URL:
 
-For end-to-end (e2e) testing, run:
+- `http://localhost:5199`
+
+Optional API docs in Development:
+
+- `http://localhost:5199/openapi/v1.json`
+- `http://localhost:5199/swagger`
+
+### 5. Install frontend dependencies
+
+Open a second terminal:
 
 ```bash
-ng e2e
+cd frontend
+npm install
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### 6. Start frontend
 
-## Additional Resources
+```bash
+npm start
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Open:
+
+- `http://localhost:4200`
+
+## Seeded Admin Account
+
+The app seeds roles and a default admin user on startup.
+
+- Email: `admin@webapiangularproject.com`
+- Password: `Admin123!`
+
+Seeder location:
+
+- `Infrastructure/Identity/IdentitySeeder.cs`
+
+## Useful Commands
+
+From repository root:
+
+```bash
+dotnet build EcommerceProject.sln
+```
+
+From `frontend`:
+
+```bash
+npm run build
+npm test
+```
+
+## Troubleshooting
+
+### API build fails with locked DLL (`MSB3021` / `MSB3027`)
+
+Stop existing API process, then rebuild:
+
+```bash
+taskkill /F /IM API.exe
+dotnet build EcommerceProject.sln
+```
+
+### Frontend cannot reach backend
+
+Check:
+
+1. API is running on `http://localhost:5199`
+2. `frontend/src/app/core/config/api.config.ts` points to the same URL
+3. CORS policy in `API/Program.cs` allows `http://localhost:4200`
+
+### Coupon type seems wrong (percentage vs fixed)
+
+Make sure coupon type mapping in frontend matches backend enum:
+
+- Percentage = `1`
+- Fixed = `2`
+
+## Notes
+
+1. `About` navbar link was removed because it had no route/page.
+2. Admin/Seller category pages are available through sidebar navigation.
